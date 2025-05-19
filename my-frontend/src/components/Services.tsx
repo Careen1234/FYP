@@ -1,4 +1,5 @@
-import React from 'react';
+import { useState } from 'react';
+import BookingForm from './BookingForm';
 import './Services.css';
 
 interface Service {
@@ -48,6 +49,16 @@ const services: Service[] = [
 ];
 
 const Services: React.FC = () => {
+  const [selectedService, setSelectedService] = useState<string | null>(null);
+
+  const handleBookNow = (serviceTitle: string) => {
+    setSelectedService(serviceTitle);
+  };
+
+  const handleCloseBooking = () => {
+    setSelectedService(null);
+  };
+
   return (
     <section className="services">
       <h2>Our Services</h2>
@@ -58,10 +69,21 @@ const Services: React.FC = () => {
             <div className="service-icon">{service.icon}</div>
             <h3>{service.title}</h3>
             <p>{service.description}</p>
-            <button className="book-service-btn">Book Now</button>
+            <button 
+              className="book-service-btn"
+              onClick={() => handleBookNow(service.title)}
+            >
+              Book Now
+            </button>
           </div>
         ))}
       </div>
+      {selectedService && (
+        <BookingForm
+          serviceTitle={selectedService}
+          onClose={handleCloseBooking}
+        />
+      )}
     </section>
   );
 };
