@@ -1,4 +1,3 @@
-// src/layouts/AdminLayout.tsx
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { Box } from '@mui/material';
@@ -13,7 +12,7 @@ const AdminLayout: React.FC = () => {
         width: '100vw',
         height: '100vh',
         backgroundColor: '#ffffff',
-        overflow: 'hidden',
+        // overflow: 'hidden', // Removed to allow scrolling inside content
       }}
     >
       {/* Sidebar */}
@@ -29,7 +28,14 @@ const AdminLayout: React.FC = () => {
       </Box>
 
       {/* Main content */}
-      <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+      <Box
+        sx={{
+          flexGrow: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          minWidth: 0,  // Prevent content shrinking issues
+        }}
+      >
         {/* Header */}
         <Box
           sx={{
@@ -51,9 +57,11 @@ const AdminLayout: React.FC = () => {
             flexGrow: 1,
             backgroundColor: '#ffffff',
             overflowX: 'auto',
-            padding: 3,
             overflowY: 'auto',
+            padding: 3,
+             maxWidth: '100%',
             minHeight: '100vh',
+            width: '100%',
           }}
         >
           <Outlet />
