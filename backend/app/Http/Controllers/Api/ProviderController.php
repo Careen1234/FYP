@@ -41,8 +41,7 @@ class ProviderController extends Controller
             return response()->json(['message' => 'Provider not found'], 404);
         }
 
-        // You can load bookings, ratings here if you have relations (just example):
-        // $provider->load('bookings', 'ratings');
+     
 
         return response()->json($provider);
     }
@@ -65,12 +64,12 @@ class ProviderController extends Controller
             ],
             'service' => 'sometimes|required|string|max:255',
             'location' => 'nullable|string|max:255',
-            'status' => 'nullable|in:pending,approved,blocked',
+            'status' => 'nullable|in:pending,rejected,approved,blocked',
             'availability' => 'nullable|boolean',
         ]);
 
         $provider->update($validated);
-
+       
         return response()->json($provider);
     }
 
@@ -101,17 +100,32 @@ class ProviderController extends Controller
         return response()->json(['message' => 'Provider approved', 'provider' => $provider]);
     }
 
-    // Block provider
-    public function block($id)
+    public function reject($id)
     {
-        $provider = Provider::find($id);
-        if (!$provider) {
-            return response()->json(['message' => 'Provider not found'], 404);
-        }
-
-        $provider->status = 'blocked';
+        $provider = Provider::findOrFail($id);
+        $provider->status = 'rejected';
         $provider->save();
 
-        return response()->json(['message' => 'Provider blocked', 'provider' => $provider]);
+        return response()->json(['message' => 'Provider rejected']);
+    }
+
+    public function toggleBlock(Request $request, $id)
+    {
+        $provider = Provider::findOrFail($id);
+        $status = $request->input('status');
+
+        if (!in_array($status, ['approved', 'blocked'])) {
+            return response()->json(['message' => 'Invalid status'], 422);
+        }
+
+        $provider->status = $status;
+        $provider->save();
+
+        return response()->json(['message' => 'Provider status updated']);
     }
 }
+
+    // Block provider
+    
+
+

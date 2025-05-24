@@ -2,6 +2,8 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\ProviderController;
+use App\Http\Controllers\Api\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,15 +19,26 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
-use App\Http\Controllers\Api\ProviderController;
+
 
 Route::prefix('providers')->group(function () {
-    Route::get('/', [ProviderController::class, 'index']); // GET /api/providers
-    Route::post('/', [ProviderController::class, 'store']); // POST /api/providers
-    Route::get('{id}', [ProviderController::class, 'show']); // GET /api/providers/{id}
-    Route::put('{id}', [ProviderController::class, 'update']); // PUT /api/providers/{id}
-    Route::delete('{id}', [ProviderController::class, 'destroy']); // DELETE /api/providers/{id}
+    Route::get('/', [ProviderController::class, 'index']); 
+    Route::post('/', [ProviderController::class, 'store']); 
+    Route::get('{id}', [ProviderController::class, 'show']); 
+    Route::put('{id}', [ProviderController::class, 'update']); 
+    Route::delete('{id}', [ProviderController::class, 'destroy']); 
 
-    Route::post('{id}/approve', [ProviderController::class, 'approve']); // POST /api/providers/{id}/approve
-    Route::post('{id}/block', [ProviderController::class, 'block']); // POST /api/providers/{id}/block
+   Route::post('{id}/approve', [ProviderController::class, 'approve']);
+   Route::put('{id}/reject', [ProviderController::class, 'reject']);
+    Route::put('{id}/block-toggle', [ProviderController::class, 'toggleBlock']);
 });
+
+Route::prefix('users')->group(function () {
+    Route::get('/', [UserController::class, 'index']); 
+    Route::post('/', [UserController::class, 'store']); 
+    Route::get('{id}', [UserController::class, 'show']); 
+    Route::put('{id}', [UserController::class, 'update']); 
+    Route::delete('{id}', [UserController::class, 'destroy']); 
+});
+
+

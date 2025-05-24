@@ -14,7 +14,10 @@ class Provider extends Model
         'email',
         'service',
         'location',
-        'status',
+         'status',
         'availability',
+    
     ];
+  
+    
 }

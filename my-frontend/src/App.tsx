@@ -4,7 +4,7 @@ import Hero from './components/public/Hero';
 import Services from './pages/public/Services';
 import AdminLayout from './components/admin/AdminLayout';
 import AdminDashboard from './pages/admin/Dashboard';
-//import UserManagement from './pages/admin/UserManagement';
+import UserManagement from './pages/admin/UsersManagement';
 import ProviderManagement from './pages/admin/ProviderManagement';
 //import ServiceManagement from './pages/admin/ServiceManagement';
 //import BookingManagement from './pages/admin/BookingManagement';
@@ -36,6 +36,8 @@ const AppContent = () => {
           <Route index element={<AdminDashboard />} />
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="providers" element={<ProviderManagement />} />
+          <Route path="users" element={<UserManagement />} />
+        
         
          
         </Route>
