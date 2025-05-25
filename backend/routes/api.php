@@ -4,6 +4,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ProviderController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\ServiceController;
+use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\BookingController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -39,6 +43,25 @@ Route::prefix('users')->group(function () {
     Route::get('{id}', [UserController::class, 'show']); 
     Route::put('{id}', [UserController::class, 'update']); 
     Route::delete('{id}', [UserController::class, 'destroy']); 
+    Route::put('{id}/block-toggle', [UserController::class, 'toggleBlock']);
+});
+
+Route::prefix('services')->group(function () {
+    Route::get('/', [ServiceController::class, 'index']);
+    Route::post('/', [ServiceController::class, 'store']);
+    Route::get('{id}', [ServiceController::class, 'show']);
+    Route::put('{id}', [ServiceController::class, 'update']);
+    Route::delete('{id}', [ServiceController::class, 'destroy']);
+});
+
+Route::get('/service-categories', [CategoryController::class, 'index']);
+
+Route::prefix('bookings')->group(function () {
+    Route::get('/', [BookingController::class, 'index']);
+    Route::post('/', [BookingController::class, 'store']);
+    Route::get('{id}', [BookingController::class, 'show']);
+    Route::put('{id}', [BookingController::class, 'update']);
+    Route::delete('{id}', [BookingController::class, 'destroy']);
 });
 
 

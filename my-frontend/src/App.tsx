@@ -6,8 +6,8 @@ import AdminLayout from './components/admin/AdminLayout';
 import AdminDashboard from './pages/admin/Dashboard';
 import UserManagement from './pages/admin/UsersManagement';
 import ProviderManagement from './pages/admin/ProviderManagement';
-//import ServiceManagement from './pages/admin/ServiceManagement';
-//import BookingManagement from './pages/admin/BookingManagement';
+import ServiceManagement from './pages/admin/ServiceManagement';
+import BookingManagement from './pages/admin/BookingManagement';
 //import ReportsAnalytics from './pages/admin/ReportsAnalytics';
 import './App.css';
 
@@ -29,7 +29,7 @@ const AppContent = () => {
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
-        <Route path="/services" element={<Services />} />
+        {/*<Route path="/services" element={<Services />} />*/}
 
         {/* Admin Routes */}
         <Route path="/admin" element={<AdminLayout />}>
@@ -37,6 +37,8 @@ const AppContent = () => {
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="providers" element={<ProviderManagement />} />
           <Route path="users" element={<UserManagement />} />
+          <Route path="services" element={<ServiceManagement />} />
+           <Route path="bookings" element={<BookingManagement />} />
         
         
          

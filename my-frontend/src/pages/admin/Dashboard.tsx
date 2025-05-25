@@ -42,22 +42,23 @@ const Dashboard: React.FC = () => {
 
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mt: 2 }}>
         <Paper sx={{ p: 2, flex: '1 1 200px', minWidth: '200px' }}>
-          <People color="primary" />
+          <People sx={{ color: 'green' }} />
+
           <Typography variant="subtitle1">Total Users</Typography>
           <Typography variant="h6">1,230</Typography>
         </Paper>
         <Paper sx={{ p: 2, flex: '1 1 200px', minWidth: '200px' }}>
-          <Build color="primary" />
+          <Build  sx={{ color: 'green' }}/>
           <Typography variant="subtitle1">Service Providers</Typography>
           <Typography variant="h6">340</Typography>
         </Paper>
         <Paper sx={{ p: 2, flex: '1 1 200px', minWidth: '200px' }}>
-          <BookOnline color="primary" />
+          <BookOnline  sx={{ color: 'green' }} />
           <Typography variant="subtitle1">Bookings</Typography>
           <Typography variant="h6">1,050</Typography>
         </Paper>
         <Paper sx={{ p: 2, flex: '1 1 200px', minWidth: '200px' }}>
-          <Payment color="primary" />
+          <Payment  sx={{ color: 'green' }} />
           <Typography variant="subtitle1">Revenue</Typography>
           <Typography variant="h6">$23,400</Typography>
         </Paper>

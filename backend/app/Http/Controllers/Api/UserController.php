@@ -25,7 +25,7 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:8|confirmed',
+            'password' => 'required|string|min:8',
             'location' => 'nullable|string|max:255',
             'phone' => 'nullable|string|max:20',
         ]);
@@ -35,7 +35,7 @@ class UserController extends Controller
             'password' => bcrypt($request->password),
             'location' => $request->location,
             'phone' => $request->phone,
-            'status' => 'active', 
+            //'status' => 'active', 
         ]);
         
         return response()->json(['message' => 'User created successfully']);
@@ -46,9 +46,11 @@ class UserController extends Controller
         $request->validate([
             'name' => 'sometimes|required|string|max:255',
             'email' => 'sometimes|required|email|unique:users,email,' . $id,
-            'password' => 'sometimes|required|string|min:8|confirmed',
+            'password' => 'sometimes|required|string|min:8',
             'location' => 'nullable|string|max:255',
             'phone' => 'nullable|string|max:20',
+             //'status' => '1',
+
         ]);
         $user = User::findOrFail($id);
         $user->name = $request->input('name', $user->name);
@@ -73,7 +75,7 @@ class UserController extends Controller
     {
        
         $user = User::findOrFail($id);
-        $user->status = ($user->status === 'blocked') ? 'active' : 'blocked';
+        $user->status = ($user->status === 'active') ? 'active' : 'blocked';
         $user->save();
         return response()->json(['message' => "User with ID: $id block status toggled"]);
     }

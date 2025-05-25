@@ -211,15 +211,16 @@ const ProviderManagement: React.FC = () => {
       </Table>
 
       <Box mt={3}>
-        <IconButton
-          color="primary"
+        <Button
+        variant='contained'
+          color="success"
           onClick={() => handleOpenModal()}
           aria-label="add provider"
           title="Add Provider"
           size="large"
         >
-          <EditIcon /> {/* You can replace with AddIcon if preferred */}
-        </IconButton>
+          Add Provider
+        </Button>
       </Box>
 
       <Dialog open={openModal} onClose={handleCloseModal} fullWidth>
@@ -240,10 +241,10 @@ const ProviderManagement: React.FC = () => {
           </Grid>
         </DialogContent>
         <DialogActions>
-          <IconButton onClick={handleCloseModal} color="secondary" title="Cancel">
+          <IconButton onClick={handleCloseModal} color="success" title="Cancel">
             <CancelIcon />
           </IconButton>
-          <IconButton onClick={handleSubmit} color="primary" title={editMode ? 'Update' : 'Submit'}>
+          <IconButton onClick={handleSubmit} color="success" title={editMode ? 'Update' : 'Submit'}>
             <CheckCircleIcon />
           </IconButton>
         </DialogActions>
@@ -288,7 +289,7 @@ const ProviderManagement: React.FC = () => {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenProfileModal(false)} color="primary">Close</Button>
+          <Button onClick={() => setOpenProfileModal(false)} color="success">Close</Button>
         </DialogActions>
       </Dialog>
     </Box>
