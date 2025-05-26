@@ -203,7 +203,7 @@ const ServicesManagement: React.FC = () => {
                     <TableCell>{service.id}</TableCell>
                     <TableCell>{service.name}</TableCell>
                     <TableCell>{service.category?.name || '-'}</TableCell>
-                   <TableCell>${Number(service.price).toFixed(2)}</TableCell>
+                   <TableCell>Tsh{Number(service.price).toFixed(2)}</TableCell>
 
                     <TableCell>
                       <Switch

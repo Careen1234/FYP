@@ -8,7 +8,9 @@ import UserManagement from './pages/admin/UsersManagement';
 import ProviderManagement from './pages/admin/ProviderManagement';
 import ServiceManagement from './pages/admin/ServiceManagement';
 import BookingManagement from './pages/admin/BookingManagement';
-//import ReportsAnalytics from './pages/admin/ReportsAnalytics';
+import PaymentManagement from './pages/admin/PaymentManagement';
+import Reports from './pages/admin/Reports';
+import CMS from './pages/admin/CmsPages';
 import './App.css';
 
 const Home = () => (
@@ -39,6 +41,9 @@ const AppContent = () => {
           <Route path="users" element={<UserManagement />} />
           <Route path="services" element={<ServiceManagement />} />
            <Route path="bookings" element={<BookingManagement />} />
+          <Route path="reports" element={<Reports />} />
+          <Route path="payments" element={<PaymentManagement />} />
+          <Route path="cms" element={<CMS />} />
         
         
          

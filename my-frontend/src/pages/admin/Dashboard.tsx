@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Header from '../../components/admin/Header';
 import {
   Box,
@@ -13,27 +13,61 @@ import {
   People,
   Build,
   BookOnline,
-  Payment,
 } from '@mui/icons-material';
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-} from 'recharts';
+import axios from 'axios';
 
-const chartData = [
-  { name: 'Jan', bookings: 30 },
-  { name: 'Feb', bookings: 45 },
-  { name: 'Mar', bookings: 25 },
-  { name: 'Apr', bookings: 60 },
-];
+interface Activity {
+  id: number;
+  message: string;
+}
+
+interface CountResponse {
+  count: number;
+}
 
 const Dashboard: React.FC = () => {
-  return (
-    <Box component="main" sx={{ flexGrow: 1, padding: 3, backgroundColor: '#f5f5f5', minHeight: '100vh' ,  pt: '64px',  }}>
+  // State for counts
+  const [totalUsers, setTotalUsers] = useState<number>(0);
+  const [totalProviders, setTotalProviders] = useState<number>(0);
+  const [totalBookings, setTotalBookings] = useState<number>(0);
+  const [latestActivities, setLatestActivities] = useState<Activity[]>([]);
+
+  // Fetch counts and activities on component mount
+useEffect(() => {
+  const fetchCounts = async () => {
+    try {
+      const [usersRes, providersRes, bookingsRes, activityRes] = await Promise.all([
+        axios.get<CountResponse>('/api/users/count'),
+        axios.get<CountResponse>('/api/providers/count'),
+        axios.get<CountResponse>('/api/bookings/count'),
+        axios.get('/api/activity/latest'),
+      ]);
+
+      console.log('Users count:', usersRes.data);
+      console.log('Providers count:', providersRes.data);
+      console.log('Bookings count:', bookingsRes.data);
+
+      setTotalUsers(usersRes.data?.count ?? 0);
+      setTotalProviders(providersRes.data?.count ?? 0);
+      setTotalBookings(bookingsRes.data?.count ?? 0);
+
+      if (Array.isArray(activityRes.data)) {
+        setLatestActivities(activityRes.data);
+      } else {
+        console.warn('Expected latest activities to be an array, got:', activityRes.data);
+        setLatestActivities([]);
+      }
+    } catch (error) {
+      console.error('Failed to fetch dashboard data:', error);
+    }
+  };
+
+  fetchCounts();
+}, []);
+
+
+return (
+    <Box component="main" sx={{ flexGrow: 1, padding: 3, backgroundColor: '#f5f5f5', minHeight: '100vh', pt: '64px' }}>
       <Header />
 
       <Typography variant="h5" gutterBottom>
@@ -43,40 +77,18 @@ const Dashboard: React.FC = () => {
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mt: 2 }}>
         <Paper sx={{ p: 2, flex: '1 1 200px', minWidth: '200px' }}>
           <People sx={{ color: 'green' }} />
-
           <Typography variant="subtitle1">Total Users</Typography>
-          <Typography variant="h6">1,230</Typography>
+          <Typography variant="h6">{totalUsers}</Typography>
         </Paper>
         <Paper sx={{ p: 2, flex: '1 1 200px', minWidth: '200px' }}>
-          <Build  sx={{ color: 'green' }}/>
+          <Build sx={{ color: 'green' }} />
           <Typography variant="subtitle1">Service Providers</Typography>
-          <Typography variant="h6">340</Typography>
+          <Typography variant="h6">{totalProviders}</Typography>
         </Paper>
         <Paper sx={{ p: 2, flex: '1 1 200px', minWidth: '200px' }}>
-          <BookOnline  sx={{ color: 'green' }} />
+          <BookOnline sx={{ color: 'green' }} />
           <Typography variant="subtitle1">Bookings</Typography>
-          <Typography variant="h6">1,050</Typography>
-        </Paper>
-        <Paper sx={{ p: 2, flex: '1 1 200px', minWidth: '200px' }}>
-          <Payment  sx={{ color: 'green' }} />
-          <Typography variant="subtitle1">Revenue</Typography>
-          <Typography variant="h6">$23,400</Typography>
-        </Paper>
-      </Box>
-
-      <Box sx={{ mt: 5 }}>
-        <Typography variant="h6" gutterBottom>
-          Booking Trends
-        </Typography>
-        <Paper sx={{ p: 2 }}>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={chartData}>
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="bookings" fill="#4caf50" />
-            </BarChart>
-          </ResponsiveContainer>
+          <Typography variant="h6">{totalBookings}</Typography>
         </Paper>
       </Box>
 
@@ -86,17 +98,19 @@ const Dashboard: React.FC = () => {
         </Typography>
         <Paper sx={{ p: 2 }}>
           <List>
-            <ListItem>
-              <ListItemText primary="User John Doe booked Cleaning Service" />
-            </ListItem>
-            <Divider />
-            <ListItem>
-              <ListItemText primary="Provider Sarah accepted a Plumbing request" />
-            </ListItem>
-            <Divider />
-            <ListItem>
-              <ListItemText primary="New user registered: Jane Smith" />
-            </ListItem>
+            {latestActivities.length === 0 && (
+              <ListItem>
+                <ListItemText primary="No recent activity found." />
+              </ListItem>
+            )}
+            {latestActivities.map(activity => (
+              <React.Fragment key={activity.id}>
+                <ListItem>
+                  <ListItemText primary={activity.message} />
+                </ListItem>
+                <Divider />
+              </React.Fragment>
+            ))}
           </List>
         </Paper>
       </Box>

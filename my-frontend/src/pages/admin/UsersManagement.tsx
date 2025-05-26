@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, type ChangeEvent } from "react";
 import axios from "axios";
 import {
   Table,
@@ -13,14 +13,16 @@ import {
   DialogTitle,
   TextField,
   IconButton,
-
-
+  Typography,
+  InputAdornment,
+  Box,
 } from "@mui/material";
 import DeleteIcon from '@mui/icons-material/Delete';
 import BlockIcon from '@mui/icons-material/Block';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
+import { Search, Add } from "@mui/icons-material";
 
 interface User {
   id?: number;
@@ -34,12 +36,12 @@ interface User {
 }
 
 const UsersManagement: React.FC = () => {
-    const [selectedUser, setSelectedUser] = useState<User | null>(null);
-    const [openProfileDialog, setOpenProfileDialog] = useState(false);
-
-  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
   const [users, setUsers] = useState<User[]>([]);
-  const [open, setOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [openProfileDialog, setOpenProfileDialog] = useState(false);
+
+  const [openFormDialog, setOpenFormDialog] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [currentUser, setCurrentUser] = useState<User>({
     name: "",
@@ -47,13 +49,13 @@ const UsersManagement: React.FC = () => {
     phone: "",
     location: "",
     password: "",
-    
+    password_confirmation: "",
   });
 
   const fetchUsers = async () => {
     try {
       const response = await axios.get<{ users: User[] }>("http://localhost:8000/api/users");
-      setUsers(response.data.users); // ✅ fix: use response.data.users
+      setUsers(response.data.users);
     } catch (error) {
       console.error("Error fetching users:", error);
     }
@@ -63,30 +65,24 @@ const UsersManagement: React.FC = () => {
     fetchUsers();
   }, []);
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setCurrentUser((prev) => ({ ...prev, [name]: value }));
   };
 
-  
-  
-    const handleSubmit = async () => {
-      try {
-        if (editMode && currentUser.id !== undefined) {
-          await axios.put(`http://localhost:8000/api/users/${currentUser.id}`, currentUser);
-          setSnackbar({ open: true, message: 'User updated', severity: 'success' });
-        } else {
-          await axios.post('http://localhost:8000/api/users', currentUser);
-          setSnackbar({ open: true, message: 'User added', severity: 'success' });
-        }
-        setOpen(false);
-        fetchUsers();
-      } catch (error) {
-        setSnackbar({ open: true, message: 'Error saving user', severity: 'error' });
+  const handleSubmit = async () => {
+    try {
+      if (editMode && currentUser.id !== undefined) {
+        await axios.put(`http://localhost:8000/api/users/${currentUser.id}`, currentUser);
+      } else {
+        await axios.post("http://localhost:8000/api/users", currentUser);
       }
+      setOpenFormDialog(false);
+      fetchUsers();
+    } catch (error) {
+      console.error("Error saving user:", error);
     }
+  };
 
   const handleDelete = async (id?: number) => {
     if (!id) return;
@@ -108,55 +104,72 @@ const UsersManagement: React.FC = () => {
     }
   };
 
-// Dummy implementation for handleViewProfile to fix the error
-const handleViewProfile = (user: User) => {
-  setSelectedUser(user);
-  setOpenProfileDialog(true);
-  setSnackbar({ open: true, message: `Viewing profile for ${user.name}`, severity: 'success' });
-};
-
-  const handleOpen = (user: User) => {
-    setCurrentUser({
-      name: "",
-      email: "",
-      phone: "",
-      location: "",
-      password: "",
-      
-    });
-    setEditMode(false);
-    setOpen(true);
+  const handleViewProfile = (user: User) => {
+    setSelectedUser(user);
+    setOpenProfileDialog(true);
   };
 
-  const handleEdit = (user: User) => {
-    setCurrentUser({
-      ...user,
-      
-      password: "",
-      
-    });
-    setEditMode(true);
-    setOpen(true);
+  const handleSearch = (event: ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
   };
 
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  return (
-    <div style={{ padding: 30 }}>
-      <h2>User Management</h2>
-      <Button variant="contained" color="success" onClick={() => handleOpen({
+  const handleOpenForm = (user?: User) => {
+    if (user) {
+      setCurrentUser({ ...user, password: "", password_confirmation: "" });
+      setEditMode(true);
+    } else {
+      setCurrentUser({
         name: "",
         email: "",
         phone: "",
         location: "",
         password: "",
-      })}>
-        Add User
-      </Button>
+        password_confirmation: "",
+      });
+      setEditMode(false);
+    }
+    setOpenFormDialog(true);
+  };
+
+  const handleCloseForm = () => setOpenFormDialog(false);
+
+  const filteredUsers = users.filter(user =>
+    user.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  return (
+    <Box sx={{ padding: 4 }}>
+      <Typography variant="h5" sx={{ color: '#2E7D32', mb: 2 }}>
+        Users Management
+      </Typography>
+
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+        <TextField
+          placeholder="Search by name ..."
+          value={searchTerm}
+          onChange={handleSearch}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Search />
+              </InputAdornment>
+            ),
+          }}
+          sx={{ width: 300 }}
+        />
+
+        <Button
+          variant="contained"
+          startIcon={<Add />}
+          sx={{ backgroundColor: '#2E7D32', '&:hover': { backgroundColor: '#27642a' } }}
+          onClick={() => handleOpenForm()}
+        >
+          Add User
+        </Button>
+      </Box>
+
       <Table>
-        <TableHead>
+        <TableHead sx={{ backgroundColor: '#2E7D32' }}>
           <TableRow>
             <TableCell>ID</TableCell>
             <TableCell>Name</TableCell>
@@ -168,58 +181,60 @@ const handleViewProfile = (user: User) => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {users.map((user) => (
+          {filteredUsers.map((user) => (
             <TableRow key={user.id}>
               <TableCell>{user.id}</TableCell>
               <TableCell>{user.name}</TableCell>
               <TableCell>{user.email}</TableCell>
               <TableCell>{user.phone}</TableCell>
               <TableCell>{user.location}</TableCell>
-              <TableCell>{user.status === 1 ? "Active" : "Active"}</TableCell>
+              <TableCell>{user.status === 0 ? "Blocked" : "Active"}</TableCell>
               <TableCell>
-                  
-                  
-                  
-
-                  <IconButton
-                    aria-label="edit"
-                    onClick={() => handleOpen(user)}
-                    title="Edit"
-                  >
-                    <EditIcon />
-                  </IconButton>
-
-                  <IconButton
-                    aria-label="delete"
-                    color="error"
-                    onClick={() => handleDelete(user.id)}
-                    title="Delete"
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-
-                  <IconButton
-                    aria-label={user.status === 0 ? 'unblock' : 'block'}
-                    color="secondary"
-                    onClick={() => handleBlockToggle(user.id)}
-                    title={user.status === 0 ? 'Unblock' : 'Block'}
-                  >
-                    {user.status === 0 ? <LockOpenIcon /> : <BlockIcon />}
-                  </IconButton>
-
-                  <IconButton onClick={() => handleViewProfile(user)}>
-                    <VisibilityIcon />
-                  </IconButton>
-
-                  
-                </TableCell>
-              </TableRow>
-           
+                <IconButton onClick={() => handleOpenForm(user)} title="Edit">
+                  <EditIcon />
+                </IconButton>
+                <IconButton onClick={() => handleDelete(user.id)} title="Delete" color="error">
+                  <DeleteIcon />
+                </IconButton>
+                <IconButton
+                  onClick={() => handleBlockToggle(user.id)}
+                  title={user.status === 0 ? "Unblock" : "Block"}
+                  color="secondary"
+                >
+                  {user.status === 0 ? <LockOpenIcon /> : <BlockIcon />}
+                </IconButton>
+                <IconButton onClick={() => handleViewProfile(user)} title="View Profile">
+                  <VisibilityIcon />
+                </IconButton>
+              </TableCell>
+            </TableRow>
           ))}
         </TableBody>
       </Table>
 
-      <Dialog open={open} onClose={handleClose}>
+      {/* Profile Dialog */}
+      <Dialog open={openProfileDialog} onClose={() => setOpenProfileDialog(false)} fullWidth maxWidth="sm">
+        <DialogTitle>User Profile</DialogTitle>
+        <DialogContent>
+          {selectedUser ? (
+            <Box>
+              <p><strong>Name:</strong> {selectedUser.name}</p>
+              <p><strong>Email:</strong> {selectedUser.email}</p>
+              <p><strong>Phone:</strong> {selectedUser.phone || 'N/A'}</p>
+              <p><strong>Location:</strong> {selectedUser.location || 'N/A'}</p>
+              <p><strong>Status:</strong> {selectedUser.status === 0 ? 'Blocked' : 'Active'}</p>
+            </Box>
+          ) : (
+            <p>No user selected</p>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenProfileDialog(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Add/Edit User Dialog */}
+      <Dialog open={openFormDialog} onClose={handleCloseForm}>
         <DialogTitle>{editMode ? "Edit User" : "Add User"}</DialogTitle>
         <DialogContent>
           <TextField
@@ -263,35 +278,26 @@ const handleViewProfile = (user: User) => {
             onChange={handleInputChange}
             fullWidth
           />
-                 
-         </DialogContent>
-
-         <Dialog open={openProfileDialog} onClose={() => setOpenProfileDialog(false)} fullWidth maxWidth="sm">
-  <DialogTitle>User Profile</DialogTitle>
-  <DialogContent>
-    {selectedUser ? (
-      <div>
-        <p><strong>Name:</strong> {selectedUser.name}</p>
-        <p><strong>Email:</strong> {selectedUser.email}</p>
-        <p><strong>Phone:</strong> {selectedUser.phone || 'N/A'}</p>
-        <p><strong>Location:</strong> {selectedUser.location || 'N/A'}</p>
-        <p><strong>Status:</strong> {selectedUser.status}</p>
-        {/* Add any more fields as needed */}
-      </div>
-    ) : (
-      <p>No user selected</p>
-    )}
-  </DialogContent>
-</Dialog>
-
+          {!editMode && (
+            <TextField
+              margin="dense"
+              label="Confirm Password"
+              name="password_confirmation"
+              type="password"
+              value={currentUser.password_confirmation}
+              onChange={handleInputChange}
+              fullWidth
+            />
+          )}
+        </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
+          <Button onClick={handleCloseForm}>Cancel</Button>
           <Button onClick={handleSubmit} color="primary">
             {editMode ? "Update" : "Create"}
           </Button>
         </DialogActions>
       </Dialog>
-    </div>
+    </Box>
   );
 };
 

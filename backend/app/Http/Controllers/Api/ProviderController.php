@@ -9,13 +9,13 @@ use Illuminate\Validation\Rule;
 
 class ProviderController extends Controller
 {
-    // List all providers
+
     public function index()
     {
         return response()->json(Provider::all());
     }
 
-    // Store new provider
+    
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -32,7 +32,7 @@ class ProviderController extends Controller
         return response()->json($provider, 201);
     }
 
-    // Show provider details
+    
     public function show($id)
     {
         $provider = Provider::find($id);
@@ -65,7 +65,7 @@ class ProviderController extends Controller
             'service' => 'sometimes|required|string|max:255',
             'location' => 'nullable|string|max:255',
             'status' => 'nullable|in:pending,rejected,approved,blocked',
-            'availability' => 'nullable|boolean',
+            'availability' => 'required|string|max:255',
         ]);
 
         $provider->update($validated);
@@ -73,7 +73,7 @@ class ProviderController extends Controller
         return response()->json($provider);
     }
 
-    // Delete provider
+   
     public function destroy($id)
     {
         $provider = Provider::find($id);
@@ -86,7 +86,7 @@ class ProviderController extends Controller
         return response()->json(['message' => 'Provider deleted']);
     }
 
-    // Approve provider
+    
     public function approve($id)
     {
         $provider = Provider::find($id);

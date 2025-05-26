@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\ServiceController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\BookingController;
+use App\Http\Controllers\Api\DashboardController;
 
 
 /*
@@ -64,4 +65,10 @@ Route::prefix('bookings')->group(function () {
     Route::delete('{id}', [BookingController::class, 'destroy']);
 });
 
+
+
+Route::get('/users/count', [DashboardController::class, 'usersCount']);
+Route::get('/providers/count', [DashboardController::class, 'providersCount']);
+Route::get('/bookings/count', [DashboardController::class, 'bookingsCount']);
+Route::get('/activity/latest', [DashboardController::class, 'latestActivity']);
 

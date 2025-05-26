@@ -64,14 +64,15 @@ const BookingManagement: React.FC = () => {
   };
 
   return (
-    <Box p={3}>
-      <Typography variant="h5" gutterBottom>
+    <Box p={5}>
+      <Typography variant="h5"  sx={{ color: '#2E7D32', mb: 2 }}gutterBottom>
         Booking Management
       </Typography>
       <TableContainer component={Paper}>
         <Table>
-          <TableHead>
+          <TableHead  sx={{ backgroundColor: '#2E7D32' }}>
             <TableRow>
+              <TableCell>ID</TableCell>
               <TableCell>User</TableCell>
               <TableCell>Provider</TableCell>
               <TableCell>Service</TableCell>
@@ -83,6 +84,7 @@ const BookingManagement: React.FC = () => {
           <TableBody>
             {bookings.map((booking) => (
               <TableRow key={booking.id}>
+                <TableCell>{booking.id}</TableCell>
                 <TableCell>{booking.user_name}</TableCell>
                 <TableCell>{booking.provider_name}</TableCell>
                 <TableCell>{booking.service_name}</TableCell>
@@ -110,6 +112,8 @@ const BookingManagement: React.FC = () => {
         </Table>
       </TableContainer>
     </Box>
+
+    
   );
 };
 
