@@ -11,6 +11,7 @@ import BookingManagement from './pages/admin/BookingManagement';
 import PaymentManagement from './pages/admin/PaymentManagement';
 import Reports from './pages/admin/Reports';
 import CMS from './pages/admin/CmsPages';
+import AuthPage from './pages/AuthPage';
 import './App.css';
 
 const Home = () => (
@@ -31,6 +32,7 @@ const AppContent = () => {
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
+        <Route path="/auth" element={<AuthPage />} />
         {/*<Route path="/services" element={<Services />} />*/}
 
         {/* Admin Routes */}
@@ -40,13 +42,10 @@ const AppContent = () => {
           <Route path="providers" element={<ProviderManagement />} />
           <Route path="users" element={<UserManagement />} />
           <Route path="services" element={<ServiceManagement />} />
-           <Route path="bookings" element={<BookingManagement />} />
+          <Route path="bookings" element={<BookingManagement />} />
           <Route path="reports" element={<Reports />} />
           <Route path="payments" element={<PaymentManagement />} />
           <Route path="cms" element={<CMS />} />
-        
-        
-         
         </Route>
 
         {/* Redirect unknown admin paths */}
