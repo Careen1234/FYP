@@ -44,15 +44,15 @@ const Sidebar: React.FC = () => {
         '& .MuiDrawer-paper': {
           width: drawerWidth,
           boxSizing: 'border-box',
-          backgroundColor: '#2e7d32', // Green background
-          color: '#fff', // White text
+          backgroundColor: '#147c3c', 
+          color: '#fff', 
         },
       }}
     >
      
        
       <Toolbar />
-      <Divider sx={{ borderColor: 'rgba(255,255,255,0.2)' }} />
+      <Divider sx={{ borderColor: '#147c3c' }} />
       <List>
         {menuItems.map(({ text, icon, path }) => {
           const isSelected = location.pathname === path;
@@ -68,7 +68,7 @@ const Sidebar: React.FC = () => {
                   backgroundColor: 'rgba(255, 255, 255, 0.2)',
                 },
                 '&:hover': {
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  backgroundColor: '#147c3c)',
                 },
               }}
             >

@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\ServiceController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\AuthController;
 
 
 /*
@@ -67,8 +68,19 @@ Route::prefix('bookings')->group(function () {
 
 
 
-Route::get('/users/count', [DashboardController::class, 'usersCount']);
-Route::get('/providers/count', [DashboardController::class, 'providersCount']);
-Route::get('/bookings/count', [DashboardController::class, 'bookingsCount']);
-Route::get('/activity/latest', [DashboardController::class, 'latestActivity']);
+
+    Route::get('/users/count', [DashboardController::class, 'usersCount']);
+    Route::get('/providers/count', [DashboardController::class, 'providersCount']);
+    Route::get('/bookings/count', [DashboardController::class, 'bookingsCount']);
+    Route::get('/activity/latest', [DashboardController::class, 'latestActivity']);
+
+   
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
+Route::middleware('auth:sanctum')->get('/me', [AuthController::class, 'me']);
+Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
+
+
+
+
 

@@ -32,9 +32,9 @@ const Header: React.FC = () => {
       sx={{
         width: `calc(100% - ${drawerWidth}px)`,
         ml: `${drawerWidth}px`,
-        backgroundColor: '#2e7d32',
+        backgroundColor: '#147c3c',
         boxShadow: 'none',
-        height: '64px',          // Explicitly set height
+        height: '64px',          
       }}
     >
       <Toolbar sx={{ justifyContent: 'space-between', height: '64px' }}>
@@ -45,10 +45,10 @@ const Header: React.FC = () => {
             sx={{
               display: 'flex',
               alignItems: 'center',
-              backgroundColor: 'rgba(255,255,255,0.15)',
+              backgroundColor: '#147c3c',
               px: 1,
               borderRadius: 1,
-              '&:hover': { backgroundColor: 'rgba(255,255,255,0.25)' },
+              '&:hover': { backgroundColor: '#147c3c)' },
               width: '300px',
             }}
           >

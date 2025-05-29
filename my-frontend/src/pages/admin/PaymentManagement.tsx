@@ -87,17 +87,17 @@ const PaymentManagement: React.FC = () => {
 
   return (
     <Box p={7}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-        <Typography variant="h5"  sx={{ color: '#2E7D32', mb: 2 }}>Payment Management</Typography>
+      <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ color: '#147c3c', mb: 2 }} mb={2}>
+        <Typography variant="h5"  sx={{ color: '#147c3c', mb: 2,  alignContent:'center'}} >PAYMENTS MANAGEMENT</Typography>
         <Button variant="contained" color="success" onClick={handleOpen}>
           Add Payment
         </Button>
       </Box>
 
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
+      <TableContainer sx={{ color: '#147c3c', mb: 2 }} component={Paper}>
+        <Table sx={{ color: '#147c3c', mb: 2 }}>
+          <TableHead sx={{ color: '#147c3c', mb: 2 }}>
+            <TableRow sx={{ color: '#147c3c', mb: 2 }}>
               <TableCell>ID</TableCell>
               <TableCell>User</TableCell>
               <TableCell>Provider</TableCell>
@@ -127,8 +127,8 @@ const PaymentManagement: React.FC = () => {
 
       {/* Add Payment Dialog */}
       <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>Add New Payment</DialogTitle>
-        <DialogContent>
+        <DialogTitle sx={{ color: '#147c3c', mb: 2 }}>Add New Payment</DialogTitle>
+        <DialogContent sx={{ color: '#147c3c', mb: 2 }}>
           <TextField
             label="User ID"
             name="userId"

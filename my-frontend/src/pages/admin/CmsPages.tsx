@@ -94,7 +94,7 @@ const CmsPagesManager: React.FC = () => {
 
   return (
     <Box p={7}>
-      <Typography variant="h4" sx={{ color: '#2E7D32', mb: 2 }} gutterBottom>CMS Pages</Typography>
+      <Typography variant="h4" sx={{ color: '#147c3c', mb: 2 }} gutterBottom>CMS Pages</Typography>
       <Button variant="contained"  onClick={() => handleOpen()}>Add New Page</Button>
 
       <List>

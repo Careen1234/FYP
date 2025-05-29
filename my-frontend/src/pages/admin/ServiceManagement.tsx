@@ -150,9 +150,9 @@ const ServicesManagement: React.FC = () => {
   };
 
   return (
-    <Box sx={{ padding: 4 }}>
-      <Typography variant="h5" sx={{ color: '#2E7D32', mb: 2 }}>
-        Service Management
+    <Box sx={{ padding: 6 }}>
+      <Typography variant="h5" sx={{ color: '#147c3c', mb: 2 }}>
+        SERVICES MANAGEMENT
       </Typography>
 
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
@@ -173,7 +173,7 @@ const ServicesManagement: React.FC = () => {
         <Button
           variant="contained"
           startIcon={<Add />}
-          sx={{ backgroundColor: '#2E7D32', '&:hover': { backgroundColor: '#27642a' } }}
+          sx={{ backgroundColor: '#147c3c', '&:hover': { backgroundColor: '#147c3c' } }}
           onClick={() => setOpenDialog(true)}
         >
           Add Service
@@ -186,7 +186,7 @@ const ServicesManagement: React.FC = () => {
         <>
           <TableContainer component={Paper}>
             <Table>
-              <TableHead sx={{ backgroundColor: '#2E7D32' }}>
+              <TableHead sx={{ backgroundColor: '#147c3c' }}>
                 <TableRow>
                   <TableCell sx={{ color: 'white' }}>ID</TableCell>
                   <TableCell sx={{ color: 'white' }}>Name</TableCell>
@@ -240,7 +240,7 @@ const ServicesManagement: React.FC = () => {
 
       {/* Add/Edit Dialog */}
       <Dialog open={openDialog} onClose={handleClose}>
-        <DialogTitle sx={{ backgroundColor: '#2E7D32', color: 'white' }}>
+        <DialogTitle sx={{ backgroundColor: '#147c3c', color: 'white' }}>
           {editService ? 'Edit Service' : 'Add Service'}
         </DialogTitle>
         <DialogContent sx={{ pt: 3 }}>
@@ -290,7 +290,7 @@ const ServicesManagement: React.FC = () => {
           <Button
             onClick={handleSubmit}
             variant="contained"
-            sx={{ backgroundColor: '#2E7D32', '&:hover': { backgroundColor: '#27642a' } }}
+            sx={{ backgroundColor: '#147c3c', '&:hover': { backgroundColor: '#147c3c' } }}
           >
             {editService ? 'Update' : 'Add'}
           </Button>

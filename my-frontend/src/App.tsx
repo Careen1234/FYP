@@ -10,7 +10,8 @@ import ServiceManagement from './pages/admin/ServiceManagement';
 import BookingManagement from './pages/admin/BookingManagement';
 import PaymentManagement from './pages/admin/PaymentManagement';
 import Reports from './pages/admin/Reports';
-import CMS from './pages/admin/CmsPages';
+import CMS from './pages/admin/CmsPages'
+//import Payment from './pages/public/Payment';
 import './App.css';
 
 const Home = () => (
@@ -31,7 +32,10 @@ const AppContent = () => {
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
-        {/*<Route path="/services" element={<Services />} />*/}
+       
+        <Route path="/servicespublic" element={<Services />}/>
+       
+
 
         {/* Admin Routes */}
         <Route path="/admin" element={<AdminLayout />}>
