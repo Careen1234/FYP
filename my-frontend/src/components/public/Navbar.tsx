@@ -10,14 +10,25 @@ const Navbar: React.FC = () => {
       </div>
       <div className="navbar-links">
         <Link to="/services">Services</Link>
-        <Link to="/book">Book Now</Link>
-        <Link to="/about">About us</Link>
-        <Link to="/contact">Contact</Link>
-        <button className="login-btn">Login</button>
-        <button className="login-btn">register</button>
+
+        <Link to="/login">
+          <button className="login-btn">Login</button>
+        </Link>
+
+        <Link to="/register">
+          <button className="login-btn">Register</button>
+        </Link>
+
+        <Link to="/become-provider">
+          <button className="login-btn">Become a Provider</button>
+        </Link>
+
+        <Link to="/request-service">
+          <button className="login-btn">Request Service</button>
+        </Link>
       </div>
     </nav>
   );
 };
 
-export default Navbar; 
+export default Navbar;

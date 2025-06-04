@@ -11,6 +11,10 @@ import BookingManagement from './pages/admin/BookingManagement';
 import PaymentManagement from './pages/admin/PaymentManagement';
 import Reports from './pages/admin/Reports';
 import CMS from './pages/admin/CmsPages'
+import Login from './pages/serviceMatching/Login';
+import Register from './pages/serviceMatching/RegisterUser';
+import BecomeProvider from './pages/serviceMatching/RegisterProvider';
+import RequestService from './pages/serviceMatching/RequestService';
 //import Payment from './pages/public/Payment';
 import './App.css';
 
@@ -34,6 +38,20 @@ const AppContent = () => {
         <Route path="/" element={<Home />} />
        
         <Route path="/servicespublic" element={<Services />}/>
+        <Route
+          path="/login"
+          element={
+            <Login
+              onLogin={(identifier: string, role: 'user' | 'provider') => {
+                // TODO: handle login logic here, e.g., set user context or redirect
+                console.log('Logged in:', identifier, role);
+              }}
+            />
+          }
+        />
+        <Route path="/register" element={<Register />} />
+        <Route path="/become-provider" element={<BecomeProvider />} />
+        <Route path="/request-service" element={<RequestService />} />
        
 
 
