@@ -6,43 +6,60 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-  public function register(Request $request)
-    {
-        $request->validate([
-            'name' => 'required',
-            'email' => 'required|email|unique:users',
-            'role' => 'required|in:admin,user,provider',
-            'password' => 'required|min:6',
-        ]);
+ public function register(Request $request)
+{
+    $request->validate([
+        'name' => 'required',
+        'email' => 'required|email|unique:users',
+        'phone' => 'required|string|max:20', 
+        'role' => 'required|in:admin,user,provider',
+        'password' => 'required|min:6|confirmed',  
+        'location' => 'nullable|string|max:255',  
+    ]);
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'role' => $request->role,
-            'password' => Hash::make($request->password),
-        ]);
+    $user = User::create([
+        'name' => $request->name,
+        'email' => $request->email,
+        'phone' => $request->phone, 
+        'role' => $request->role,
+        'location' => $request->location,
+        'password' => Hash::make($request->password),
+    ]);
 
-        return response()->json($user);
-    }
+    return response()->json($user, 201);
+}
+
 
     public function login(Request $request)
-    {
-        $user = User::where('email', $request->email)->first();
+{
+    $credentials = $request->validate([
+        'email' => 'required|email',
+        'password' => 'required',
+    ]);
 
-        if (! $user || ! Hash::check($request->password, $user->password)) {
-            throw ValidationException::withMessages([
-                'email' => ['Incorrect credentials.'],
-            ]);
-        }
+    $user = User::where('email', $credentials['email'])->first();
 
+    if (!$user || !Hash::check($credentials['password'], $user->password)) {
         return response()->json([
-            'token' => $user->createToken('auth-token')->plainTextToken,
-            'user' => $user,
-        ]);
+            'message' => 'Incorrect credentials.',
+            'errors' => [
+                'email' => ['Incorrect credentials.']
+            ]
+        ], 401);
     }
+
+    Auth::login($user);
+
+    return response()->json([
+        'message' => 'Login successful',
+        'user' => $user,
+    ]);
+}
+
 
     public function me(Request $request)
     {

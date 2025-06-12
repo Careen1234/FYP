@@ -52,4 +52,19 @@ class User extends Authenticatable
     public function Services(){
         return $this->hasMany(Service::class);
     }
+
+    public function ratings()
+{
+    return $this->hasMany(Ratings::class);
+}
+
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class);
+    }
+
+    public function provider()
+    {
+        return $this->hasOne(Provider::class);
+    }
 }

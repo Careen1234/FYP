@@ -13,11 +13,13 @@ const Navbar: React.FC = () => {
         <Link to="/book">Book Now</Link>
         <Link to="/about">About us</Link>
         <Link to="/contact">Contact</Link>
-        <button className="login-btn">Login</button>
-        <button className="login-btn">register</button>
+
+        {/* Login and Register as Links styled as buttons */}
+        <Link to="/login" className="login-btn">Login</Link>
+        <Link to="/register" className="login-btn">Register</Link>
       </div>
     </nav>
   );
 };
 
-export default Navbar; 
+export default Navbar;
