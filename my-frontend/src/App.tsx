@@ -10,9 +10,17 @@ import ServiceManagement from './pages/admin/ServiceManagement';
 import BookingManagement from './pages/admin/BookingManagement';
 import PaymentManagement from './pages/admin/PaymentManagement';
 import Reports from './pages/admin/Reports';
+<<<<<<< HEAD
 import CMS from './pages/admin/CmsPages';
 import AuthPage from './pages/AuthPage';
+=======
+import UserLayout from './pages/user/UserLayout'
+import RegisterForm from './components/Register';
+import CMS from './pages/admin/CmsPages'
+import Login from './components/Login';
+>>>>>>> 66c321a5b6050b3069ddc17d9ece579157c97d18
 import './App.css';
+import ErrorBoundary from './components/ErrorBoundary';
 
 const Home = () => (
   <>
@@ -24,11 +32,13 @@ const Home = () => (
 const AppContent = () => {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin');
+  const isUserRoute = location.pathname.startsWith('/user');
 
   return (
     <div className="app">
-      {!isAdminRoute && <Navbar />}
+      {!isAdminRoute && !isUserRoute && <Navbar />}
 
+<<<<<<< HEAD
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
@@ -47,20 +57,47 @@ const AppContent = () => {
           <Route path="payments" element={<PaymentManagement />} />
           <Route path="cms" element={<CMS />} />
         </Route>
+=======
+      <ErrorBoundary>
+        <Routes>
+          {/* Public */}
+          <Route path="/" element={<Home />} />
+          <Route path="/servicespublic" element={<Services />} />
+          <Route path="/register" element={<RegisterForm />} />
+          <Route path="/login" element={<Login />} />
 
-        {/* Redirect unknown admin paths */}
-        <Route path="/admin/*" element={<Navigate to="/admin/dashboard" replace />} />
-      </Routes>
+          {/* Admin */}
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<AdminDashboard />} />
+            <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="providers" element={<ProviderManagement />} />
+            <Route path="users" element={<UserManagement />} />
+            <Route path="services" element={<ServiceManagement />} />
+            <Route path="bookings" element={<BookingManagement />} />
+            <Route path="reports" element={<Reports />} />
+            <Route path="payments" element={<PaymentManagement />} />
+            <Route path="cms" element={<CMS />} />
+          </Route>
+>>>>>>> 66c321a5b6050b3069ddc17d9ece579157c97d18
+
+          {/* User */}
+          <Route path="/user" element={<UserLayout />}>
+            <Route index element={<h2>Welcome to User Dashboard</h2>} />
+            <Route path="dashboard" element={<h2>User Dashboard</h2>} />
+          </Route>
+
+          {/* 404 fallback */}
+          <Route path="*" element={<h2>404 Page Not Found</h2>} />
+        </Routes>
+      </ErrorBoundary>
     </div>
   );
 };
 
-function App() {
-  return (
-    <Router>
-      <AppContent />
-    </Router>
-  );
-}
+const App = () => (
+  <Router>
+    <AppContent />
+  </Router>
+);
 
 export default App;

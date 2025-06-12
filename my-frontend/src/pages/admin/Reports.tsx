@@ -41,8 +41,8 @@ const ReportsAndAnalytics: React.FC = () => {
   };
 
   return (
-    <Box p={3}>
-      <Typography variant="h4" gutterBottom>
+    <Box p={5}>
+      <Typography variant="h4" sx={{ color: '#147c3c', mb: 2 }} gutterBottom>
         Reports & Analytics
       </Typography>
 
@@ -57,8 +57,8 @@ const ReportsAndAnalytics: React.FC = () => {
         ].map((item) => (
           <Card key={item.title} sx={{ flex: '1 1 200px' }}>
             <CardContent>
-              <Typography variant="h6">{item.title}</Typography>
-              <Typography variant="h5">{item.value}</Typography>
+              <Typography variant="h6" color='#147c3c'>{item.title}</Typography>
+              <Typography variant="h5" color='#147c3c'>{item.value}</Typography>
             </CardContent>
           </Card>
         ))}

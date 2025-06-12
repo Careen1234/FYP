@@ -20,4 +20,10 @@ class Service extends Model
     {
         return $this->hasMany(Booking::class);
 }
+public function providers()
+{
+    return $this->belongsToMany(Provider::class, 'provider_service', 'service_id', 'provider_id');
+}
+
+
 }

@@ -178,9 +178,9 @@ const ProviderManagement: React.FC = () => {
   );
 
   return (
-    <Box p={4}>
-      <Typography variant="h5" sx={{ color: '#2E7D32', mb: 2 }}>
-        Provider Management
+    <Box p={6}>
+      <Typography variant="h5" sx={{ color: '#147c3c', mb: 2 }}>
+       PROVIDERS MANAGEMENT
       </Typography>
 
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
@@ -199,7 +199,7 @@ const ProviderManagement: React.FC = () => {
         <Button
           variant="contained"
           startIcon={<Add />}
-          sx={{ backgroundColor: '#2E7D32', '&:hover': { backgroundColor: '#27642a' } }}
+          sx={{ backgroundColor: '#147c3c', '&:hover': { backgroundColor: '##147c3c' } }}
           onClick={() => handleOpenModal()}
         >
           Add Provider
@@ -207,7 +207,7 @@ const ProviderManagement: React.FC = () => {
       </Box>
 
       <Table>
-        <TableHead sx={{ backgroundColor: '#2E7D32' }}>
+        <TableHead sx={{ backgroundColor: '#147c3c' }}>
           <TableRow>
             <TableCell sx={{ color: 'white' }}>ID</TableCell>
             <TableCell sx={{ color: 'white' }}>Name</TableCell>
@@ -351,7 +351,7 @@ const ProviderManagement: React.FC = () => {
           <Button onClick={handleCloseModal} color="secondary">
             Cancel
           </Button>
-          <Button onClick={handleSubmit} variant="contained" sx={{ backgroundColor: '#2E7D32' }}>
+          <Button onClick={handleSubmit} variant="contained" sx={{ backgroundColor: '#147c3c' }}>
             {editMode ? 'Update' : 'Add'}
           </Button>
         </DialogActions>

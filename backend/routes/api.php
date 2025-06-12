@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\ServiceController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\AuthController;
 
 
 /*
@@ -27,6 +28,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 
 Route::prefix('providers')->group(function () {
+    Route::get('/providers', [ProviderController::class, 'listProviders']);
     Route::get('/', [ProviderController::class, 'index']); 
     Route::post('/', [ProviderController::class, 'store']); 
     Route::get('{id}', [ProviderController::class, 'show']); 
@@ -58,6 +60,7 @@ Route::prefix('services')->group(function () {
 Route::get('/service-categories', [CategoryController::class, 'index']);
 
 Route::prefix('bookings')->group(function () {
+    Route::post('/providers/match', [BookingController::class, 'getAvailableProviders']);
     Route::get('/', [BookingController::class, 'index']);
     Route::post('/', [BookingController::class, 'store']);
     Route::get('{id}', [BookingController::class, 'show']);
@@ -67,8 +70,22 @@ Route::prefix('bookings')->group(function () {
 
 
 
-Route::get('/users/count', [DashboardController::class, 'usersCount']);
-Route::get('/providers/count', [DashboardController::class, 'providersCount']);
-Route::get('/bookings/count', [DashboardController::class, 'bookingsCount']);
-Route::get('/activity/latest', [DashboardController::class, 'latestActivity']);
+
+    Route::get('/users/count', [DashboardController::class, 'usersCount']);
+    Route::get('/providers/count', [DashboardController::class, 'providersCount']);
+    Route::get('/bookings/count', [DashboardController::class, 'bookingsCount']);
+    Route::get('/activity/latest', [DashboardController::class, 'latestActivity']);
+
+   
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/me', [AuthController::class, 'me']);
+    Route::post('/logout', [AuthController::class, 'logout']);
+});
+
+
+
+
 

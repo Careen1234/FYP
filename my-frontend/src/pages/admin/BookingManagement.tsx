@@ -64,13 +64,13 @@ const BookingManagement: React.FC = () => {
   };
 
   return (
-    <Box p={5}>
-      <Typography variant="h5"  sx={{ color: '#2E7D32', mb: 2 }}gutterBottom>
-        Booking Management
+    <Box p={6}>
+      <Typography variant="h5"  sx={{ color: '#147c3c', mb: 2 }}gutterBottom>
+       BOOKINGS MANAGEMENT
       </Typography>
       <TableContainer component={Paper}>
         <Table>
-          <TableHead  sx={{ backgroundColor: '#2E7D32' }}>
+          <TableHead  sx={{ backgroundColor: '#147c3c' }}>
             <TableRow>
               <TableCell>ID</TableCell>
               <TableCell>User</TableCell>

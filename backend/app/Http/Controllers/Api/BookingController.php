@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\Service;
 use App\Models\ServiceCategory;
 use App\Models\Booking;
+use App\Models\Provider;
+use Illuminate\Support\Facades\DB;
 
 class BookingController extends Controller
 {
@@ -49,12 +51,47 @@ public function index()
         return response()->json(['message' => 'Booking created successfully', 'data' => $booking], 201);
     }
 
-    // Show a single booking
-    public function show($id)
-    {
-        $booking = Booking::with(['user', 'provider', 'service'])->findOrFail($id);
-        return response()->json(['data' => $booking]);
-    }
+
+ public function getAvailableProviders(Request $request)
+{
+    $request->validate([
+        'service_id' => 'required|exists:services,id',
+        'latitude'   => 'required|numeric',
+        'longitude'  => 'required|numeric',
+    ]);
+
+    $serviceId = $request->service_id;
+    $userLat = $request->latitude;
+    $userLng = $request->longitude;
+
+    $providers = Provider::whereHas('services', function ($q) use ($serviceId) {
+            $q->where('service_id', $serviceId);
+        })
+        ->select('providers.*')
+        // Subquery to get average rating per provider
+        ->selectSub(function ($query) {
+            $query->from('ratings')
+                ->selectRaw('AVG(rating)')
+                ->whereColumn('ratings.provider_id', 'providers.id');
+        }, 'avg_rating')
+        // Calculate distance using raw expression
+        ->selectRaw("
+            (6371 * acos(
+                cos(radians(?)) * cos(radians(latitude)) *
+                cos(radians(longitude) - radians(?)) +
+                sin(radians(?)) * sin(radians(latitude))
+            )) AS distance
+        ", [$userLat, $userLng, $userLat])
+        ->having('distance', '<', 30)
+        ->orderByDesc('avg_rating')
+        ->orderBy('distance')
+        ->get();
+
+    return response()->json($providers);
+}
+
+
+
 
     // Update booking status (admin or provider action)
     public function update(Request $request, $id)

@@ -23,7 +23,8 @@ class User extends Authenticatable
         'password',
         'location',
         'phone',
-           'status'
+        'status',
+        'role'
          ];
 
     
@@ -46,4 +47,24 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+
+    public function Services(){
+        return $this->hasMany(Service::class);
+    }
+
+    public function ratings()
+{
+    return $this->hasMany(Ratings::class);
+}
+
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class);
+    }
+
+    public function provider()
+    {
+        return $this->hasOne(Provider::class);
+    }
 }

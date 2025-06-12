@@ -11,17 +11,18 @@ const AdminLayout: React.FC = () => {
         display: 'flex',
         width: '100vw',
         height: '100vh',
-        backgroundColor: '#ffffff',
-        // overflow: 'hidden', // Removed to allow scrolling inside content
+        overflow: 'hidden', 
       }}
     >
       {/* Sidebar */}
       <Box
         sx={{
-          width: 240,
-          flexShrink: 0,
-          bgcolor: '#2e7d32', // Green
+          width: '240px', 
+         flexShrink: 0,
+          bgcolor: '#147c3c',
           color: '#fff',
+          display: 'flex',
+          overflow: 'hidden',
         }}
       >
         <Sidebar />
@@ -33,19 +34,21 @@ const AdminLayout: React.FC = () => {
           flexGrow: 1,
           display: 'flex',
           flexDirection: 'column',
-          minWidth: 0,  // Prevent content shrinking issues
+          minWidth: 0,
+         
         }}
       >
         {/* Header */}
         <Box
           sx={{
-            height: 64,
-            bgcolor: '#2e7d32', // Green
+            height: '64px',
+            bgcolor: '#147c3c',
             color: '#fff',
             display: 'flex',
             alignItems: 'center',
             px: 3,
             boxShadow: 1,
+            flexShrink: 0,
           }}
         >
           <Header />
@@ -55,13 +58,9 @@ const AdminLayout: React.FC = () => {
         <Box
           sx={{
             flexGrow: 1,
-            backgroundColor: '#ffffff',
-            overflowX: 'auto',
-            overflowY: 'auto',
+            overflow: 'auto',
             padding: 3,
-             maxWidth: '100%',
-            minHeight: '100vh',
-            width: '100%',
+            backgroundColor: '#ffffff',
           }}
         >
           <Outlet />

@@ -22,7 +22,7 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28'];
 export const LineChart = ({ title, dataKey }: { title: string; dataKey: string }) => (
   <Card>
     <CardContent>
-      <Typography variant="h6" sx={{ color: '#2E7D32', mb: 2 }} gutterBottom>{title}</Typography>
+      <Typography variant="h6" sx={{ color: '#147c3c', mb: 2 }} gutterBottom>{title}</Typography>
       <ResponsiveContainer width="100%" height={300}>
         <ReLineChart data={sampleData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
           <XAxis dataKey="name" />
@@ -38,14 +38,14 @@ export const LineChart = ({ title, dataKey }: { title: string; dataKey: string }
 export const BarChart = ({ title, dataKey }: { title: string; dataKey: string }) => (
   <Card>
     <CardContent>
-      <Typography variant="h6" sx={{ color: '#2E7D32', mb: 2 }} gutterBottom>{title}</Typography>
+      <Typography variant="h6" sx={{ color: '#147c3c', mb: 2 }} gutterBottom>{title}</Typography>
       <ResponsiveContainer width="100%" height={300}>
         <ReBarChart data={sampleData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="name" />
           <YAxis />
           <Tooltip />
-          <Bar dataKey={dataKey} fill="#82ca9d" />
+          <Bar dataKey={dataKey} fill="#147c3c" />
         </ReBarChart>
       </ResponsiveContainer>
     </CardContent>
@@ -55,7 +55,7 @@ export const BarChart = ({ title, dataKey }: { title: string; dataKey: string })
 export const PieChart = ({ title }: { title: string }) => (
   <Card>
     <CardContent>
-      <Typography variant="h6" sx={{ color: '#2E7D32', mb: 2 }} gutterBottom>{title}</Typography>
+      <Typography variant="h6" sx={{ color: '#147c3c', mb: 2 }} gutterBottom>{title}</Typography>
       <ResponsiveContainer width="100%" height={300}>
         <RePieChart>
           <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} label>
@@ -73,7 +73,7 @@ export const PieChart = ({ title }: { title: string }) => (
 export const DoughnutChart = ({ title }: { title: string }) => (
   <Card>
     <CardContent>
-      <Typography variant="h6"  sx={{ color: '#2E7D32', mb: 2 }}gutterBottom>{title}</Typography>
+      <Typography variant="h6"  sx={{ color: '#147c3c', mb: 2 }}gutterBottom>{title}</Typography>
       <ResponsiveContainer width="100%" height={300}>
         <RePieChart>
           <Pie

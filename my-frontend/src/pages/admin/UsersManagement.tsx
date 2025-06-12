@@ -138,9 +138,9 @@ const UsersManagement: React.FC = () => {
   );
 
   return (
-    <Box sx={{ padding: 4 }}>
-      <Typography variant="h5" sx={{ color: '#2E7D32', mb: 2 }}>
-        Users Management
+    <Box sx={{ padding: 6 }}>
+      <Typography variant="h5" sx={{ color: '#147c3c', mb: 2 }}>
+       USERS MANAGEMENT
       </Typography>
 
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
@@ -161,7 +161,7 @@ const UsersManagement: React.FC = () => {
         <Button
           variant="contained"
           startIcon={<Add />}
-          sx={{ backgroundColor: '#2E7D32', '&:hover': { backgroundColor: '#27642a' } }}
+          sx={{ backgroundColor: '#147c3c', '&:hover': { backgroundColor: '#147c3c' } }}
           onClick={() => handleOpenForm()}
         >
           Add User
@@ -169,7 +169,7 @@ const UsersManagement: React.FC = () => {
       </Box>
 
       <Table>
-        <TableHead sx={{ backgroundColor: '#2E7D32' }}>
+        <TableHead sx={{ backgroundColor: '#147c3c' }}>
           <TableRow>
             <TableCell>ID</TableCell>
             <TableCell>Name</TableCell>
@@ -199,7 +199,7 @@ const UsersManagement: React.FC = () => {
                 <IconButton
                   onClick={() => handleBlockToggle(user.id)}
                   title={user.status === 0 ? "Unblock" : "Block"}
-                  color="secondary"
+                  color="success"
                 >
                   {user.status === 0 ? <LockOpenIcon /> : <BlockIcon />}
                 </IconButton>

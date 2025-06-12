@@ -70,31 +70,31 @@ return (
     <Box component="main" sx={{ flexGrow: 1, padding: 3, backgroundColor: '#f5f5f5', minHeight: '100vh', pt: '64px' }}>
       <Header />
 
-      <Typography variant="h5" gutterBottom>
-        Dashboard Overview
+      <Typography variant="h6" sx={{ color: '#147c3c', mb: 2 }} gutterBottom>
+       DASHBOARD OVERVIEW
       </Typography>
 
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mt: 2 }}>
         <Paper sx={{ p: 2, flex: '1 1 200px', minWidth: '200px' }}>
-          <People sx={{ color: 'green' }} />
+          <People sx={{ color: '#147c3c' }} />
           <Typography variant="subtitle1">Total Users</Typography>
           <Typography variant="h6">{totalUsers}</Typography>
         </Paper>
         <Paper sx={{ p: 2, flex: '1 1 200px', minWidth: '200px' }}>
-          <Build sx={{ color: 'green' }} />
+          <Build sx={{ color: '#147c3c' }} />
           <Typography variant="subtitle1">Service Providers</Typography>
           <Typography variant="h6">{totalProviders}</Typography>
         </Paper>
         <Paper sx={{ p: 2, flex: '1 1 200px', minWidth: '200px' }}>
-          <BookOnline sx={{ color: 'green' }} />
+          <BookOnline sx={{ color: '#147c3c' }} />
           <Typography variant="subtitle1">Bookings</Typography>
           <Typography variant="h6">{totalBookings}</Typography>
         </Paper>
       </Box>
 
       <Box sx={{ mt: 5, pb: 5 }}>
-        <Typography variant="h6" gutterBottom>
-          Latest Activity
+        <Typography variant="h6" sx={{ color: '#147c3c', mb: 2 }} gutterBottom>
+          LATEST ACTIVITIES
         </Typography>
         <Paper sx={{ p: 2 }}>
           <List>
