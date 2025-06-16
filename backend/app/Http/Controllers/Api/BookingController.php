@@ -25,6 +25,7 @@ public function index()
             'service_name' => $booking->service ? $booking->service->name : 'N/A',
             'booking_date' => $booking->booking_date,
             'status' => $booking->status,
+            
         ];
     });
 
@@ -113,5 +114,14 @@ public function index()
     {
         Booking::destroy($id);
         return response()->json(['message' => 'Booking deleted']);
+    }
+
+    // Get bookings for the logged-in user
+    public function userBookings(Request $request)
+    {
+        //$user = $request->user();
+        
+        $bookings = Booking::where('user_id', $user->id)->get();
+        return response()->json($bookings);
     }
 }

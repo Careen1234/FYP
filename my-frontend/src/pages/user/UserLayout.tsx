@@ -28,6 +28,7 @@ import RateReviewIcon from '@mui/icons-material/RateReview';
 import LogoutIcon from '@mui/icons-material/Logout';
 import PersonIcon from '@mui/icons-material/Person';
 import axios from 'axios';
+import MyRequest from './MyRequest';
 
 const categories = ['Home Services', 'Personal Care', 'Roadside Assistance'];
 
@@ -223,8 +224,9 @@ const UserDashboard: React.FC = () => {
 
       {/* Main Content */}
       <Box sx={{ flex: 1 }}>
-        {/* If booking flow active (selectedServiceId != null), show providers */}
-        {selectedServiceId !== null ? (
+        {activeTab === 'requests' ? (
+          <MyRequest />
+        ) : selectedServiceId !== null ? (
           <>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
               <Typography variant="h5" fontWeight={600}>
