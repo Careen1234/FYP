@@ -13,12 +13,7 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('provider_service', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('provider_id')->constrained()->onDelete('cascade');
-             $table->foreignId('service_id')->constrained()->onDelete('cascade');
-            $table->timestamps();
-        });
+        //
     }
 
     /**
@@ -28,6 +23,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('provider_service');
+        //
     }
 };

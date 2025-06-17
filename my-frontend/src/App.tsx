@@ -21,9 +21,9 @@ import CMS from "./pages/admin/CmsPages";
 //import AuthPage from "./pages/AuthPage";
 
 import UserLayout from "./pages/user/UserLayout";
-//import RegisterForm from "./components/Register";
+import Register from "./components/Register";
 
-//import Login from "./components/Login";
+import Login from "./components/Login";
 
 import "./App.css";
 //import ErrorBoundary from "./components/ErrorBoundary";
@@ -47,6 +47,10 @@ const AppContent = () => {
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
+
+        {/* Auth Routes */}
+        <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<Login />} />
 
         {/*<Route path="/services" element={<Services />} />*/}
 

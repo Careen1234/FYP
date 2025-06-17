@@ -1,5 +1,5 @@
-import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
   AppBar,
   Toolbar,
@@ -7,9 +7,9 @@ import {
   Button,
   Box,
   Container,
-} from '@mui/material';
-import './Navbar.css';
-import '../ContactModal';
+} from "@mui/material";
+import "./Navbar.css";
+import "../ContactModal";
 
 const Navbar: React.FC = () => {
   const navigate = useNavigate();
@@ -24,8 +24,13 @@ const Navbar: React.FC = () => {
         <Link to="/book">Book Now</Link>
         <Link to="/about">About us</Link>
         <Link to="/contact">Contact</Link>
-        <button className="login-btn">Login</button>
-        <button className="login-btn">register</button>
+        <Link to="/login">
+          <button className="login-btn">Login</button>
+        </Link>
+
+        <Link to="/register">
+          <button className="register-btn">Register</button>
+        </Link>
       </div>
     </nav>
   );
