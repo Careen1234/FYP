@@ -1,0 +1,17 @@
+import React from 'react';
+import { Typography, Box } from '@mui/material';
+
+const ProviderProfile: React.FC = () => {
+  return (
+    <Box>
+      <Typography variant="h4" gutterBottom>
+        My Profile
+      </Typography>
+      <Typography>
+        Update your personal and business details here.
+      </Typography>
+    </Box>
+  );
+};
+
+export default ProviderProfile;

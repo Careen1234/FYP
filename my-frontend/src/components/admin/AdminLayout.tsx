@@ -4,69 +4,62 @@ import { Box } from '@mui/material';
 import Sidebar from '../admin/Sidebar';
 import Header from '../admin/Header';
 
+const drawerWidth = 240;
+const headerHeight = 64;
+
 const AdminLayout: React.FC = () => {
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        width: '100vw',
-        height: '100vh',
-        overflow: 'hidden', 
-      }}
-    >
-      {/* Sidebar */}
+    <>
+      {/* Fixed Sidebar */}
       <Box
         sx={{
-          width: '240px', 
-         flexShrink: 0,
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: drawerWidth,
+          height: '100vh',
           bgcolor: '#147c3c',
-          color: '#fff',
-          display: 'flex',
-          overflow: 'hidden',
+          zIndex: 1200,
         }}
       >
         <Sidebar />
       </Box>
 
-      {/* Main content */}
+      {/* Fixed Header */}
       <Box
         sx={{
-          flexGrow: 1,
+          position: 'fixed',
+          top: 0,
+          left: drawerWidth,
+          height: headerHeight,
+          width: `calc(100% - ${drawerWidth}px)`,
+          bgcolor: '#147c3c',
           display: 'flex',
-          flexDirection: 'column',
-          minWidth: 0,
-         
+          alignItems: 'center',
+          px: 3,
+          zIndex: 1100,
+          boxShadow: 1,
         }}
       >
-        {/* Header */}
-        <Box
-          sx={{
-            height: '64px',
-            bgcolor: '#147c3c',
-            color: '#fff',
-            display: 'flex',
-            alignItems: 'center',
-            px: 3,
-            boxShadow: 1,
-            flexShrink: 0,
-          }}
-        >
-          <Header />
-        </Box>
-
-        {/* Main Body */}
-        <Box
-          sx={{
-            flexGrow: 1,
-            overflow: 'auto',
-            padding: 3,
-            backgroundColor: '#ffffff',
-          }}
-        >
-          <Outlet />
-        </Box>
+        <Header />
       </Box>
-    </Box>
+
+      {/* Scrollable Content Area */}
+      <Box
+        sx={{
+          position: 'absolute',
+          top: headerHeight,
+          left: drawerWidth,
+          width: `calc(100% - ${drawerWidth}px)`,
+          height: `calc(100vh - ${headerHeight}px)`,
+          overflowY: 'auto',
+          p: 3,
+          bgcolor: '#ffffff',
+        }}
+      >
+        <Outlet />
+      </Box>
+    </>
   );
 };
 

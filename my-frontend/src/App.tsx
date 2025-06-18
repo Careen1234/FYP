@@ -18,6 +18,16 @@ import PaymentManagement from "./pages/admin/PaymentManagement";
 import Reports from "./pages/admin/Reports";
 
 import CMS from "./pages/admin/CmsPages";
+
+// Layout
+import ProviderLayout from "./components/provider/ProviderLayout";
+
+// Pages
+import ProviderDashboard from "./pages/provider/ProviderDashboard";
+import ProviderRequests from "./pages/provider/ProviderRequests";
+import ProviderReviews from "./pages/provider/ProviderReviews";
+import ProviderProfile from "./pages/provider/ProviderProfile";
+
 //import AuthPage from "./pages/AuthPage";
 
 import UserLayout from "./pages/user/UserLayout";
@@ -71,6 +81,14 @@ const AppContent = () => {
         <Route path="/user" element={<UserLayout />}>
           <Route index element={<h2>Welcome to User Dashboard</h2>} />
           <Route path="dashboard" element={<h2>User Dashboard</h2>} />
+        </Route>
+
+        {/* Provider routes with layout */}
+        <Route path="/provider" element={<ProviderLayout />}>
+          <Route path="dashboard" element={<ProviderDashboard />} />
+          <Route path="requests" element={<ProviderRequests />} />
+          <Route path="reviews" element={<ProviderReviews />} />
+          <Route path="profile" element={<ProviderProfile />} />
         </Route>
 
         {/* 404 fallback */}
