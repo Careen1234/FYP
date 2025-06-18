@@ -30,6 +30,8 @@ import PersonIcon from "@mui/icons-material/Person";
 import axios from "axios";
 import MyRequest from "./MyRequest";
 import MyReviews from "./MyReviews";
+import Profile from "./Profile";
+
 
 const categories = ["Home Services", "Personal Care", "Roadside Assistance"];
 
@@ -189,7 +191,9 @@ const UserDashboard: React.FC = () => {
     setSelectedServiceId(null);
     setProviders([]);
     setProvidersError("");
+    
   };
+  
 
   return (
     <Box sx={{ display: "flex", px: 3, py: 6, gap: 4 }}>
@@ -198,7 +202,7 @@ const UserDashboard: React.FC = () => {
         <Box display="flex" alignItems="center" gap={2} mb={3}>
           <Avatar sx={{ color: "#147c3c", fontWeight: 700 }}>U</Avatar>
           <Box>
-            <Typography variant="h6">User</Typography>
+            <Typography variant="h6">kalistine</Typography>
             <Typography variant="body2" color="text.success"></Typography>
           </Box>
         </Box>
@@ -265,11 +269,10 @@ const UserDashboard: React.FC = () => {
       <Box sx={{ flex: 1 }}>
         {activeTab === "requests" ? (
           <MyRequest />
-
-          ) : activeTab === "reviews" ? (
-            <MyReviews />
-
-
+        ) : activeTab === "reviews" ? (
+          <MyReviews />
+        )  : activeTab === "profile"?(
+          <Profile />
         ) : selectedServiceId !== null ? (
           <>
             <Box

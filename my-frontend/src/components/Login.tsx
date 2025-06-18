@@ -1,12 +1,19 @@
-import React, { useState } from 'react';
-import { Box, Button, TextField, Typography, Alert, CircularProgress } from '@mui/material';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import {
+  Box,
+  Button,
+  TextField,
+  Typography,
+  Alert,
+  CircularProgress,
+} from "@mui/material";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 export default function LoginForm() {
-  const [formData, setFormData] = useState({ email: '', password: '' });
-  const [error, setError] = useState('');
-  const [successMsg, setSuccessMsg] = useState('');
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [error, setError] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -17,8 +24,8 @@ export default function LoginForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
-    setSuccessMsg('');
+    setError("");
+    setSuccessMsg("");
 
     try {
       interface LoginResponse {
@@ -29,43 +36,68 @@ export default function LoginForm() {
         [key: string]: any;
       }
 
-      const response = await axios.post<LoginResponse>('http://localhost:8000/api/login', formData, {
-        withCredentials: true
-      });
+      const response = await axios.post<LoginResponse>(
+        "http://localhost:8000/api/login",
+        formData,
+        {
+          withCredentials: true,
+        }
+      );
 
       const user = response.data.user;
-      setSuccessMsg('Login successful! Redirecting...');
+      setSuccessMsg("Login successful! Redirecting...");
 
       // Store user in localStorage or context
-      localStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem("user", JSON.stringify(user));
 
       // Redirect based on role
       switch (user.role) {
-        case 'admin':
-          navigate('/admin/dashboard');
+        case "admin":
+          navigate("/admin/dashboard");
           break;
-        case 'provider':
-          navigate('/provider/dashboard');
+        case "provider":
+          navigate("/provider/dashboard");
           break;
-        case 'user':
-          navigate('/dashboard');
+        case "user":
+          navigate("/user/dashboard");
           break;
         default:
-          navigate('/');
+          navigate("/");
       }
-
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Login failed');
+      setError(err.response?.data?.message || "Login failed");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Box maxWidth={400} mx="auto" mt={4} p={3} boxShadow={3} borderRadius={2} component="form" onSubmit={handleSubmit}>
-      <Typography variant="h5" mb={3} align="center">Login</Typography>
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-      {successMsg && <Alert severity="success" sx={{ mb: 2, backgroundColor: '#147c3c', color: 'white' }}>{successMsg}</Alert>}
+    <Box
+      maxWidth={400}
+      mx="auto"
+      mt={4}
+      p={3}
+      boxShadow={3}
+      borderRadius={2}
+      component="form"
+      onSubmit={handleSubmit}
+    >
+      <Typography variant="h5" mb={3} align="center">
+        Login
+      </Typography>
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
+      {successMsg && (
+        <Alert
+          severity="success"
+          sx={{ mb: 2, backgroundColor: "#147c3c", color: "white" }}
+        >
+          {successMsg}
+        </Alert>
+      )}
 
       <TextField
         fullWidth
@@ -86,8 +118,15 @@ export default function LoginForm() {
         margin="normal"
         required
       />
-      <Button type="submit" variant="contained" color="success" fullWidth disabled={loading} sx={{ mt: 2 }}>
-        {loading ? <CircularProgress size={24} /> : 'Login'}
+      <Button
+        type="submit"
+        variant="contained"
+        color="success"
+        fullWidth
+        disabled={loading}
+        sx={{ mt: 2 }}
+      >
+        {loading ? <CircularProgress size={24} /> : "Login"}
       </Button>
     </Box>
   );

@@ -89,6 +89,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 });
 
+// Session-based authentication routes
+Route::middleware('auth:web')->group(function () {
+    Route::put('/user/profile/update', [UserController::class, 'updateCurrentUserProfile']);
+});
+
+
+
 
 
 
