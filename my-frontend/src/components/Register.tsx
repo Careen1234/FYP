@@ -24,6 +24,7 @@ export default function RegisterForm() {
     role: 'user',
     password: '',
     password_confirmation: '',
+    service: '',
   });
 
   const [errors, setErrors] = useState<any>({});
@@ -31,10 +32,21 @@ export default function RegisterForm() {
   const [success, setSuccess] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
+    const { name, value } = e.target;
+
+    setFormData((prev) => {
+      if (name === 'role' && value !== 'provider') {
+        return {
+          ...prev,
+          role: value,
+          service: '', 
+        };
+      }
+      return {
+        ...prev,
+        [name]: value,
+      };
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -44,7 +56,16 @@ export default function RegisterForm() {
     setSuccess('');
 
     try {
-      const response = await axios.post(' http://localhost:8000/api/register', formData);
+      // Make a copy of formData with service as optional
+      const payload: Omit<typeof formData, 'service'> & { service?: string } = { ...formData };
+
+      
+      if (payload.role !== 'provider') {
+        delete payload.service;
+      }
+
+      const response = await axios.post('http://localhost:8000/api/register', payload);
+
       setSuccess('Registration successful! You can now login.');
       setFormData({
         name: '',
@@ -54,6 +75,7 @@ export default function RegisterForm() {
         role: 'user',
         password: '',
         password_confirmation: '',
+        service: '',
       });
     } catch (error: any) {
       if (error.response?.data?.errors) {
@@ -119,17 +141,16 @@ export default function RegisterForm() {
       />
 
       <TextField
-  fullWidth
-  label="Phone"
-  name="phone"
-  value={formData.phone}
-  onChange={handleChange}
-  margin="normal"
-  required
-  error={Boolean(errors.phone)}
-  helperText={errors.phone?.[0]}
-/>
-
+        fullWidth
+        label="Phone"
+        name="phone"
+        value={formData.phone}
+        onChange={handleChange}
+        margin="normal"
+        required
+        error={Boolean(errors.phone)}
+        helperText={errors.phone?.[0]}
+      />
 
       <TextField
         fullWidth
@@ -160,6 +181,21 @@ export default function RegisterForm() {
           </MenuItem>
         ))}
       </TextField>
+
+      {/* Show Service only for provider */}
+      {formData.role === 'provider' && (
+        <TextField
+          fullWidth
+          label="Service Provided"
+          name="service"
+          value={formData.service}
+          onChange={handleChange}
+          margin="normal"
+          required
+          error={Boolean(errors.service)}
+          helperText={errors.service?.[0]}
+        />
+      )}
 
       <TextField
         fullWidth

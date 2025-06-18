@@ -24,13 +24,21 @@ const Navbar: React.FC = () => {
         <Link to="/book">Book Now</Link>
         <Link to="/about">About us</Link>
         <Link to="/contact">Contact</Link>
-        <Link to="/login">
-          <button className="login-btn">Login</button>
-        </Link>
-
-        <Link to="/register">
-          <button className="register-btn">Register</button>
-        </Link>
+        
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => navigate("/login")}
+        >
+          Login
+        </Button>
+        <Button
+          variant="contained"
+          color="secondary"
+          onClick={() => navigate("/register")}
+        >
+          Register
+        </Button>
       </div>
     </nav>
   );

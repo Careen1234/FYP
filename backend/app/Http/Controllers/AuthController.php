@@ -7,20 +7,25 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Provider; 
 
 class AuthController extends Controller
 {
  public function register(Request $request)
 {
-    $request->validate([
-        'name' => 'required',
-        'email' => 'required|email|unique:users',
-        'phone' => 'required|string|max:20', 
-        'role' => 'required|in:admin,user,provider',
-        'password' => 'required|min:6|confirmed',  
-        'location' => 'nullable|string|max:255',  
-    ]);
-
+     try {
+        $validated = $request->validate([
+            'name' => 'required',
+            'email' => 'required|email|unique:users',
+            'phone' => 'required|string|max:20',
+            'role' => 'required|in:admin,user,provider',
+            'password' => 'required|min:6|confirmed',
+            'location' => 'nullable|string|max:255',
+            'service' => 'required_if:role,provider|string|max:255',
+        ]);
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        return response()->json(['errors' => $e->errors()], 422);
+    }
     $user = User::create([
         'name' => $request->name,
         'email' => $request->email,
@@ -28,7 +33,24 @@ class AuthController extends Controller
         'role' => $request->role,
         'location' => $request->location,
         'password' => Hash::make($request->password),
+        
     ]);
+
+    if ($user->role === 'provider') {
+        Provider::create([
+            'user_id' => $user->id,
+            'name' => $request->name,
+            'email' => $request->email,
+            'location' => $request->location ?? '',
+            'service' => $request->service,
+            
+        ]);
+    }
+
+    return response()->json([
+        'message' => 'Registration successful',
+        'user' => $user,
+    ], 201);
 
     return response()->json($user, 201);
 }

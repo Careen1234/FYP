@@ -10,6 +10,7 @@ class Provider extends Model
     use HasFactory;
 
      protected $fillable = [
+    
         'name',
         'email',
         'service',
@@ -18,6 +19,8 @@ class Provider extends Model
         'availability',
     
     ];
+
+    protected $nullable=['user_id'];
   public function services()
 {
     return $this->belongsToMany(Service::class, 'provider_service', 'provider_id', 'service_id');
@@ -43,6 +46,11 @@ public function getAverageRatingAttribute()
 {
     return $this->ratings()->avg('rating');
 }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
     
 }
