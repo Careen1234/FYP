@@ -1,4 +1,3 @@
-// src/components/provider/ProviderSidebar.tsx
 import React from 'react';
 import {
   Drawer,
@@ -19,19 +18,27 @@ const drawerWidth = 240;
 
 const menuItems = [
   { text: 'Dashboard', icon: <DashboardIcon />, path: '/provider/dashboard' },
- 
   { text: 'Service Requests', icon: <BookOnlineIcon />, path: '/provider/requests' },
   { text: 'My Reviews', icon: <ReviewsIcon />, path: '/provider/reviews' },
   { text: 'Profile', icon: <PersonIcon />, path: '/provider/profile' },
 ];
 
-const ProviderSidebar: React.FC = () => {
+interface ProviderSidebarProps {
+  open: boolean;
+  onClose: () => void;
+  isMobile: boolean;
+}
+
+const ProviderSidebar: React.FC<ProviderSidebarProps> = ({ open, onClose, isMobile }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
   return (
     <Drawer
-      variant="permanent"
+      variant={isMobile ? 'temporary' : 'persistent'}
+      open={open}
+      onClose={onClose}
+      ModalProps={{ keepMounted: true }} // Better open performance on mobile
       sx={{
         width: drawerWidth,
         flexShrink: 0,
@@ -44,7 +51,7 @@ const ProviderSidebar: React.FC = () => {
       }}
     >
       <Toolbar />
-      <Divider sx={{ borderColor: '#147c3c' }} />
+      <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.12)' }} />
       <List>
         {menuItems.map(({ text, icon, path }) => {
           const isSelected = location.pathname === path;
@@ -52,7 +59,10 @@ const ProviderSidebar: React.FC = () => {
             <ListItemButton
               key={text}
               selected={isSelected}
-              onClick={() => navigate(path)}
+              onClick={() => {
+                navigate(path);
+                if (isMobile) onClose();
+              }}
               sx={{
                 color: '#fff',
                 '&.Mui-selected': {
