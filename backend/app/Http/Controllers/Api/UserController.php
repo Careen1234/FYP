@@ -83,46 +83,47 @@ class UserController extends Controller
     }
 
     public function updateCurrentUserProfile(Request $request)
-    {
-    
+{
+    $user = auth()->user(); 
 
-        // Validate the request
-        $request->validate([
-            'name' => 'sometimes|required|string|max:255',
-            'email' => 'sometimes|required|email|unique:users,email,' . $user->id,
-            'phone' => 'nullable|string|max:20',
-            'location' => 'nullable|string|max:255',
-        ]);
+    // Validate the request
+    $request->validate([
+        'name' => 'sometimes|required|string|max:255',
+        'email' => 'sometimes|required|email|unique:users,email,' . $user->id,
+        'phone' => 'nullable|string|max:20',
+        'location' => 'nullable|string|max:255',
+    ]);
 
-        // Update user fields
-        if ($request->has('name')) {
-            $user->name = $request->name;
-        }
-        if ($request->has('email')) {
-            $user->email = $request->email;
-        }
-        if ($request->has('phone')) {
-            $user->phone = $request->phone;
-        }
-        if ($request->has('location')) {
-            $user->location = $request->location;
-        }
-
-        $user->save();
-
-        return response()->json([
-            'message' => 'Profile updated successfully',
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'phone' => $user->phone,
-                'location' => $user->location,
-                'role' => $user->role,
-                'status' => $user->status,
-                'created_at' => $user->created_at,
-                'updated_at' => $user->updated_at,
-            ]
-        ]);
+    // Update user fields
+    if ($request->has('name')) {
+        $user->name = $request->name;
     }
+    if ($request->has('email')) {
+        $user->email = $request->email;
+    }
+    if ($request->has('phone')) {
+        $user->phone = $request->phone;
+    }
+    if ($request->has('location')) {
+        $user->location = $request->location;
+    }
+
+    $user->save();
+
+    return response()->json([
+        'message' => 'Profile updated successfully',
+        'user' => [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'phone' => $user->phone,
+            'location' => $user->location,
+            'role' => $user->role,
+            'status' => $user->status,
+            'created_at' => $user->created_at,
+            'updated_at' => $user->updated_at,
+        ]
+    ]);
+}
+
 }

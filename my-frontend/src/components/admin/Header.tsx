@@ -1,4 +1,3 @@
-// src/components/admin/Header.tsx
 import React, { useState } from 'react';
 import {
   AppBar,
@@ -13,18 +12,34 @@ import {
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import AccountCircle from '@mui/icons-material/AccountCircle';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const drawerWidth = 240;
 
 const Header: React.FC = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
+  const navigate = useNavigate();
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
 
   const handleMenuClose = () => setAnchorEl(null);
+
+  // Added logout function here
+  const handleLogout = async () => {
+    handleMenuClose(); // close menu first
+    try {
+      await axios.post('/api/logout', {}, { withCredentials: true });
+      localStorage.removeItem('role');
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout failed', error);
+      // You can optionally add user feedback here
+    }
+  };
 
   return (
     <AppBar
@@ -70,7 +85,7 @@ const Header: React.FC = () => {
             transformOrigin={{ horizontal: 'right', vertical: 'top' }}
           >
             <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-            <MenuItem onClick={handleMenuClose}>Logout</MenuItem>
+            <MenuItem onClick={handleLogout}>Logout</MenuItem> {/* <-- Logout linked */}
           </Menu>
         </Box>
       </Toolbar>

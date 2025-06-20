@@ -1,17 +1,15 @@
 import React, { useState } from 'react';
-import {
-  Box,
-  Typography,
-  Grid,
-  Paper,
-  Stack,
-  Switch,
-  FormControlLabel,
-  Badge,
-  LinearProgress,
-  Divider,
-  Chip
-} from '@mui/material';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import Grid from '@mui/material/Grid';
+import Paper from '@mui/material/Paper';
+import Stack from '@mui/material/Stack';
+import Switch from '@mui/material/Switch';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Badge from '@mui/material/Badge';
+import LinearProgress from '@mui/material/LinearProgress';
+import Divider from '@mui/material/Divider';
+import Chip from '@mui/material/Chip';
 import {
   Dashboard as DashboardIcon,
   CheckCircle as OnlineIcon,
@@ -42,7 +40,7 @@ const ProviderDashboard = () => {
     setIsOnline(!isOnline);
   };
 
-  const StatCard = ({ icon, title, value, subtext, progress }) => (
+  const StatCard = ({ icon, title, value, subtext, progress }: { icon: React.ReactElement; title: any; value: any; subtext: any; progress?: any }) => (
     <Paper sx={{
       p: 3,
       height: '100%', // makes card fill parent Grid cell
@@ -65,9 +63,11 @@ const ProviderDashboard = () => {
             width: 48,
             height: 48
           }}>
-            {React.cloneElement(icon, {
-              sx: { fontSize: 32, color: '#147c3c' }
-            })}
+            {React.isValidElement(icon)
+              ? React.cloneElement(icon as React.ReactElement<any, any>, {
+                  sx: { fontSize: 32, color: '#147c3c' }
+                })
+              : icon}
           </Box>
           <Box flex={1}>
             <Typography variant="subtitle2" color="text.secondary">{title}</Typography>
@@ -80,7 +80,7 @@ const ProviderDashboard = () => {
         <Typography variant="caption" color="text.secondary">{subtext}</Typography>
       )}
 
-      {progress && (
+      {progress !== undefined && (
         <Box mt={2}>
           <LinearProgress
             variant="determinate"
