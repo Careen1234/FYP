@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+<<<<<<< HEAD
 import {
   Box,
   Typography,
@@ -12,6 +13,19 @@ import {
   Chip,
   Avatar
 } from '@mui/material';
+=======
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import Grid from '@mui/material/Grid';
+import Paper from '@mui/material/Paper';
+import Stack from '@mui/material/Stack';
+import Switch from '@mui/material/Switch';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Badge from '@mui/material/Badge';
+import LinearProgress from '@mui/material/LinearProgress';
+import Divider from '@mui/material/Divider';
+import Chip from '@mui/material/Chip';
+>>>>>>> 9d79cc9abd35fdc2d7979e9e2416e4b1afa128e3
 import {
   Dashboard as DashboardIcon,
   CheckCircle as OnlineIcon,
@@ -69,6 +83,7 @@ const ProviderDashboard = () => {
     setIsOnline(!isOnline);
   };
 
+<<<<<<< HEAD
   const StatCard = ({ icon, title, value, subtext, progress }: {
     icon: React.ReactElement;
     title: any;
@@ -76,6 +91,9 @@ const ProviderDashboard = () => {
     subtext: any;
     progress?: number;
   }) => (
+=======
+  const StatCard = ({ icon, title, value, subtext, progress }: { icon: React.ReactElement; title: any; value: any; subtext: any; progress?: any }) => (
+>>>>>>> 9d79cc9abd35fdc2d7979e9e2416e4b1afa128e3
     <Paper sx={{
       p: 3,
       height: '100%',
@@ -98,7 +116,15 @@ const ProviderDashboard = () => {
             width: 48,
             height: 48
           }}>
+<<<<<<< HEAD
             {icon}
+=======
+            {React.isValidElement(icon)
+              ? React.cloneElement(icon as React.ReactElement<any, any>, {
+                  sx: { fontSize: 32, color: '#147c3c' }
+                })
+              : icon}
+>>>>>>> 9d79cc9abd35fdc2d7979e9e2416e4b1afa128e3
           </Box>
           <Box sx={{ flex: 1 }}>
             <Typography variant="subtitle2" color="text.secondary">{title}</Typography>
@@ -111,7 +137,7 @@ const ProviderDashboard = () => {
         <Typography variant="caption" color="text.secondary">{subtext}</Typography>
       )}
 
-      {progress && (
+      {progress !== undefined && (
         <Box mt={2}>
           <LinearProgress
             variant="determinate"

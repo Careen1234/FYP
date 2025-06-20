@@ -103,7 +103,7 @@ const Profile: React.FC = () => {
       setSaving(true);
       try {
         const response = await axios.put<{message: string, user: UserProfile}>(
-          "http://localhost:8000/api/user/profile/update",
+          "http://localhost:8000/api/profile",
           {
             name: editedProfile.name,
             email: editedProfile.email,

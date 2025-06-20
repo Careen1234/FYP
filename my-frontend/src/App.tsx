@@ -3,11 +3,12 @@ import {
   Routes,
   Route,
   useLocation,
-  Navigate,
 } from "react-router-dom";
+
 import Navbar from "./components/public/Navbar";
 import Hero from "./components/public/Hero";
 import Services from "./pages/public/Services";
+
 import AdminLayout from "./components/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/Dashboard";
 import UserManagement from "./pages/admin/UsersManagement";
@@ -16,27 +17,21 @@ import ServiceManagement from "./pages/admin/ServiceManagement";
 import BookingManagement from "./pages/admin/BookingManagement";
 import PaymentManagement from "./pages/admin/PaymentManagement";
 import Reports from "./pages/admin/Reports";
-
 import CMS from "./pages/admin/CmsPages";
 
-// Layout
 import ProviderLayout from "./components/provider/ProviderLayout";
-
-// Pages
 import ProviderDashboard from "./pages/provider/ProviderDashboard";
 import ProviderRequests from "./pages/provider/ProviderRequests";
 import ProviderReviews from "./pages/provider/ProviderReviews";
 import ProviderProfile from "./pages/provider/ProviderProfile";
 
-//import AuthPage from "./pages/AuthPage";
-
 import UserLayout from "./pages/user/UserLayout";
-import Register from "./components/Register";
 
+import Register from "./components/Register";
 import Login from "./components/Login";
+import Unauthorized from "./pages/Unauthorized";
 
 import "./App.css";
-//import ErrorBoundary from "./components/ErrorBoundary";
 
 const Home = () => (
   <>
@@ -49,20 +44,20 @@ const AppContent = () => {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith("/admin");
   const isUserRoute = location.pathname.startsWith("/user");
+  const isProviderRoute = location.pathname.startsWith("/provider");
+
+  const hideNavbar = isAdminRoute || isUserRoute || isProviderRoute;
 
   return (
     <div className="app">
-      {!isAdminRoute && !isUserRoute && <Navbar />}
+      {!hideNavbar && <Navbar />}
 
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
-
-        {/* Auth Routes */}
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
-
-        {/*<Route path="/services" element={<Services />} />*/}
+        <Route path="/unauthorized" element={<Unauthorized />} />
 
         {/* Admin Routes */}
         <Route path="/admin" element={<AdminLayout />}>
@@ -77,13 +72,13 @@ const AppContent = () => {
           <Route path="cms" element={<CMS />} />
         </Route>
 
-        {/* User */}
+        {/* User Routes */}
         <Route path="/user" element={<UserLayout />}>
           <Route index element={<h2>Welcome to User Dashboard</h2>} />
           <Route path="dashboard" element={<h2>User Dashboard</h2>} />
         </Route>
 
-        {/* Provider routes with layout */}
+        {/* Provider Routes */}
         <Route path="/provider" element={<ProviderLayout />}>
           <Route path="dashboard" element={<ProviderDashboard />} />
           <Route path="requests" element={<ProviderRequests />} />
@@ -91,7 +86,7 @@ const AppContent = () => {
           <Route path="profile" element={<ProviderProfile />} />
         </Route>
 
-        {/* 404 fallback */}
+        {/* 404 Fallback */}
         <Route path="*" element={<h2>404 Page Not Found</h2>} />
       </Routes>
     </div>

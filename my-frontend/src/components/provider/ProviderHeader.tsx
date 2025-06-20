@@ -13,6 +13,8 @@ import {
 import SearchIcon from '@mui/icons-material/Search';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import MenuIcon from '@mui/icons-material/Menu';
+import { logout } from '../../pages/Authlogout';  // <-- import logout
+import { useNavigate } from 'react-router-dom';   // <-- import navigate hook
 
 interface ProviderHeaderProps {
   toggleSidebar: () => void;
@@ -22,12 +24,20 @@ interface ProviderHeaderProps {
 const ProviderHeader: React.FC<ProviderHeaderProps> = ({ toggleSidebar, sidebarOpen }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
+  const navigate = useNavigate();  // <-- initialize navigate
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
 
   const handleMenuClose = () => setAnchorEl(null);
+
+  // <-- Add logout handler here
+  const handleLogout = async () => {
+    handleMenuClose();
+    const result = await logout();
+    if (result) navigate('/login');
+  };
 
   return (
     <AppBar
@@ -89,7 +99,8 @@ const ProviderHeader: React.FC<ProviderHeaderProps> = ({ toggleSidebar, sidebarO
             transformOrigin={{ horizontal: 'right', vertical: 'top' }}
           >
             <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-            <MenuItem onClick={handleMenuClose}>Logout</MenuItem>
+            {/* <-- call logout handler on logout menu item */}
+            <MenuItem onClick={handleLogout}>Logout</MenuItem>
           </Menu>
         </Box>
       </Toolbar>
