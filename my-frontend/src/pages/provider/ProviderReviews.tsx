@@ -7,10 +7,9 @@ import {
   Divider,
   Rating,
   Avatar,
-  Chip,
-  Grid,
-  useTheme
+  Chip
 } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import {
   Reviews as ReviewsIcon,
   Star as StarIcon,
@@ -67,8 +66,8 @@ const ProviderReviews = () => {
       </Stack>
 
       {/* Summary */}
-      <Grid container spacing={3} mb={4}>
-        <Grid item xs={12} sm={6} md={4}>
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, mb: 4 }}>
+        <Box sx={{ flex: '1 1 260px', minWidth: 260, maxWidth: 340 }}>
           <Paper sx={{ p: 3, textAlign: 'center' }}>
             <Typography variant="subtitle2" color="text.secondary" mb={1}>
               Average Rating
@@ -88,9 +87,9 @@ const ProviderReviews = () => {
               from {reviews.length} reviews
             </Typography>
           </Paper>
-        </Grid>
+        </Box>
 
-        <Grid item xs={12} sm={6} md={4}>
+        <Box sx={{ flex: '1 1 260px', minWidth: 260, maxWidth: 340 }}>
           <Paper sx={{ p: 3, textAlign: 'center' }}>
             <Typography variant="subtitle2" color="text.secondary" mb={1}>
               5-Star Reviews
@@ -102,9 +101,9 @@ const ProviderReviews = () => {
               {Math.round((reviews.filter(r => r.rating === 5).length / reviews.length) * 100)}% of total
             </Typography>
           </Paper>
-        </Grid>
+        </Box>
 
-        <Grid item xs={12} md={4}>
+        <Box sx={{ flex: '1 1 260px', minWidth: 260, maxWidth: 340 }}>
           <Paper sx={{ p: 3, textAlign: 'center' }}>
             <Typography variant="subtitle2" color="text.secondary" mb={1}>
               Recent Feedback
@@ -116,8 +115,8 @@ const ProviderReviews = () => {
               "{reviews[0].comment.substring(0, 30)}..."
             </Typography>
           </Paper>
-        </Grid>
-      </Grid>
+        </Box>
+      </Box>
 
       {/* Review List */}
       <Paper sx={{ p: { xs: 2, md: 3 }, mb: 3 }}>

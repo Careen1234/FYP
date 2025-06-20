@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
   Box,
   Typography,
-  Grid,
   Paper,
   Stack,
   Switch,
@@ -10,7 +9,8 @@ import {
   Badge,
   LinearProgress,
   Divider,
-  Chip
+  Chip,
+  Avatar
 } from '@mui/material';
 import {
   Dashboard as DashboardIcon,
@@ -23,29 +23,62 @@ import {
   TrendingUp as TrendIcon
 } from '@mui/icons-material';
 
+const recentActivity = [
+  { id: 1, customer: 'Alex Johnson', service: 'Pipe Repair', time: 'Today, 10:30 AM' },
+  { id: 2, customer: 'Sarah Miller', service: 'Faucet Installation', time: 'Yesterday' }
+];
+
 const ProviderDashboard = () => {
   const [isOnline, setIsOnline] = useState(true);
 
-  const stats = {
-    earnings: { current: 6500000 },
-    upcomingJobs: 3,
-    rating: 4.8,
-    pendingRequests: 2,
-    completionRate: 85,
-    recentActivity: [
-      { id: 1, customer: 'Alex Johnson', service: 'Pipe Repair', time: 'Today, 10:30 AM' },
-      { id: 2, customer: 'Sarah Miller', service: 'Faucet Installation', time: 'Yesterday' }
-    ]
-  };
+  const stats = [
+    {
+      icon: <EarningsIcon sx={{ fontSize: 32, color: '#147c3c' }} />,
+      title: "Monthly Earnings",
+      value: `Tsh ${6500000..toLocaleString()}`,
+      subtext: "This month"
+    },
+    {
+      icon: <RatingIcon sx={{ fontSize: 32, color: '#147c3c' }} />,
+      title: "Your Rating",
+      value: 4.8,
+      subtext: "Based on customer reviews"
+    },
+    {
+      icon: <RequestsIcon sx={{ fontSize: 32, color: '#147c3c' }} />,
+      title: "Pending Requests",
+      value: 2,
+      subtext: "Action needed"
+    },
+    {
+      icon: <ScheduleIcon sx={{ fontSize: 32, color: '#147c3c' }} />,
+      title: "Upcoming Jobs",
+      value: 3,
+      subtext: "Scheduled this week"
+    },
+    {
+      icon: <TrendIcon sx={{ fontSize: 32, color: '#147c3c' }} />,
+      title: "Completion Rate",
+      value: `85%`,
+      subtext: "All time",
+      progress: 85
+    }
+  ];
 
   const toggleAvailability = () => {
     setIsOnline(!isOnline);
   };
 
-  const StatCard = ({ icon, title, value, subtext, progress }) => (
+  const StatCard = ({ icon, title, value, subtext, progress }: {
+    icon: React.ReactElement;
+    title: any;
+    value: any;
+    subtext: any;
+    progress?: number;
+  }) => (
     <Paper sx={{
       p: 3,
-      height: '100%', // makes card fill parent Grid cell
+      height: '100%',
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'space-between',
@@ -65,11 +98,9 @@ const ProviderDashboard = () => {
             width: 48,
             height: 48
           }}>
-            {React.cloneElement(icon, {
-              sx: { fontSize: 32, color: '#147c3c' }
-            })}
+            {icon}
           </Box>
-          <Box flex={1}>
+          <Box sx={{ flex: 1 }}>
             <Typography variant="subtitle2" color="text.secondary">{title}</Typography>
             <Typography variant="h4" fontWeight={700}>{value}</Typography>
           </Box>
@@ -181,103 +212,44 @@ const ProviderDashboard = () => {
       </Paper>
 
       {/* Stats Cards */}
-      <Grid 
-        container 
-        spacing={3}
-        sx={{ mb: 4 }}
-        alignItems="stretch"
+      <Box
+        sx={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: 3,
+          mb: 4,
+          alignItems: 'stretch',
+        }}
       >
-        {[
-          {
-            icon: <EarningsIcon />,
-            title: "Monthly Earnings",
-            value: `Tsh ${stats.earnings.current.toLocaleString()}`,
-            subtext: "This month"
-          },
-          {
-            icon: <RatingIcon />,
-            title: "Your Rating",
-            value: stats.rating,
-            subtext: "From 24 reviews"
-          },
-          {
-            icon: <ScheduleIcon />,
-            title: "Upcoming Jobs",
-            value: stats.upcomingJobs,
-            subtext: "Scheduled this week"
-          },
-          {
-            icon: <RequestsIcon />,
-            title: "Pending Requests",
-            value: stats.pendingRequests,
-            subtext: "Needing approval"
-          }
-        ].map((item, index) => (
-          <Grid 
-            item 
-            key={index}
-            xs={12} sm={6} md={3}
-            sx={{ display: 'flex' }} // ensures equal height
-          >
-            <StatCard {...item} />
-          </Grid>
+        {stats.map((stat, idx) => (
+          <Box key={idx} sx={{ flex: '1 1 260px', minWidth: 260, maxWidth: 340, display: 'flex' }}>
+            <StatCard {...stat} />
+          </Box>
         ))}
-      </Grid>
+      </Box>
 
       {/* Recent Activity */}
-      <Paper sx={{
-        p: 3,
-        transition: 'box-shadow 0.3s',
-        '&:hover': {
-          boxShadow: 4
-        }
-      }}>
+      <Paper sx={{ p: 3 }}>
         <Typography variant="h6" fontWeight={600} mb={2}>
           Recent Activity
         </Typography>
-        <Divider sx={{ mb: 3 }} />
-
+        <Divider sx={{ mb: 2 }} />
         <Stack spacing={2}>
-          {stats.recentActivity.map((activity) => (
-            <Paper
-              key={activity.id}
-              variant="outlined"
-              sx={{
-                p: 2,
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                '&:hover': {
-                  bgcolor: '#f9f9f9'
-                }
-              }}
-            >
+          {recentActivity.map((activity) => (
+            <Box key={activity.id} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Avatar sx={{ bgcolor: '#147c3c', width: 40, height: 40 }}>
+                {activity.customer.charAt(0)}
+              </Avatar>
               <Box>
-                <Typography fontWeight={500}>{activity.customer}</Typography>
-                <Typography variant="body2" color="text.secondary">{activity.service}</Typography>
+                <Typography fontWeight={600}>{activity.customer}</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {activity.service} &mdash; {activity.time}
+                </Typography>
               </Box>
-              <Chip
-                label={activity.time}
-                size="small"
-                variant="outlined"
-              />
-            </Paper>
+            </Box>
           ))}
         </Stack>
       </Paper>
-
-      {/* Completion Rate */}
-      <Grid container spacing={3} sx={{ mt: 2 }}>
-        <Grid item xs={12} md={6} sx={{ display: 'flex' }}>
-          <StatCard
-            icon={<TrendIcon />}
-            title="Job Completion Rate"
-            value={`${stats.completionRate}%`}
-            subtext="Last 30 days"
-            progress={stats.completionRate}
-          />
-        </Grid>
-      </Grid>
     </Box>
   );
 };

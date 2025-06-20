@@ -23,7 +23,16 @@ import {
 
 const ProviderProfile = () => {
   const [isEditing, setIsEditing] = useState(false);
-  const [profile, setProfile] = useState({
+  const [profile, setProfile] = useState<{
+    name: string;
+    email: string;
+    phone: string;
+    service: string;
+    price: string;
+    bio: string;
+    profilePhoto: string | null;
+    businessPhotos: string[];
+  }>({
     name: 'AquaFlow Plumbing',
     email: 'contact@aquaflow.com',
     phone: '(555) 123-4567',
@@ -34,8 +43,8 @@ const ProviderProfile = () => {
     businessPhotos: []
   });
 
-  const profileInputRef = useRef();
-  const businessInputRef = useRef();
+  const profileInputRef = useRef<HTMLInputElement>(null);
+  const businessInputRef = useRef<HTMLInputElement>(null);
 
   const greenColor = '#147c3c';
   const greenHover = '#126e35';
@@ -45,15 +54,17 @@ const ProviderProfile = () => {
     // API save logic would go here
   };
 
-  const handlePhotoUpload = (e, type) => {
-    const file = e.target.files[0];
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>, type: 'profile' | 'business') => {
+    const file = e.target.files && e.target.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = () => {
-        if (type === 'profile') {
-          setProfile({ ...profile, profilePhoto: reader.result });
-        } else {
-          setProfile({ ...profile, businessPhotos: [...profile.businessPhotos, reader.result] });
+        if (typeof reader.result === 'string') {
+          if (type === 'profile') {
+            setProfile({ ...profile, profilePhoto: reader.result as string });
+          } else {
+            setProfile({ ...profile, businessPhotos: [...profile.businessPhotos, reader.result as string] });
+          }
         }
       };
       reader.readAsDataURL(file);
@@ -102,7 +113,7 @@ const ProviderProfile = () => {
           {/* Avatar */}
           <Stack alignItems="center" spacing={2} sx={{ minWidth: '200px' }}>
             <Avatar
-              src={profile.profilePhoto}
+              src={profile.profilePhoto || undefined}
               sx={{
                 width: 150,
                 height: 150,
@@ -110,7 +121,7 @@ const ProviderProfile = () => {
                 fontSize: 60
               }}
             >
-              {profile.name.charAt(0)}
+              {profile.name ? profile.name.charAt(0) : ''}
             </Avatar>
 
             {isEditing && (
@@ -125,7 +136,7 @@ const ProviderProfile = () => {
                 <Button
                   variant="outlined"
                   startIcon={<AddPhotoIcon />}
-                  onClick={() => profileInputRef.current.click()}
+                  onClick={() => profileInputRef.current?.click()}
                   sx={{
                     borderColor: greenColor,
                     color: greenColor,
@@ -233,12 +244,11 @@ const ProviderProfile = () => {
               ref={businessInputRef}
               onChange={(e) => handlePhotoUpload(e, 'business')}
               style={{ display: 'none' }}
-              multiple
             />
             <Button
               variant="outlined"
               startIcon={<AddPhotoIcon />}
-              onClick={() => businessInputRef.current.click()}
+              onClick={() => businessInputRef.current?.click()}
               sx={{
                 mb: 3,
                 borderColor: greenColor,
