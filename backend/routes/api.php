@@ -24,7 +24,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 // ✅ Public Auth Routes
 Route::post('/login', [AuthController::class, 'login']);
 
-Route::post('/register', [AuthController::class, 'register'])->middleware('guest');
+Route::post('/register', [AuthController::class, 'register']);
 
 // ✅ Logout and "me" - must be protected
 Route::middleware('auth:sanctum')->group(function () {
@@ -42,6 +42,7 @@ Route::prefix('providers')->group(function () {
     Route::get('/providers', [ProviderController::class, 'listProviders']);
     Route::get('/', [ProviderController::class, 'index']);
     Route::post('/', [ProviderController::class, 'store']);
+    Route::get('/profile', [ProviderController::class, 'getProfile'])->middleware('auth:sanctum');
     Route::get('{id}', [ProviderController::class, 'show']);
     Route::put('{id}', [ProviderController::class, 'update']);
     Route::delete('{id}', [ProviderController::class, 'destroy']);
@@ -91,6 +92,7 @@ Route::get('/activity/latest', [DashboardController::class, 'latestActivity']);
 
 // ✅ Ratings
 Route::get('/ratings', [RatingsController::class, 'index']);
+Route::get('/provider/reviews', [RatingsController::class, 'providerReviews']);
 
 Route::put('/profile', [UserController::class, 'updateCurrentUserProfile']);
    

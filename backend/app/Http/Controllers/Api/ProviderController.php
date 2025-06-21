@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Provider;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Log;
 
 class ProviderController extends Controller
 {
@@ -173,6 +174,30 @@ class ProviderController extends Controller
         $provider->save();
 
         return response()->json(['message' => 'Provider status updated']);
+    }
+
+    public function getProfile(Request $request)
+    {
+        try {
+            $user = $request->user();
+
+            if (!$user) {
+                return response()->json(['error' => 'User not authenticated'], 401);
+            }
+
+            // Eager load the service category relationship
+            $provider = Provider::with('serviceCategory')->where('user_id', $user->id)->first();
+
+            if (!$provider) {
+                return response()->json(['error' => 'Provider profile not found for this user.'], 404);
+            }
+
+            return response()->json($provider);
+
+        } catch (\Exception $e) {
+            Log::error('Failed to fetch provider profile: ' . $e->getMessage());
+            return response()->json(['error' => 'Server error while fetching profile.'], 500);
+        }
     }
 }
 

@@ -4,7 +4,12 @@
     "@emotion/styled": "^11.14.0",
     "@mui/icons-material": "^7.1.0",
     "@mui/material": "^7.1.0",
-    "@mui/x-data-grid": "^8.4.0"
+    "@mui/x-data-grid": "^8.4.0",
+    "@types/js-cookie": "^3.0.6",
+    "@types/react-leaflet": "^2.8.3",
+    "js-cookie": "^3.0.5",
+    "leaflet": "^1.9.4",
+    "react-leaflet": "^5.0.0"
   },
   "devDependencies": {
     "@types/react": "^19.1.5",

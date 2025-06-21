@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -9,7 +9,9 @@ import {
   Stack,
   Chip,
   Paper,
-  IconButton
+  IconButton,
+  CircularProgress,
+  Alert
 } from '@mui/material';
 import {
   Edit as EditIcon,
@@ -20,34 +22,68 @@ import {
   AddPhotoAlternate as AddPhotoIcon,
   AttachMoney as PriceIcon
 } from '@mui/icons-material';
+import axios from 'axios';
+
+interface ProfileData {
+  name: string;
+  email: string;
+  phone: string;
+  service: string;
+  price: string;
+  bio: string;
+  profilePhoto: string | null;
+  businessPhotos: string[];
+}
+
+interface ProviderApiResponse {
+  business_name: string;
+  business_email: string;
+  business_phone: string;
+  service_category?: { name: string };
+  price: number | string;
+  bio: string;
+  profile_photo_url: string | null;
+  business_photos_urls: string[];
+}
 
 const ProviderProfile = () => {
   const [isEditing, setIsEditing] = useState(false);
-  const [profile, setProfile] = useState<{
-    name: string;
-    email: string;
-    phone: string;
-    service: string;
-    price: string;
-    bio: string;
-    profilePhoto: string | null;
-    businessPhotos: string[];
-  }>({
-    name: 'AquaFlow Plumbing',
-    email: 'contact@aquaflow.com',
-    phone: '(555) 123-4567',
-    service: 'Residential Plumbing',
-    price: '$85/hr',
-    bio: 'Specializing in leak repairs, pipe installations, and emergency plumbing services.',
-    profilePhoto: null,
-    businessPhotos: []
-  });
+  const [profile, setProfile] = useState<ProfileData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const profileInputRef = useRef<HTMLInputElement>(null);
   const businessInputRef = useRef<HTMLInputElement>(null);
 
   const greenColor = '#147c3c';
   const greenHover = '#126e35';
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await axios.get<ProviderApiResponse>('http://localhost:8000/api/providers', {
+          withCredentials: true,
+        });
+        const data = response.data;
+        setProfile({
+          name: data.business_name || 'N/A',
+          email: data.business_email || 'N/A',
+          phone: data.business_phone || 'N/A',
+          service: data.service_category?.name || 'Not Set',
+          price: data.price ? `$${data.price}/hr` : 'Not Set',
+          bio: data.bio || '',
+          profilePhoto: data.profile_photo_url || null,
+          businessPhotos: data.business_photos_urls || []
+        });
+      } catch (err: any) {
+        setError(err.response?.data?.error || 'Failed to fetch profile data.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
 
   const handleSave = () => {
     setIsEditing(false);
@@ -59,7 +95,7 @@ const ProviderProfile = () => {
     if (file) {
       const reader = new FileReader();
       reader.onload = () => {
-        if (typeof reader.result === 'string') {
+        if (typeof reader.result === 'string' && profile) {
           if (type === 'profile') {
             setProfile({ ...profile, profilePhoto: reader.result as string });
           } else {
@@ -70,6 +106,22 @@ const ProviderProfile = () => {
       reader.readAsDataURL(file);
     }
   };
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error || !profile) {
+    return (
+      <Box sx={{ p: 3 }}>
+        <Alert severity="error">{error || 'Could not load profile.'}</Alert>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ 
@@ -223,6 +275,22 @@ const ProviderProfile = () => {
                 variant="outlined"
               />
             )}
+
+            {isEditing ? (
+              <TextField
+                label="Bio"
+                value={profile.bio}
+                onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
+                multiline
+                rows={4}
+                fullWidth
+                margin="normal"
+              />
+            ) : (
+              <Typography variant="body1" color="text.secondary">
+                {profile.bio}
+              </Typography>
+            )}
           </Box>
         </Stack>
       </Paper>
@@ -291,25 +359,6 @@ const ProviderProfile = () => {
             </Box>
           ))}
         </Box>
-      </Paper>
-
-      {/* Bio Section */}
-      <Paper sx={{ p: 3 }}>
-        <Typography variant="h6" gutterBottom>
-          About Your Business
-        </Typography>
-        {isEditing ? (
-          <TextField
-            label="Business Description"
-            value={profile.bio}
-            onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
-            multiline
-            rows={4}
-            fullWidth
-          />
-        ) : (
-          <Typography color="text.secondary">{profile.bio}</Typography>
-        )}
       </Paper>
     </Box>
   );

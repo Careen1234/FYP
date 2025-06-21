@@ -11,23 +11,28 @@ return new class extends Migration
      *
      * @return void
      */
-    public function up()
-    {
+   public function up()
+{
+    if (!Schema::hasColumn('users', 'role')) {
         Schema::table('users', function (Blueprint $table) {
             $table->enum('role', ['admin', 'user', 'provider'])->default('user');
-
         });
     }
+}
+
 
     /**
      * Reverse the migrations.
      *
      * @return void
      */
-    public function down()
-    {
+   public function down()
+{
+    if (Schema::hasColumn('users', 'role')) {
         Schema::table('users', function (Blueprint $table) {
-            //
+            $table->dropColumn('role');
         });
     }
+}
+
 };

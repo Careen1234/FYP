@@ -56,7 +56,10 @@ export default function RegisterForm() {
     setSuccess('');
 
     try {
-      // Make a copy of formData with service as optional
+     await axios.get('http://localhost:8000/sanctum/csrf-cookie',{
+      withCredentials: true
+     })
+
       const payload: Omit<typeof formData, 'service'> & { service?: string } = { ...formData };
 
       
@@ -64,7 +67,12 @@ export default function RegisterForm() {
         delete payload.service;
       }
 
-      const response = await axios.post('http://localhost:8000/api/register', payload);
+      const response = await axios.post('http://localhost:8000/api/register',
+         payload,
+         {
+          withCredentials: true,
+         }
+        );
 
       setSuccess('Registration successful! You can now login.');
       setFormData({

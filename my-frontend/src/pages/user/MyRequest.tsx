@@ -105,7 +105,18 @@ const MyRequest: React.FC = () => {
                 <TableCell>{booking.user_name}</TableCell>
                 <TableCell>{booking.provider_name}</TableCell>
                 <TableCell>{booking.service_name}</TableCell>
-                <TableCell>{booking.status}</TableCell>
+                <TableCell>{(() => {
+                  switch (booking.status) {
+                    case "pending":
+                      return "Pending";
+                    case "approved":
+                      return "Approved";
+                    case "blocked":
+                      return "Blocked";
+                    default:
+                      return booking.status;
+                  }
+                })()}</TableCell>
                 <TableCell>{booking.is_paid ? "Paid" : "Pending"}</TableCell>
                 <TableCell>
                   {new Date(booking.booking_date).toLocaleDateString()}

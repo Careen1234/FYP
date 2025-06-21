@@ -32,6 +32,11 @@ const ProviderHeader: React.FC<ProviderHeaderProps> = ({ toggleSidebar, sidebarO
 
   const handleMenuClose = () => setAnchorEl(null);
 
+  const handleProfileClick = () => {
+    navigate('/provider/profile');
+    handleMenuClose();
+  };
+
   // <-- Add logout handler here
   const handleLogout = async () => {
     handleMenuClose();
@@ -98,7 +103,7 @@ const ProviderHeader: React.FC<ProviderHeaderProps> = ({ toggleSidebar, sidebarO
             anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
             transformOrigin={{ horizontal: 'right', vertical: 'top' }}
           >
-            <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
+            <MenuItem onClick={handleProfileClick}>Profile</MenuItem>
             {/* <-- call logout handler on logout menu item */}
             <MenuItem onClick={handleLogout}>Logout</MenuItem>
           </Menu>
