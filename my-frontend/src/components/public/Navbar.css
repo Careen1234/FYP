@@ -1,17 +1,33 @@
+/* Navbar.css - Modern responsive navbar styling */
+
 .navbar {
+  background-color: #ffffff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  transition: all 0.3s ease;
+}
+
+.navbar-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 1rem 2rem;
-  background-color: #ffffff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .navbar-brand a {
-  font-size: 1.5rem;
-  font-weight: bold;
+  font-size: 1.8rem;
+  font-weight: 800;
   color: #147c3c;
   text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.navbar-brand a:hover {
+  color: #0f5e2f;
 }
 
 .navbar-links {
@@ -24,35 +40,201 @@
   color: #4b5563;
   text-decoration: none;
   font-weight: 500;
-  transition: color 0.2s;
+  transition: color 0.3s ease;
+  position: relative;
 }
 
 .navbar-links a:hover {
   color: #147c3c;
 }
 
+.navbar-links a::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: -5px;
+  left: 0;
+  background-color: #147c3c;
+  transition: width 0.3s ease;
+}
+
+.navbar-links a:hover::after {
+  width: 100%;
+}
+
+.navbar-auth-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-left: 1rem;
+}
+
+.login-btn,
+.register-btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 50px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
 .login-btn {
+  background-color: transparent;
+  color: #147c3c;
+  border: 2px solid #147c3c;
+}
+
+.login-btn:hover {
   background-color: #147c3c;
   color: white;
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 0.375rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(20, 124, 60, 0.3);
 }
 
 .register-btn {
   background-color: #147c3c;
   color: white;
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 0.375rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s;
+  border: 2px solid #147c3c;
 }
 
-.login-btn:hover {
-  background-color: #147c3c;
-} 
+.register-btn:hover {
+  background-color: #0f5e2f;
+  border-color: #0f5e2f;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(20, 124, 60, 0.3);
+}
+
+/* Language Toggle Styles */
+.language-toggle {
+  display: flex;
+  gap: 5px;
+  margin-left: 1rem;
+  background: rgba(20, 124, 60, 0.1);
+  border-radius: 25px;
+  padding: 5px;
+}
+
+.lang-btn {
+  background: transparent;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #6b7280;
+}
+
+.lang-btn:hover {
+  background: rgba(20, 124, 60, 0.2);
+  color: #147c3c;
+}
+
+.lang-btn.active {
+  background: #147c3c;
+  color: white;
+  box-shadow: 0 2px 8px rgba(20, 124, 60, 0.3);
+}
+
+/* Mobile Menu Toggle */
+.mobile-menu-toggle {
+  display: none;
+  cursor: pointer;
+  color: #147c3c;
+  transition: color 0.3s ease;
+}
+
+.mobile-menu-toggle:hover {
+  color: #0f5e2f;
+}
+
+/* Mobile Responsive Design */
+@media (max-width: 768px) {
+  .navbar-container {
+    padding: 1rem;
+  }
+
+  .mobile-menu-toggle {
+    display: block;
+  }
+
+  .navbar-links {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: white;
+    flex-direction: column;
+    padding: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    transform: translateY(-100%);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    gap: 1.5rem;
+  }
+
+  .navbar-links-mobile {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .navbar-links a {
+    font-size: 1.1rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f1f5f9;
+    width: 100%;
+    text-align: center;
+  }
+
+  .navbar-links a:last-of-type {
+    border-bottom: none;
+  }
+
+  .navbar-auth-buttons {
+    flex-direction: column;
+    gap: 1rem;
+    margin-left: 0;
+    margin-top: 1rem;
+    width: 100%;
+  }
+
+  .login-btn,
+  .register-btn {
+    width: 100%;
+    text-align: center;
+    padding: 1rem;
+    font-size: 1rem;
+  }
+
+  .language-toggle {
+    margin-left: 0;
+    margin-top: 1rem;
+    justify-content: center;
+    width: 100%;
+  }
+  
+  .lang-btn {
+    flex: 1;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar-container {
+    padding: 0.75rem;
+  }
+  
+  .navbar-brand a {
+    font-size: 1.5rem;
+  }
+  
+  .navbar-links {
+    padding: 1.5rem;
+  }
+}

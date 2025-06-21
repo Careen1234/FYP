@@ -6,8 +6,8 @@ import {
 } from "react-router-dom";
 
 import Navbar from "./components/public/Navbar";
-import Hero from "./components/public/Hero";
-import Services from "./pages/public/Services";
+import Home from "./pages/Home";
+import { LanguageProvider } from "./contexts/LanguageContext";
 
 import AdminLayout from "./components/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -33,13 +33,6 @@ import Unauthorized from "./pages/Unauthorized";
 
 import "./App.css";
 
-const Home = () => (
-  <>
-    <Hero />
-    <Services />
-  </>
-);
-
 const AppContent = () => {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith("/admin");
@@ -52,8 +45,7 @@ const AppContent = () => {
     <div className="app">
       {!hideNavbar && <Navbar />}
 
-      <Routes>
-        {/* Public Routes */}
+      <Routes>        {/* Public Routes */}
         <Route path="/" element={<Home />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
@@ -95,7 +87,9 @@ const AppContent = () => {
 
 const App = () => (
   <Router>
-    <AppContent />
+    <LanguageProvider>
+      <AppContent />
+    </LanguageProvider>
   </Router>
 );
 
