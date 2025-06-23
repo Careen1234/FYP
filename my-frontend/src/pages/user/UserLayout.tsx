@@ -175,7 +175,7 @@ const UserDashboard: React.FC = () => {
           </Box>
 
           <List>
-            {["services", "requests", "reviews", "payments", "settings", "profile"].map((key) => (
+            {["services", "requests", "reviews", "payments", "messages", "profile"].map((key) => (
               <ListItemButton
                 key={key}
                 selected={activeTab === key}
@@ -189,7 +189,7 @@ const UserDashboard: React.FC = () => {
                    key === "requests" ? <HistoryIcon fontSize="small" /> :
                    key === "reviews" ? <RateReviewIcon fontSize="small" /> :
                    key === "payments" ? <PaymentIcon fontSize="small" /> :
-                   key === "settings" ? <SettingsIcon fontSize="small" /> :
+                   key === "messages" ? <SettingsIcon fontSize="small" /> :
                    <PersonIcon fontSize="small" />}
                 </ListItemIcon>
                 <ListItemText primary={key.charAt(0).toUpperCase() + key.slice(1)} />
