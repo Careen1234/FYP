@@ -41,10 +41,11 @@ class ProviderController extends Controller
 
         $providers = Provider::select('providers.*')
             ->join('provider_service', 'providers.id', '=', 'provider_service.provider_id')
+            ->join('users', 'providers.user_id', '=', 'users.id')
             ->leftJoin('ratings', 'providers.id', '=', 'ratings.provider_id')
             ->where('provider_service.service_id', $serviceId)
-            ->selectRaw("AVG(ratings.rating) as average_rating")
-            ->groupBy('providers.id')
+            ->selectRaw("AVG(ratings.rating) as average_rating, users.phone")
+            ->groupBy('providers.id', 'users.phone')
             ->havingRaw("$haversine < ?", [$radiusKm])
             ->orderByDesc('average_rating')
             ->get();

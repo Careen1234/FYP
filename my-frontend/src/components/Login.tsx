@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { useAuth } from "../components/AuthContext"; // 👈 import useAuth
+import { useAuth, type User } from "../components/AuthContext"; // 👈 import useAuth
 
 // Axios instance with CSRF + credentials support
 const api = axios.create({
@@ -37,51 +37,43 @@ export default function LoginForm() {
       // Step 1: Get CSRF cookie
       await api.get("/sanctum/csrf-cookie");
 
+      type LoginResponse = {
+        message: string;
+        user: User;
+      };
+
       // Step 2: Send login request
-      const response = await api.post("/api/login", {
+      const response = await api.post<LoginResponse>("/api/login", {
         email: formData.email,
         password: formData.password,
       });
 
-      // Type assertion for response.data
-      type UserResponse = { name?: string; role?: string };
-      const data = response.data as UserResponse;
+      const { user } = response.data;
 
-      console.log("Login success:", data);
-
-      // Assume response includes full user info like { name, email, role }
-      const validRoles = ["admin", "provider", "user"] as const;
-      type Role = typeof validRoles[number];
-      const userRole = validRoles.includes(data.role as Role) ? (data.role as Role) : undefined;
-
-      if (!userRole) {
-        setError("Unknown role received. Please contact support.");
+      if (!user || !user.id || !user.role) {
+        setError("Invalid login response from server.");
         setLoading(false);
         return;
       }
 
-      const user = {
-        name: data.name || "User",
-        email: formData.email,
-        role: userRole,
-      };
+      console.log("Login success:", user);
 
       // Save to localStorage and AuthContext
       localStorage.setItem("user", JSON.stringify(user));
       setUser(user);
 
       // Step 3: Redirect based on role
-      if (userRole === "admin") {
+      if (user.role === "admin") {
         console.log("Redirecting to /admin/dashboard");
         navigate("/admin/dashboard");
-      } else if (userRole === "provider") {
+      } else if (user.role === "provider") {
         console.log("Redirecting to /provider/dashboard");
         navigate("/provider/dashboard");
-      } else if (userRole === "user") {
+      } else if (user.role === "user") {
         console.log("Redirecting to /user");
         navigate("/user");
       } else {
-        console.warn("Unknown role:", userRole);
+        console.warn("Unknown role:", user.role);
         setError("Unknown role received. Please contact support.");
       }
     } catch (error: any) {

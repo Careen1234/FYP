@@ -42,6 +42,7 @@ const categories = ["Home Services", "Personal Care", "Roadside Assistance"];
 interface Provider {
   id: number;
   name: string;
+  phone: string;
   ratings_avg_rating?: number;
   distance: number;
 }
