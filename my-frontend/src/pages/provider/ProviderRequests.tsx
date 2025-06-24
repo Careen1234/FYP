@@ -25,27 +25,68 @@ const ProviderRequests: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+ const fetchRequests = async () => {
+  setLoading(true);
+  setError('');
+  try {
+    // 1. Ensure CSRF cookie is set
+    await axios.get('http://localhost:8000/sanctum/csrf-cookie', { withCredentials: true });
+
+    // 2. Get the token (if you're using Bearer token, optional if cookie-based)
+    const token = localStorage.getItem('token');
+
+    // 3. Make the authenticated request
+    const res = await axios.get('http://localhost:8000/api/provider/bookings', {
+      withCredentials: true,
+      headers: {
+        Authorization: token ? `Bearer ${token}` : '',
+      },
+    });
+
+    console.log('API response data:', res.data);
+
+    if (Array.isArray(res.data)) {
+      setRequests(res.data);
+    } else if (
+      typeof res.data === 'object' &&
+      res.data !== null &&
+      Array.isArray((res.data as { bookings?: unknown }).bookings)
+    ) {
+      setRequests((res.data as { bookings: any[] }).bookings);
+    } else {
+      setRequests([]);
+      setError('Unexpected data format from API');
+    }
+  } catch (err: any) {
+    console.error(err);
+    setError('Failed to load requests.');
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+
   useEffect(() => {
-    const fetchRequests = async () => {
-      setLoading(true);
-      setError('');
-      try {
-        // Replace with your actual API endpoint
-        const res = await axios.get('http://localhost:8000/api/providers', { withCredentials: true });
-        setRequests(res.data as Array<any>);
-      } catch (err: any) {
-        setError('Failed to load requests.');
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchRequests();
   }, []);
 
-  // Categorize requests
-  const incomingRequests = requests.filter((r) => r.status === 'pending');
-  const inProgressRequests = requests.filter((r) => r.status === "approved");
-  const completedRequests = requests.filter((r) => r.status === 'blocked');
+  const updateStatus = async (id: number, status: string) => {
+    try {
+      await axios.patch(
+        `http://localhost:8000/api/provider/bookings/${id}/status`,
+        { status },
+        { withCredentials: true }
+      );
+      fetchRequests();
+    } catch (error) {
+      console.error("Failed to update status", error);
+    }
+  };
+
+  const incomingRequests = Array.isArray(requests) ? requests.filter((r) => r.status === 'pending') : [];
+const inProgressRequests = Array.isArray(requests) ? requests.filter((r) => r.status === 'approved') : [];
+const completedRequests = Array.isArray(requests) ? requests.filter((r) => r.status === 'completed') : [];
 
   return (
     <Box sx={{ 
@@ -77,6 +118,7 @@ const ProviderRequests: React.FC = () => {
                   size="small"
                   variant="contained"
                   sx={{ textTransform: 'none', backgroundColor: '#147c3c', '&:hover': { backgroundColor: '#106d32' } }}
+                  onClick={() => updateStatus(row.id, 'approved')}
                 >
                   Accept
                 </Button>
@@ -93,6 +135,7 @@ const ProviderRequests: React.FC = () => {
                       color: '#106d32'
                     }
                   }}
+                  onClick={() => updateStatus(row.id, 'rejected')}
                 >
                   Decline
                 </Button>
@@ -104,11 +147,12 @@ const ProviderRequests: React.FC = () => {
             icon={<PendingActionsIcon sx={{ fontSize: 28, color: '#147c3c' }} />}
             title="In Progress"
             data={inProgressRequests}
-            actions={() => (
+            actions={(row) => (
               <Button
                 size="small"
                 variant="contained"
                 sx={{ textTransform: 'none', backgroundColor: '#147c3c', '&:hover': { backgroundColor: '#106d32' } }}
+                onClick={() => updateStatus(row.id, 'blocked')}
               >
                 Mark as Completed
               </Button>

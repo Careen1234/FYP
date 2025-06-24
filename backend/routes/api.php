@@ -10,6 +10,8 @@ use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\RatingsController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Api\PaymentController;
+use App\Http\Controllers\Api\AzamPayController;
 
 /*
 |--------------------------------------------------------------------------
@@ -76,6 +78,7 @@ Route::get('/service-categories', [CategoryController::class, 'index']);
 // ✅ Bookings
 Route::prefix('bookings')->group(function () {
     Route::post('/providers/match', [BookingController::class, 'getAvailableProviders']);
+    Route::post('/book', [BookingController::class, 'bookProvider']);
     Route::get('/', [BookingController::class, 'index']);
     Route::post('/', [BookingController::class, 'store']);
     Route::get('/user', [BookingController::class, 'userBookings']);
@@ -96,3 +99,12 @@ Route::get('/provider/reviews', [RatingsController::class, 'providerReviews']);
 
 Route::put('/profile', [UserController::class, 'updateCurrentUserProfile']);
    
+Route::middleware(['auth:sanctum', 'role:provider'])->group(function () {
+    Route::get('/provider/bookings', [BookingController::class, 'getProviderBookings']);
+    Route::patch('/provider/bookings/{bookingId}/status', [BookingController::class, 'updateBookingStatus']);
+});
+
+Route::middleware(['auth:sanctum', 'role:user'])->group(function () {
+    Route::post('/payments/cash', [PaymentController::class, 'payWithCash']);
+    Route::post('/payments/initiate', [PaymentController::class, 'pay']);
+});

@@ -32,6 +32,7 @@ import Login from "./components/Login";
 import Unauthorized from "./pages/Unauthorized";
 
 import "./App.css";
+import BookingSuccess from "./pages/BookingSuccess";
 
 const AppContent = () => {
   const location = useLocation();
@@ -68,6 +69,8 @@ const AppContent = () => {
         <Route path="/user" element={<UserLayout />}>
           <Route index element={<h2>Welcome to User Dashboard</h2>} />
           <Route path="dashboard" element={<h2>User Dashboard</h2>} />
+          <Route path="booking-success" element={<BookingSuccess />} />
+
         </Route>
 
         {/* Provider Routes */}

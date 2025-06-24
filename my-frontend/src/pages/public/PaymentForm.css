@@ -1,0 +1,43 @@
+.payment-title {
+  font-weight: 700;
+  font-size: 20px;
+  color: #147c3c;
+  text-align: center;
+}
+
+.payment-content {
+  padding: 1.5rem 2rem;
+}
+
+.payment-text {
+  margin-bottom: 1rem;
+  font-size: 16px;
+}
+
+.payment-option {
+  margin-bottom: 0.75rem;
+}
+
+.payment-loading {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.payment-alert {
+  margin-top: 1rem;
+}
+
+.payment-actions {
+  padding: 1rem 1.5rem;
+  justify-content: space-between;
+}
+
+.payment-button {
+  border-radius: 8px;
+  min-width: 120px;
+}
+.payment-button.cancel {
+  background-color: #f0f0f0;
+  color: #333;
+}
