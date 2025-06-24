@@ -6,8 +6,8 @@ import {
 } from "react-router-dom";
 
 import Navbar from "./components/public/Navbar";
-import Hero from "./components/public/Hero";
-import Services from "./pages/public/Services";
+import Home from "./pages/Home";
+import { LanguageProvider } from "./contexts/LanguageContext";
 
 import AdminLayout from "./components/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -32,13 +32,7 @@ import Login from "./components/Login";
 import Unauthorized from "./pages/Unauthorized";
 
 import "./App.css";
-
-const Home = () => (
-  <>
-    <Hero />
-    <Services />
-  </>
-);
+import BookingSuccess from "./pages/BookingSuccess";
 
 const AppContent = () => {
   const location = useLocation();
@@ -52,8 +46,7 @@ const AppContent = () => {
     <div className="app">
       {!hideNavbar && <Navbar />}
 
-      <Routes>
-        {/* Public Routes */}
+      <Routes>        {/* Public Routes */}
         <Route path="/" element={<Home />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
@@ -76,6 +69,8 @@ const AppContent = () => {
         <Route path="/user" element={<UserLayout />}>
           <Route index element={<h2>Welcome to User Dashboard</h2>} />
           <Route path="dashboard" element={<h2>User Dashboard</h2>} />
+          <Route path="booking-success" element={<BookingSuccess />} />
+
         </Route>
 
         {/* Provider Routes */}
@@ -95,7 +90,9 @@ const AppContent = () => {
 
 const App = () => (
   <Router>
-    <AppContent />
+    <LanguageProvider>
+      <AppContent />
+    </LanguageProvider>
   </Router>
 );
 

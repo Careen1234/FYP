@@ -41,7 +41,6 @@ const MyRequest: React.FC = () => {
           { withCredentials: true }
         );
 
-        // Now TypeScript knows that `res.data.data` exists and is Booking[]
         if (Array.isArray(res.data.data)) {
           setBookings(res.data.data);
         } else {
@@ -105,18 +104,41 @@ const MyRequest: React.FC = () => {
                 <TableCell>{booking.user_name}</TableCell>
                 <TableCell>{booking.provider_name}</TableCell>
                 <TableCell>{booking.service_name}</TableCell>
-                <TableCell>{(() => {
-                  switch (booking.status) {
-                    case "pending":
-                      return "Pending";
-                    case "approved":
-                      return "Approved";
-                    case "blocked":
-                      return "Blocked";
-                    default:
-                      return booking.status;
-                  }
-                })()}</TableCell>
+                <TableCell>
+                  {(() => {
+                    switch (booking.status) {
+                      case "pending":
+                        return (
+                          <>
+                            Pending
+                            <Typography variant="caption" color="orange">
+                              • Awaiting confirmation
+                            </Typography>
+                          </>
+                        );
+                      case "approved":
+                        return (
+                          <>
+                            Approved
+                            <Typography variant="caption" color="green">
+                              • Service confirmed
+                            </Typography>
+                          </>
+                        );
+                      case "blocked":
+                        return (
+                          <>
+                            Blocked
+                            <Typography variant="caption" color="red">
+                              • Provider unavailable
+                            </Typography>
+                          </>
+                        );
+                      default:
+                        return booking.status;
+                    }
+                  })()}
+                </TableCell>
                 <TableCell>{booking.is_paid ? "Paid" : "Pending"}</TableCell>
                 <TableCell>
                   {new Date(booking.booking_date).toLocaleDateString()}

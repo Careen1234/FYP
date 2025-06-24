@@ -4,10 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
-class Provider extends Model
+
+class Provider extends Authenticatable
 {
-    use HasFactory;
+     use HasApiTokens, HasFactory, Notifiable;
 
      protected $fillable = [
     
@@ -23,7 +27,7 @@ class Provider extends Model
     protected $nullable=['user_id'];
   public function services()
 {
-    return $this->belongsToMany(Service::class, 'provider_service', 'provider_id', 'service_id');
+    return $this->belongsTo(Service::class, 'provider_service', 'provider_id', 'service_id');
 }
 
 

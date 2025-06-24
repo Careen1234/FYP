@@ -96,5 +96,28 @@ class AuthController extends Controller
         $request->user()->tokens()->delete();
         return response()->json(['message' => 'Logged out']);
     }
+
+
+    public function loginProvider(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string'
+        ]);
+
+        $provider = Provider::where('email', $request->email)->first();
+
+        if (!$provider || !Hash::check($request->password, $provider->password)) {
+            return response()->json(['message' => 'Invalid credentials'], 401);
+        }
+
+        Auth::login($provider); // ✅ uses the default 'web' guard
+
+        return response()->json([
+            'message' => 'Provider login successful',
+            'user' => $provider
+        ]);
+    }
 }
+
 

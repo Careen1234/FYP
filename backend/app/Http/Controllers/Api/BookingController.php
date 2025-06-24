@@ -55,44 +55,27 @@ public function index()
 
  public function getAvailableProviders(Request $request)
 {
-    $request->validate([
-        'service_id' => 'required|exists:services,id',
-        'latitude'   => 'required|numeric',
-        'longitude'  => 'required|numeric',
-    ]);
+    $serviceId = $request->input('service_id');
+        $lat = $request->input('lat');
+        $lng = $request->input('lng');
 
-    $serviceId = $request->service_id;
-    $userLat = $request->latitude;
-    $userLng = $request->longitude;
+        if (!$serviceId || !$lat || !$lng) {
+            return response()->json(['error' => 'Missing required parameters'], 400);
+        }
 
-    $providers = Provider::whereHas('services', function ($q) use ($serviceId) {
-            $q->where('service_id', $serviceId);
-        })
-        ->select('providers.*')
-        // Subquery to get average rating per provider
-        ->selectSub(function ($query) {
-            $query->from('ratings')
-                ->selectRaw('AVG(rating)')
-                ->whereColumn('ratings.provider_id', 'providers.id');
-        }, 'avg_rating')
-        // Calculate distance using raw expression
-        ->selectRaw("
-            (6371 * acos(
-                cos(radians(?)) * cos(radians(latitude)) *
-                cos(radians(longitude) - radians(?)) +
-                sin(radians(?)) * sin(radians(latitude))
-            )) AS distance
-        ", [$userLat, $userLng, $userLat])
-        ->having('distance', '<', 30)
-        ->orderByDesc('avg_rating')
-        ->orderBy('distance')
-        ->get();
+        $radius = 50; // km radius to find nearby providers
 
-    return response()->json($providers);
-}
+        // Haversine formula to calculate distance
+        $providers = Provider::selectRaw("*, ( 6371 * acos( cos( radians(?) ) * cos( radians(latitude) ) 
+            * cos( radians(longitude) - radians(?) ) + sin( radians(?) ) * sin( radians(latitude) ) ) ) AS distance", 
+            [$lat, $lng, $lat])
+            ->where('service_id', $serviceId)
+            ->having('distance', '<=', $radius)
+            ->orderBy('distance')
+            ->get();
 
-
-
+        return response()->json($providers);
+    }
 
     // Update booking status (admin or provider action)
     public function update(Request $request, $id)
@@ -124,4 +107,97 @@ public function index()
         $bookings = Booking::where('user_id', $user->id)->get();
         return response()->json($bookings);
     }
+
+    public function bookProvider(Request $request)
+{
+    $validated = $request->validate([
+        'provider_id' => 'required|exists:providers,id',
+        'service_id' => 'required|exists:services,id',
+        'latitude' => 'required|numeric',
+        'longitude' => 'required|numeric',
+        'booking_date' => 'required|date',
+        'address' => 'nullable|string',
+    ]);
+
+    
+    $booking = Booking::create([
+        'user_id' => auth()->id(),
+        'provider_id' => $validated['provider_id'],
+        'service_id' => $validated['service_id'],
+        'latitude' => $validated['latitude'],
+        'longitude' => $validated['longitude'],
+        'booking_date' => $validated['booking_date'],
+        'address' => $validated['address'] ?? '',
+        'status' => 'pending',
+        'is_paid' => false,
+    ]);
+
+    return response()->json(['message' => 'Booking successful', 'booking' => $booking]);
+}
+
+
+public function getProviderBookings(Request $request)
+{
+    $user = auth()->user();
+
+    if (!$user || $user->role !== 'provider') {
+        return response()->json(['message' => 'Unauthorized'], 403);
+    }
+
+    $provider = \App\Models\Provider::where('user_id', $user->id)->first();
+
+    if (!$provider) {
+        return response()->json(['message' => 'Provider not found'], 404);
+    }
+
+    $bookings = \App\Models\Booking::with(['user', 'service'])
+        ->where('provider_id', $provider->id)
+        ->get();
+
+    $formatted = $bookings->map(function ($booking) {
+        return [
+            'id' => $booking->id,
+            'customer' => $booking->user->name ?? 'N/A',
+            'date' => $booking->booking_date,
+            'status' => $booking->status,
+        ];
+    });
+
+   
+
+
+
+    \Log::info('Provider reached this method.');
+    \Log::info('User role:', ['role' => $user->role]);
+
+    \Log::info('Provider bookings retrieved successfully.', ['provider_id' => $provider->provider_id, 'bookings_count' => $formatted->count()]);
+    \Log::info('Formatted bookings data:', ['bookings' => $formatted->toArray()]);
+    \Log::info('Provider bookings response sent.');
+    \Log::info('Provider bookings response sent successfully.', ['provider_id' => $provider->provider_id, 'bookings_count' => $formatted->count()]);
+
+    return response()->json($formatted);
+}
+
+
+
+
+
+
+
+    public function updateBookingStatus(Request $request, $bookingId)
+    {
+        $validated = $request->validate([
+            'status' => 'required|in:pending,approved,rejected,canceled',
+        ]);
+
+        $booking = Booking::where('id', $bookingId)
+            ->where('provider_id', auth()->id())  
+            ->firstOrFail();
+
+        $booking->status = $validated['status'];
+        $booking->save();
+
+        return response()->json(['message' => 'Booking status updated', 'booking' => $booking]);
+    }
+
 }

@@ -22,15 +22,15 @@ class ProviderController extends Controller
     {
         $request->validate([
             'service_id' => 'required|integer|exists:services,id',
-            'user_lat' => 'required|numeric',
-            'user_lng' => 'required|numeric',
+            'lat' => 'required|numeric',
+            'lng' => 'required|numeric',
         ]);
 
         $serviceId = $request->service_id;
-        $userLat = $request->user_lat;
-        $userLng = $request->user_lng;
+        $userLat = $request->lat;
+        $userLng = $request->lng;
 
-        $radiusKm = 10; // Radius for nearby providers, can be changed
+        $radiusKm = 30; // Radius for nearby providers, can be changed
 
         // Haversine formula to calculate distance between two lat/lng points
         $haversine = "(6371 * acos(cos(radians($userLat)) 
