@@ -10,10 +10,18 @@ class CategoryController extends Controller
 {
     public function index()
     {
-        // Fetch all categories
+        
         $categories = ServiceCategory::all();
 
-        // Return JSON response
          return response()->json($categories);
 }
+
+
+
+
+
+
+
+
+
 }

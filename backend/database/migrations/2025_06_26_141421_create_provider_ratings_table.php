@@ -13,13 +13,12 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('services', function (Blueprint $table) {
+        Schema::create('provider_ratings', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique();
-            $table->text('description')->nullable();
-            $table->decimal('price', 10, 2);
-            $table->foreignId('category_id')->constrained('service_categories')->onDelete('cascade');
-            $table->boolean('status')->default(true);
+            $table->foreignId('provider_id')->constrained('providers')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained('user')->onDelete('cascade');
+            $table->integer('rating'); 
+            $table->text('review')->nullable(); 
             $table->timestamps();
         });
     }
@@ -31,6 +30,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('services');
+        Schema::dropIfExists('provider_ratings');
     }
 };

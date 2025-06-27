@@ -13,11 +13,7 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('services', function (Blueprint $table) {
-         if (!Schema::hasColumn('services', 'image_url')) {
-            $table->string('image_url')->nullable()->after('price');
-        }
-        });
+        Schema::rename('provider_service', 'provider_services');
     }
 
     /**
@@ -27,8 +23,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('services', function (Blueprint $table) {
-            $table->dropColumn('image_url');
-        });
+        Schema::rename('provider_services', 'provider_service');
     }
 };

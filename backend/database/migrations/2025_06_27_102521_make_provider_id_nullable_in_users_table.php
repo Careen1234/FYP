@@ -13,12 +13,13 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('service_categories', function (Blueprint $table) {
-            $table->id();
-            $table->string('name')->unique();
-            $table->timestamps();
+        Schema::table('users', function (Blueprint $table) {
+            $table->unsignedBigInteger('provider_id')->nullable()->change();
         });
     }
+
+            
+       
 
     /**
      * Reverse the migrations.
@@ -27,6 +28,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('service_categories');
+        Schema::table('users', function (Blueprint $table) {
+            //
+        });
     }
 };

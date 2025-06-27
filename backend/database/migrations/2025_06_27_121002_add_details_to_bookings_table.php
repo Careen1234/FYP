@@ -14,10 +14,12 @@ return new class extends Migration
     public function up()
     {
         Schema::table('bookings', function (Blueprint $table) {
-         $table->string('transaction_id')->nullable();
-        $table->string('reference_id')->nullable();
-        $table->string('payment_status')->default('UNPAID'); // or 'PENDING'
-         $table->string('payment_method')->nullable()->after('payment_status'); // e.g., 'cash' or 'mobile'    
+           $table->decimal('user_latitude', 10, 7)->nullable();
+            $table->decimal('user_longitude', 10, 7)->nullable();
+            $table->string('status')->default('pending');
+            $table->boolean('is_paid')->default(false);
+            $table->string('address')->nullable();
+
         });
     }
 
@@ -29,7 +31,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('bookings', function (Blueprint $table) {
-            $table->dropColumn(['transaction_id', 'reference_id', 'payment_status', 'payment_method']);
+            //
         });
     }
 };
