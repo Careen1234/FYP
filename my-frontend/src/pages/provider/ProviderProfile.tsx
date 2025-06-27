@@ -61,15 +61,15 @@ const ProviderProfile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await axios.get<ProviderApiResponse>('http://localhost:8000/api/providers', {
+        const response = await axios.get('http://localhost:8000/api/providers/profile', {
           withCredentials: true,
         });
         const data = response.data;
         setProfile({
-          name: data.business_name || 'N/A',
-          email: data.business_email || 'N/A',
-          phone: data.business_phone || 'N/A',
-          service: data.service_category?.name || 'Not Set',
+          name: data.name || 'N/A',
+          email: data.user?.email || 'N/A',
+          phone: data.user?.phone || 'N/A',
+          service: data.serviceCategory?.name || 'Not Set',
           price: data.price ? `$${data.price}/hr` : 'Not Set',
           bio: data.bio || '',
           profilePhoto: data.profile_photo_url || null,

@@ -24,8 +24,10 @@ import ProviderDashboard from "./pages/provider/ProviderDashboard";
 import ProviderRequests from "./pages/provider/ProviderRequests";
 import ProviderReviews from "./pages/provider/ProviderReviews";
 import ProviderProfile from "./pages/provider/ProviderProfile";
+import ProviderMessage from "./pages/provider/ProviderMessage";
 
 import UserLayout from "./pages/user/UserLayout";
+import UserMessage from "./pages/user/UserMessage";
 
 import Register from "./components/Register";
 import Login from "./components/Login";
@@ -33,6 +35,7 @@ import Unauthorized from "./pages/Unauthorized";
 
 import "./App.css";
 import BookingSuccess from "./pages/BookingSuccess";
+
 
 const AppContent = () => {
   const location = useLocation();
@@ -70,7 +73,8 @@ const AppContent = () => {
           <Route index element={<h2>Welcome to User Dashboard</h2>} />
           <Route path="dashboard" element={<h2>User Dashboard</h2>} />
           <Route path="booking-success" element={<BookingSuccess />} />
-
+          <Route path="message" element={<UserMessage />} />
+          <Route path="/user/usermessage" element={<UserMessage />} />
         </Route>
 
         {/* Provider Routes */}
@@ -79,6 +83,7 @@ const AppContent = () => {
           <Route path="requests" element={<ProviderRequests />} />
           <Route path="reviews" element={<ProviderReviews />} />
           <Route path="profile" element={<ProviderProfile />} />
+          <Route path="messages" element={<ProviderMessage />} />
         </Route>
 
         {/* 404 Fallback */}

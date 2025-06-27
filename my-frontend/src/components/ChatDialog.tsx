@@ -15,6 +15,8 @@ import { listenToMessages } from './message/ListenMessage';
 import { sendMessage } from './message/SendMessage';
 import { useAuth } from './AuthContext';
 import { Timestamp } from 'firebase/firestore';
+import { doc, setDoc } from 'firebase/firestore';
+import { db } from './Firebase';
 
 interface ChatDialogProps {
   open: boolean;
@@ -44,7 +46,7 @@ const ChatDialog: React.FC<ChatDialogProps> = ({ open, onClose, provider }) => {
 
   const getChatId = useCallback(() => {
     if (!user || !provider) return null;
-    const ids = [user.id, provider.id].sort();
+    const ids = [String(user.id), String(provider.id)].sort();
     return ids.join('_');
   }, [user, provider]);
 
@@ -55,6 +57,13 @@ const ChatDialog: React.FC<ChatDialogProps> = ({ open, onClose, provider }) => {
         setMessages(msgs as Message[]);
         scrollToBottom();
       });
+      // Mark as read
+      if (user) {
+        const chatDocRef = doc(db, 'chats', String(chatId));
+        setDoc(chatDocRef, {
+          lastRead: { [String(user.id)]: Date.now() }
+        }, { merge: true });
+      }
       return () => unsubscribe();
     }
   }, [open, getChatId]);
@@ -91,7 +100,7 @@ const ChatDialog: React.FC<ChatDialogProps> = ({ open, onClose, provider }) => {
               key={msg.id}
               sx={{
                 display: 'flex',
-                justifyContent: msg.senderId === user?.id ? 'flex-end' : 'flex-start',
+                justifyContent: String(msg.senderId) === String(user?.id) ? 'flex-end' : 'flex-start',
                 mb: 1,
               }}
             >
@@ -103,7 +112,7 @@ const ChatDialog: React.FC<ChatDialogProps> = ({ open, onClose, provider }) => {
                     px: 1.5,
                     py: 1,
                     borderRadius: '12px',
-                    bgcolor: msg.senderId === user?.id ? 'primary.light' : '#fff',
+                    bgcolor: String(msg.senderId) === String(user?.id) ? 'primary.light' : '#fff',
                     color: 'text.primary',
                     boxShadow: 1,
                   }}
@@ -115,7 +124,7 @@ const ChatDialog: React.FC<ChatDialogProps> = ({ open, onClose, provider }) => {
                   color="text.secondary"
                   sx={{
                     display: 'block',
-                    textAlign: msg.senderId === user?.id ? 'right' : 'left',
+                    textAlign: String(msg.senderId) === String(user?.id) ? 'right' : 'left',
                     mt: 0.5,
                   }}
                 >

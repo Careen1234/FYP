@@ -186,12 +186,17 @@ class ProviderController extends Controller
                 return response()->json(['error' => 'User not authenticated'], 401);
             }
 
-            // Eager load the service category relationship
-            $provider = Provider::with('serviceCategory')->where('user_id', $user->id)->first();
+            // Fetch provider by email (if email is unique in providers table)
+            $provider = Provider::with(['category'])
+                ->where('email', $user->email)
+                ->first();
 
             if (!$provider) {
                 return response()->json(['error' => 'Provider profile not found for this user.'], 404);
             }
+
+            // Optionally, attach user info for frontend mapping
+            $provider->user = $user;
 
             return response()->json($provider);
 
