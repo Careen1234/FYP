@@ -13,9 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('providers', function (Blueprint $table) {
-            $table->decimal('latitude', 10, 7)->nullable()->after('location');
-            $table->decimal('longitude', 10, 7)->nullable()->after('latitude');
+        Schema::table('user', function (Blueprint $table) {
+            $table->string('phone')->nullable()->after('email');
+            
         });
     }
 
@@ -26,8 +26,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('providers', function (Blueprint $table) {
-             $table->dropColumn(['latitude', 'longitude']);
+        Schema::table('user', function (Blueprint $table) {
+            //
         });
     }
 };

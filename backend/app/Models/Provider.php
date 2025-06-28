@@ -17,44 +17,31 @@ class Provider extends Authenticatable
     
         'name',
         'email',
+        'phone',
         'service',
         'location',
-         'status',
-        'availability',
-    
+        'status',
+        'latitude',
+        'longitude',
     ];
 
     protected $nullable=['user_id'];
-  public function services()
+ 
+public function services()
 {
-    return $this->belongsTo(Service::class, 'provider_service', 'provider_id', 'service_id');
+    return $this->belongsToMany(Service::class, 'provider_services');
 }
-
-
-
-    public function bookings()
-    {
-        return $this->hasMany(Booking::class);
-    }
-
-    public function category()
-    {
-        return $this->belongsTo(ServiceCategory::class, 'service', 'id');
-    }
-    public function ratings()
+public function bookings()
 {
-    return $this->hasMany(Ratings::class);
-}
-
-public function getAverageRatingAttribute()
-{
-    return $this->ratings()->avg('rating');
-}
-
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
+    return $this->hasMany(Booking::class, 'provider_id');
 
     
+}
+
+public function ratings()
+{
+return $this->hasMany(Rating::class, 'provider_id');
+}
+
+
 }

@@ -9,20 +9,14 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { useAuth } from "../components/AuthContext"; // 👈 import useAuth
-
-// Axios instance with CSRF + credentials support
-const api = axios.create({
-  baseURL: "http://localhost:8000",
-  withCredentials: true,
-});
+import { useAuth } from "../components/AuthContext";
 
 export default function LoginForm() {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { setUser } = useAuth(); // 👈 get setUser from AuthContext
+  const { setUser } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -34,64 +28,63 @@ export default function LoginForm() {
     setError("");
 
     try {
-      // Step 1: Get CSRF cookie
-      await api.get("/sanctum/csrf-cookie");
+      interface LoginResponse {
+        token: string;
+        user: {
+          name?: string;
+          email: string;
+          role: string;
+        };
+      }
 
-      // Step 2: Send login request
-      const response = await api.post("/api/login", {
+      const response = await axios.post<LoginResponse>("http://localhost:8000/api/login", {
         email: formData.email,
         password: formData.password,
       });
 
-      // Type assertion for response.data
-      type UserResponse = { name?: string; role?: string };
-      const data = response.data as UserResponse;
+      const { token, user } = response.data;
 
-      console.log("Login success:", data);
-
-      // Assume response includes full user info like { name, email, role }
-      const validRoles = ["admin", "provider", "user"] as const;
-      type Role = typeof validRoles[number];
-      const userRole = validRoles.includes(data.role as Role) ? (data.role as Role) : undefined;
-
-      if (!userRole) {
-        setError("Unknown role received. Please contact support.");
-        setLoading(false);
-        return;
+      if (!token || !user || !user.role) {
+        throw new Error("Invalid login response");
       }
 
-      const user = {
-        name: data.name || "User",
-        email: formData.email,
-        role: userRole,
+      // Save token to localStorage
+      localStorage.setItem("token", token);
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
+      // Ensure role is one of the allowed types
+      const allowedRoles = ["admin", "provider", "user"] as const;
+      type AllowedRole = typeof allowedRoles[number];
+
+      const mappedRole = allowedRoles.includes(user.role as AllowedRole)
+        ? (user.role as AllowedRole)
+        : "user";
+
+      const userInfo = {
+        name: user.name || "User",
+        email: user.email,
+        role: mappedRole,
       };
 
-      // Save to localStorage and AuthContext
-      localStorage.setItem("user", JSON.stringify(user));
-      setUser(user);
+      localStorage.setItem("user", JSON.stringify(userInfo));
+      setUser(userInfo);
 
-      // Step 3: Redirect based on role
-      if (userRole === "admin") {
-        console.log("Redirecting to /admin/dashboard");
+      // Redirect based on role
+      if (user.role === "admin") {
         navigate("/admin/dashboard");
-      } else if (userRole === "provider") {
-        console.log("Redirecting to /provider/dashboard");
+      } else if (user.role === "provider") {
         navigate("/provider/dashboard");
-      } else if (userRole === "user") {
-        console.log("Redirecting to /user");
+      } else if (user.role === "user") {
         navigate("/user");
       } else {
-        console.warn("Unknown role:", userRole);
-        setError("Unknown role received. Please contact support.");
+        setError("Unknown role. Contact support.");
       }
-    } catch (error: any) {
-      console.error("Login error:", error);
-      if (error.response?.status === 401) {
+    } catch (err: any) {
+      console.error("Login error:", err);
+      if (err.response?.status === 401) {
         setError("Invalid email or password.");
-      } else if (error.response?.status === 419) {
-        setError("CSRF token mismatch. Please refresh and try again.");
       } else {
-        setError("Login failed. Please check your server or credentials.");
+        setError("Login failed. Please try again.");
       }
     } finally {
       setLoading(false);
@@ -113,11 +106,7 @@ export default function LoginForm() {
         Login
       </Typography>
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      )}
+      {error && <Alert severity="error">{error}</Alert>}
 
       <TextField
         fullWidth

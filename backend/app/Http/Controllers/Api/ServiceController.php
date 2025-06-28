@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Service;
 use App\Models\ServiceCategory;
+use Illuminate\Http\JsonResponse;
 
 
 class ServiceController extends Controller
@@ -73,5 +74,42 @@ public function index(Request $request)
 
         return response()->json(['message' => 'Service deleted successfully']);
     }
+
+
+ public function register(): JsonResponse
+    {
+        $services = Service::select('id', 'name')->get();
+
+        return response()->json([
+            'services' => $services,
+        ]);
+    }
+
+
+
+public function getServicesByCategory(Request $request)
+{
+    $categoryName = $request->query('category');
+
+    if (!$categoryName) {
+        return response()->json(['error' => 'Missing category'], 400);
+    }
+
+    $category = ServiceCategory::where('category', $categoryName)->first();
+
+    if (!$category) {
+        return response()->json(['error' => 'Category not found'], 404);
+    }
+
+    $services = Service::where('service_category_id', $category->id)->get();
+
+    return response()->json($services);
+}
+
+
+
+
+
+
 }
 

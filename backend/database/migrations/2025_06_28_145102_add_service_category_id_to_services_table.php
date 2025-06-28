@@ -14,19 +14,10 @@ return new class extends Migration
     public function up()
     {
         Schema::table('services', function (Blueprint $table) {
-          if (!Schema::hasColumn('services', 'category_id')) {
-            $table->unsignedBigInteger('category_id')->after('price');
-        }
-
-        if (Schema::hasColumn('services', 'category')) {
-            $table->dropColumn('category');
-        }
-
-        if (Schema::hasColumn('services', 'image_url')) {
-            $table->dropColumn('image_url');
-        }
-
-        $table->string('status')->default('active')->change();
+            $table->foreignId('service_category_id')
+                ->constrained('service_category')
+                ->onDelete('cascade')
+                ->after('id'); 
         });
     }
 

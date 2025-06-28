@@ -13,11 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->string('phone')->after('email');
-            $table->string('location')->after('phone');
-            $table->boolean('status')->default(true)->after('location');
-            
+        Schema::create('service_category', function (Blueprint $table) {
+            $table->id();
+            $table->string('category')->unique();
+            $table->timestamps();
         });
     }
 
@@ -28,8 +27,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('users', function (Blueprint $table) {
-            //
-        });
+        Schema::dropIfExists('service_category');
     }
 };

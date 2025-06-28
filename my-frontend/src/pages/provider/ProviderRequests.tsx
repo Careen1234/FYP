@@ -25,47 +25,27 @@ const ProviderRequests: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
- const fetchRequests = async () => {
-  setLoading(true);
-  setError('');
-  try {
-    // 1. Ensure CSRF cookie is set
-    await axios.get('http://localhost:8000/sanctum/csrf-cookie', { withCredentials: true });
+  const fetchRequests = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      await axios.get('http://localhost:8000/sanctum/csrf-cookie', { withCredentials: true });
+      const token = localStorage.getItem('token');
+      const res = await axios.get('http://localhost:8000/api/provider/bookings', {
+        withCredentials: true,
+        headers: {
+          Authorization: token ? `Bearer ${token}` : '',
+        },
+      });
 
-    // 2. Get the token (if you're using Bearer token, optional if cookie-based)
-    const token = localStorage.getItem('token');
-
-    // 3. Make the authenticated request
-    const res = await axios.get('http://localhost:8000/api/provider/bookings', {
-      withCredentials: true,
-      headers: {
-        Authorization: token ? `Bearer ${token}` : '',
-      },
-    });
-
-    console.log('API response data:', res.data);
-
-    if (Array.isArray(res.data)) {
-      setRequests(res.data);
-    } else if (
-      typeof res.data === 'object' &&
-      res.data !== null &&
-      Array.isArray((res.data as { bookings?: unknown }).bookings)
-    ) {
-      setRequests((res.data as { bookings: any[] }).bookings);
-    } else {
-      setRequests([]);
-      setError('Unexpected data format from API');
+      setRequests(Array.isArray(res.data) ? res.data : []);
+    } catch (err) {
+      console.error(err);
+      setError('Failed to load requests.');
+    } finally {
+      setLoading(false);
     }
-  } catch (err: any) {
-    console.error(err);
-    setError('Failed to load requests.');
-  } finally {
-    setLoading(false);
-  }
-};
-
-
+  };
 
   useEffect(() => {
     fetchRequests();
@@ -73,8 +53,7 @@ const ProviderRequests: React.FC = () => {
 
   const updateStatus = async (id: number, status: string) => {
     try {
-      await axios.patch(
-        `http://localhost:8000/api/provider/bookings/${id}/status`,
+      await axios.patch(`http://localhost:8000/api/provider/bookings/${id}/status`,
         { status },
         { withCredentials: true }
       );
@@ -84,30 +63,23 @@ const ProviderRequests: React.FC = () => {
     }
   };
 
-  const incomingRequests = Array.isArray(requests) ? requests.filter((r) => r.status === 'pending') : [];
-const inProgressRequests = Array.isArray(requests) ? requests.filter((r) => r.status === 'approved') : [];
-const completedRequests = Array.isArray(requests) ? requests.filter((r) => r.status === 'completed') : [];
+  const incomingRequests = requests.filter((r) => r.status === 'pending');
+  const inProgressRequests = requests.filter((r) => r.status === 'accepted');
+  const completedRequests = requests.filter((r) => r.status === 'completed');
 
   return (
-    <Box sx={{ 
-      p: { xs: 2, md: 3 }, 
-      backgroundColor: '#f5f5f5',
-      minHeight: '100vh' 
-    }}>
+    <Box sx={{ p: { xs: 2, md: 3 }, backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
       <Stack direction="row" alignItems="center" spacing={1.5} mb={1}>
         <AssignmentIcon sx={{ fontSize: 30, color: '#147c3c' }} />
-        <Typography variant="h5" fontWeight={600}>
-          Service Requests
-        </Typography>
+        <Typography variant="h5" fontWeight={600}>Service Requests</Typography>
       </Stack>
 
-      {error && (
-        <Typography color="error" mb={2}>{error}</Typography>
-      )}
+      {error && <Typography color="error" mb={2}>{error}</Typography>}
       {loading ? (
         <Typography>Loading...</Typography>
       ) : (
         <>
+          {/* Incoming */}
           <RequestTable
             icon={<AssignmentIcon sx={{ fontSize: 28, color: '#147c3c' }} />}
             title="Incoming Requests"
@@ -117,8 +89,8 @@ const completedRequests = Array.isArray(requests) ? requests.filter((r) => r.sta
                 <Button
                   size="small"
                   variant="contained"
-                  sx={{ textTransform: 'none', backgroundColor: '#147c3c', '&:hover': { backgroundColor: '#106d32' } }}
-                  onClick={() => updateStatus(row.id, 'approved')}
+                  sx={{ textTransform: 'none', backgroundColor: '#147c3c' }}
+                  onClick={() => updateStatus(row.id, 'accepted')}
                 >
                   Accept
                 </Button>
@@ -137,12 +109,13 @@ const completedRequests = Array.isArray(requests) ? requests.filter((r) => r.sta
                   }}
                   onClick={() => updateStatus(row.id, 'rejected')}
                 >
-                  Decline
+                  Reject
                 </Button>
               </Stack>
             )}
           />
 
+          {/* In Progress */}
           <RequestTable
             icon={<PendingActionsIcon sx={{ fontSize: 28, color: '#147c3c' }} />}
             title="In Progress"
@@ -151,14 +124,15 @@ const completedRequests = Array.isArray(requests) ? requests.filter((r) => r.sta
               <Button
                 size="small"
                 variant="contained"
-                sx={{ textTransform: 'none', backgroundColor: '#147c3c', '&:hover': { backgroundColor: '#106d32' } }}
-                onClick={() => updateStatus(row.id, 'blocked')}
+                sx={{ textTransform: 'none', backgroundColor: '#147c3c' }}
+                onClick={() => updateStatus(row.id, 'completed')}
               >
                 Mark as Completed
               </Button>
             )}
           />
 
+          {/* Completed */}
           <RequestTable
             icon={<DoneAllIcon sx={{ fontSize: 28, color: '#147c3c' }} />}
             title="Completed Requests"
@@ -179,10 +153,20 @@ const RequestTable = ({
 }: {
   icon: React.ReactNode,
   title: string,
-  data: Array<{ id: number, customer: string, date: string, status: string }>;
+  data: Array<any>,
   actions: (row: any) => React.ReactNode,
 }) => {
   const theme = useTheme();
+
+  const getChipColor = (status: string) => {
+    switch (status) {
+      case 'pending': return theme.palette.warning.main;
+      case 'accepted': return theme.palette.info.main;
+      case 'rejected': return theme.palette.error.main;
+      case 'completed': return theme.palette.success.main;
+      default: return theme.palette.grey[500];
+    }
+  };
 
   return (
     <Box mb={4}>
@@ -196,13 +180,7 @@ const RequestTable = ({
         />
       </Stack>
 
-      <TableContainer 
-        component={Paper} 
-        sx={{ 
-          border: `1px solid ${theme.palette.divider}`,
-          boxShadow: 'none'
-        }}
-      >
+      <TableContainer component={Paper} sx={{ border: `1px solid ${theme.palette.divider}` }}>
         <Table size="medium">
           <TableHead sx={{ backgroundColor: theme.palette.grey[50] }}>
             <TableRow>
@@ -215,26 +193,16 @@ const RequestTable = ({
           <TableBody>
             {data.map((row) => (
               <TableRow key={row.id} hover>
-                <TableCell>{row.customer}</TableCell>
-                <TableCell>{row.date}</TableCell>
+                <TableCell>{row.customer ?? ''}</TableCell>
+                <TableCell>{row.date ?? ''}</TableCell>
                 <TableCell>
                   <Chip
                     label={row.status}
                     size="small"
                     variant="outlined"
                     sx={{
-                      color:
-                        row.status === 'New'
-                          ? '#147c3c'
-                          : row.status === 'pending'
-                          ? theme.palette.warning.main
-                          : theme.palette.success.main,
-                      borderColor:
-                        row.status === 'New'
-                          ? '#147c3c'
-                          : row.status === 'pending'
-                          ? theme.palette.warning.main
-                          : theme.palette.success.main
+                      color: getChipColor(row.status),
+                      borderColor: getChipColor(row.status)
                     }}
                   />
                 </TableCell>

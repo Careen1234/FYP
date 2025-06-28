@@ -9,11 +9,11 @@ class Service extends Model
 {
     use HasFactory;
 
-     protected $fillable = ['name', 'description', 'price', 'category_id', 'status'];
+     protected $fillable = ['name', 'description',  'service_category_id'];
 
     public function category()
     {
-        return $this->belongsTo(ServiceCategory::class, 'category_id');
+        return $this->belongsTo(ServiceCategory::class, 'service_category_id');
     }
 
     public function bookings()
@@ -22,8 +22,12 @@ class Service extends Model
 }
 public function providers()
 {
-    return $this->belongsToMany(Provider::class, 'provider_service', 'service_id', 'provider_id');
+    return $this->belongsToMany(Provider::class) ;
 }
 
+public function providerServices()
+{
+    return $this->hasMany(ProviderService::class);
 
+}
 }

@@ -40,6 +40,7 @@ const LocationSelector: React.FC<Props> = ({ onLocationSelect }) => {
           const res = await fetch(
             `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${coords.lat}&lon=${coords.lng}`
           );
+          
           const data = await res.json();
           const clean = extractCleanAddress(data.display_name);
           setAddress(clean);

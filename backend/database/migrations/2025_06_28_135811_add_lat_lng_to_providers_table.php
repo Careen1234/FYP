@@ -13,8 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('users', function (Blueprint $table) {
-             $table->string('status')->default('active')->change();
+        Schema::table('providers', function (Blueprint $table) {
+           $table->string('location')->nullable()->after('phone');
+           
+             $table->decimal('latitude', 10, 7)->nullable()->after('location');
+            $table->decimal('longitude', 10, 7)->nullable()->after('latitude');
         });
     }
 
@@ -25,8 +28,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('users', function (Blueprint $table) {
-             $table->string('status')->default(null)->change(); // rollback
+        Schema::table('providers', function (Blueprint $table) {
+            //
         });
     }
 };

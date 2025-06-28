@@ -9,16 +9,18 @@ class Ratings extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id','provider_id','service_id', 'rating', 'reviews'];
+    protected $table = 'provider_ratings';
+
+    protected $fillable = ['user_id','provider_id', 'rating', 'reviews'];
 
     public function user()
 {
-    return $this->belongsTo(User::class);
+    return $this->belongsTo(UserBasic::class);
 }
 
 public function provider()
 {
-    return $this->belongsTo(User::class); 
+    return $this->belongsTo(Provider::class); 
 }
 
 public function service()

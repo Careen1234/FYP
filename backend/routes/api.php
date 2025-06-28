@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\RatingsController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\AzamPayController;
+use App\Http\Controllers\Api\ProviderAuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,21 +24,24 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-// ✅ Public Auth Routes
+
+
+
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::post('/register', [AuthController::class, 'register']);
 
-// ✅ Logout and "me" - must be protected
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
 });
 
-// ✅ CSRF route (optional – usually handled automatically)
+
 Route::get('/sanctum/csrf-cookie', function () {
     return response()->noContent();
 });
+
 
 // ✅ Providers
 Route::prefix('providers')->group(function () {
@@ -53,7 +57,7 @@ Route::prefix('providers')->group(function () {
     Route::put('{id}/block-toggle', [ProviderController::class, 'toggleBlock']);
 });
 
-// ✅ Users
+
 Route::prefix('users')->group(function () {
     Route::get('/', [UserController::class, 'index']);
     Route::post('/', [UserController::class, 'store']);
@@ -75,10 +79,10 @@ Route::prefix('services')->group(function () {
 // ✅ Categories
 Route::get('/service-categories', [CategoryController::class, 'index']);
 
-// ✅ Bookings
-Route::prefix('bookings')->group(function () {
-    Route::post('/providers/match', [BookingController::class, 'getAvailableProviders']);
-    Route::post('/book', [BookingController::class, 'bookProvider']);
+
+Route::middleware('auth:sanctum')->prefix('bookings')->group(function () {
+   Route::get('/providers/match', [BookingController::class, 'getAvailableProviders']);
+    Route::post('/book', [BookingController::class, 'book']);
     Route::get('/', [BookingController::class, 'index']);
     Route::post('/', [BookingController::class, 'store']);
     Route::get('/user', [BookingController::class, 'userBookings']);
@@ -86,6 +90,8 @@ Route::prefix('bookings')->group(function () {
     Route::put('{id}', [BookingController::class, 'update']);
     Route::delete('{id}', [BookingController::class, 'destroy']);
 });
+
+  
 
 // ✅ Dashboard Stats
 Route::get('/users/count', [DashboardController::class, 'usersCount']);
@@ -99,12 +105,52 @@ Route::get('/provider/reviews', [RatingsController::class, 'providerReviews']);
 
 Route::put('/profile', [UserController::class, 'updateCurrentUserProfile']);
    
-Route::middleware(['auth:sanctum', 'role:provider'])->group(function () {
+//Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/provider/bookings', [BookingController::class, 'getProviderBookings']);
-    Route::patch('/provider/bookings/{bookingId}/status', [BookingController::class, 'updateBookingStatus']);
-});
+   
+
+//});
+
 
 Route::middleware(['auth:sanctum', 'role:user'])->group(function () {
     Route::post('/payments/cash', [PaymentController::class, 'payWithCash']);
     Route::post('/payments/initiate', [PaymentController::class, 'pay']);
 });
+
+
+
+Route::get('/service', [ServiceController::class, 'getServicesByCategory']);
+Route::get('/service/register', [ServiceController::class, 'register']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/bookings/book', [BookingController::class, 'book']);
+    Route::get('/providers/match', [BookingController::class, 'getAvailableProviders']);
+});
+
+
+
+
+
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('/provider/bookings', [ProviderController::class, 'getProviderBookings']);
+    //Route::post('/provider/bookings/{id}/accept', [ProviderController::class, 'acceptBooking']);
+   // Route::post('/provider/bookings/{id}/reject', [ProviderController::class, 'rejectBooking']);
+    //Route::post('/provider/bookings/{id}/complete', [ProviderController::class, 'completeBooking']);
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

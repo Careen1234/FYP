@@ -74,7 +74,7 @@ const UserDashboard: React.FC = () => {
       setServicesError("");
       try {
         const response = await axios.get(
-          `http://localhost:8000/api/services?category_name=${encodeURIComponent(selectedCategory)}`
+          `http://localhost:8000/api/service?category=${encodeURIComponent(selectedCategory)}`
         );
         const data = response.data as any;
         const fetched = Array.isArray(data) ? data : data.data;
@@ -91,33 +91,37 @@ const UserDashboard: React.FC = () => {
   }, [selectedCategory]);
 
   // Fetch providers when service and location are selected
-  useEffect(() => {
-    if (selectedServiceId !== null && userLocation) {
-      const fetchProviders = async () => {
-        setLoadingProviders(true);
-        setProvidersError("");
-        try {
-          const response = await axios.get("http://localhost:8000/api/providers", {
-            params: {
-              service_id: selectedServiceId,
-              lat: userLocation.lat,
-              lng: userLocation.lng,
-            },
-          });
-          const data = response.data as any;
-          const fetchedProviders = Array.isArray(data) ? data : data.data;
-          setProviders(Array.isArray(fetchedProviders) ? fetchedProviders : []);
-        } catch (err) {
-          console.error("Failed to fetch providers:", err);
-          setProvidersError("Failed to load providers near you.");
-          setProviders([]);
-        } finally {
-          setLoadingProviders(false);
-        }
-      };
-      fetchProviders();
-    }
-  }, [selectedServiceId, userLocation]);
+ useEffect(() => {
+  if (selectedServiceId !== null && userLocation) {
+    const fetchProviders = async () => {
+      setLoadingProviders(true);
+      setProvidersError("");
+
+      try {
+        const response = await axios.get("http://localhost:8000/api/bookings/providers/match", {
+  params: {
+    service_id: selectedServiceId,
+    lat: userLocation.lat,
+    lng: userLocation.lng,
+  },
+ });
+
+        const data = response.data as any;
+        const fetchedProviders = Array.isArray(data) ? data : data.data;
+        setProviders(Array.isArray(fetchedProviders) ? fetchedProviders : []);
+      } catch (err) {
+        console.error("Failed to fetch providers:", err);
+        setProvidersError("Failed to load providers near you.");
+        setProviders([]);
+      } finally {
+        setLoadingProviders(false);
+      }
+    };
+
+    fetchProviders();
+  }
+}, [selectedServiceId, userLocation]);
+
 
   // Automatically detect user location on service selection
   useEffect(() => {
@@ -192,21 +196,18 @@ if (isNaN(parsedDate.getTime())) {
 const isoDate = parsedDate.toISOString();
 const formattedDate = isoDate.split("T")[0]; // 'YYYY-MM-DD'
 
-  try {
-    await axios.post(
-      "http://localhost:8000/api/bookings/book",
-      {
-        provider_id: selectedProvider.id,
-        service_id: selectedServiceId,
-        latitude: userLocation.lat,
-        longitude: userLocation.lng,
-        booking_date: formattedDate, // ✅
-        address: locationLabel,
-      },
-      {
-        withCredentials: true,
-      }
-    );
+ try {
+ await axios.post(
+    "http://localhost:8000/api/bookings/book",
+    {
+      provider_id: selectedProvider.id,
+      service_id: selectedServiceId,
+      latitude: userLocation.lat,
+      longitude: userLocation.lng,
+      booking_date: formattedDate,
+      address: locationLabel,
+    },
+  );
     alert("Booking successful!");
     setBookingDialogOpen(false);
     setSelectedProvider(null);
@@ -308,16 +309,17 @@ const formattedDate = isoDate.split("T")[0]; // 'YYYY-MM-DD'
             ))}
             <Divider sx={{ my: 1 }} />
             <ListItemButton onClick={async () => {
-              try {
-                await axios.get("http://localhost:8000/sanctum/csrf-cookie", { withCredentials: true });
-                const csrfToken = Cookies.get("XSRF-TOKEN");
-                axios.defaults.headers.common["X-XSRF-TOKEN"] = csrfToken ?? "";
-                await axios.post("http://localhost:8000/api/logout", {}, { withCredentials: true });
-                localStorage.removeItem("role");
-                navigate("/login");
-              } catch (error) {
-                alert("Failed to logout. Please try again.");
-              }
+               const handleLogout = async () => {
+    try {
+      await axios.post("/api/logout");
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      delete axios.defaults.headers.common["Authorization"];
+      navigate("/login");
+    } catch {
+      alert("Logout failed.");
+    }
+  };
             }}>
               <ListItemIcon><LogoutIcon fontSize="small" /></ListItemIcon>
               <ListItemText primary="Logout" />
@@ -383,7 +385,7 @@ const formattedDate = isoDate.split("T")[0]; // 'YYYY-MM-DD'
                       <ListItemButton key={provider.id}>
                         <ListItemText
                           primary={provider.name}
-                          secondary={`Rating: ${provider.ratings_avg_rating ?? "N/A"} | Distance: ${provider.distance?.toFixed(2) ?? "N/A"} km`}
+                          secondary={`Rating: ${provider.ratings_avg_rating?.toFixed(1) ?? "N/A"} | Distance: ${provider.distance?.toFixed(2) ?? "N/A"} km`}
                         />
                         <Button
                           variant="contained"
