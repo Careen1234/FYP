@@ -126,9 +126,13 @@ if ($user_id) {
     // Return user info with related data
     return response()->json([
         'message' => 'Login successful',
+
         'role' => $user->role,
         'token' => $token,
         'user' => $user->load(['providerInfo', 'userInfo']),
+
+        'user' => $user
+
     ]);
 }
 

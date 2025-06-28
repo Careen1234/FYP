@@ -82,12 +82,15 @@ const ProviderDashboard = () => {
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'space-between',
-      boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+      borderRadius: 4,
+      background: 'linear-gradient(135deg, #fff 60%, #eafaf1 100%)',
+      boxShadow: '0 6px 24px rgba(20,124,60,0.08)',
       transition: 'transform 0.3s, box-shadow 0.3s',
       '&:hover': {
-        transform: 'translateY(-5px)',
-        boxShadow: '0 6px 16px rgba(0,0,0,0.1)'
-      }
+        transform: 'translateY(-8px) scale(1.03)',
+        boxShadow: '0 12px 32px rgba(20,124,60,0.18)'
+      },
+      border: '1.5px solid #e0f2e9',
     }}>
       <Box>
         <Stack direction="row" alignItems="center" spacing={2} mb={2}>
@@ -95,20 +98,23 @@ const ProviderDashboard = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            width: 48,
-            height: 48
+            width: 56,
+            height: 56,
+            borderRadius: '50%',
+            background: '#eafaf1',
+            boxShadow: '0 2px 8px rgba(20,124,60,0.07)'
           }}>
             {icon}
           </Box>
           <Box sx={{ flex: 1 }}>
-            <Typography variant="subtitle2" color="text.secondary">{title}</Typography>
-            <Typography variant="h4" fontWeight={700}>{value}</Typography>
+            <Typography variant="subtitle2" color="#147c3c" fontWeight={600}>{title}</Typography>
+            <Typography variant="h4" fontWeight={800} color="#147c3c">{value}</Typography>
           </Box>
         </Stack>
       </Box>
 
       {subtext && (
-        <Typography variant="caption" color="text.secondary">{subtext}</Typography>
+        <Typography variant="caption" color="#147c3c" fontWeight={500}>{subtext}</Typography>
       )}
 
       {progress !== undefined && (
@@ -117,9 +123,9 @@ const ProviderDashboard = () => {
             variant="determinate"
             value={progress}
             sx={{
-              height: 6,
+              height: 7,
               borderRadius: 3,
-              backgroundColor: '#eee',
+              backgroundColor: '#eafaf1',
               '& .MuiLinearProgress-bar': {
                 borderRadius: 3,
                 backgroundColor: '#147c3c'
@@ -133,9 +139,12 @@ const ProviderDashboard = () => {
 
   return (
     <Box sx={{
-      p: { xs: 2, md: 3 },
-      backgroundColor: '#f5f5f5',
-      minHeight: '100vh'
+      p: { xs: 2, md: 4 },
+      background: 'linear-gradient(120deg, #eafaf1 0%, #fff 100%)',
+      minHeight: '100vh',
+      width: '100vw',
+      position: 'relative',
+      overflowX: 'hidden',
     }}>
       {/* Header */}
       <Stack
@@ -146,8 +155,19 @@ const ProviderDashboard = () => {
         mb={4}
       >
         <Stack direction="row" alignItems="center" spacing={2}>
-          <DashboardIcon sx={{ fontSize: 32, color: '#147c3c' }} />
-          <Typography variant="h5" fontWeight={600}>
+          <Box sx={{
+            background: '#147c3c',
+            borderRadius: '50%',
+            width: 48,
+            height: 48,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 2px 8px rgba(20,124,60,0.13)'
+          }}>
+            <DashboardIcon sx={{ fontSize: 32, color: '#fff' }} />
+          </Box>
+          <Typography variant="h5" fontWeight={800} color="#147c3c">
             Dashboard Overview
           </Typography>
         </Stack>
@@ -157,7 +177,17 @@ const ProviderDashboard = () => {
             <Switch
               checked={isOnline}
               onChange={toggleAvailability}
-              color="success"
+              sx={{
+                '& .MuiSwitch-switchBase.Mui-checked': {
+                  color: '#147c3c',
+                },
+                '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                  backgroundColor: '#147c3c',
+                },
+                '& .MuiSwitch-track': {
+                  backgroundColor: '#eafaf1',
+                },
+              }}
               size="medium"
             />
           }
@@ -171,7 +201,11 @@ const ProviderDashboard = () => {
                   top: 10,
                   px: 1.5,
                   py: 0.5,
-                  borderRadius: 2
+                  borderRadius: 2,
+                  background: isOnline ? '#147c3c' : '#d32f2f',
+                  color: '#fff',
+                  fontWeight: 700,
+                  fontSize: 13
                 }
               }}
             />
@@ -180,8 +214,9 @@ const ProviderDashboard = () => {
           sx={{
             ml: 0,
             '& .MuiTypography-root': {
-              fontWeight: 600,
-              color: isOnline ? '#147c3c' : '#d32f2f'
+              fontWeight: 700,
+              color: isOnline ? '#147c3c' : '#d32f2f',
+              fontSize: 16
             }
           }}
         />
@@ -189,21 +224,23 @@ const ProviderDashboard = () => {
 
       {/* Status Indicator */}
       <Paper sx={{
-        p: 2,
-        mb: 3,
-        bgcolor: isOnline ? '#d0f2df' : '#fddede',
-        borderLeft: `4px solid ${isOnline ? '#147c3c' : '#d32f2f'}`
+        p: 2.5,
+        mb: 4,
+        bgcolor: isOnline ? '#eafaf1' : '#fddede',
+        borderLeft: `5px solid ${isOnline ? '#147c3c' : '#d32f2f'}`,
+        borderRadius: 3,
+        boxShadow: '0 2px 12px rgba(20,124,60,0.07)'
       }}>
-        <Stack direction="row" alignItems="center" spacing={1.5}>
+        <Stack direction="row" alignItems="center" spacing={2}>
           {isOnline ? (
-            <OnlineIcon sx={{ color: '#147c3c', fontSize: 28 }} />
+            <OnlineIcon sx={{ color: '#147c3c', fontSize: 32 }} />
           ) : (
-            <OfflineIcon sx={{ color: '#d32f2f', fontSize: 28 }} />
+            <OfflineIcon sx={{ color: '#d32f2f', fontSize: 32 }} />
           )}
-          <Typography variant="body1" fontWeight={500}>
+          <Typography variant="body1" fontWeight={700} color={isOnline ? '#147c3c' : '#d32f2f'}>
             You are currently <span style={{
               color: isOnline ? '#147c3c' : '#d32f2f',
-              fontWeight: 600
+              fontWeight: 800
             }}>
               {isOnline ? 'AVAILABLE' : 'NOT AVAILABLE'}
             </span> for new service requests
@@ -214,35 +251,40 @@ const ProviderDashboard = () => {
       {/* Stats Cards */}
       <Box
         sx={{
-          display: 'flex',
-          flexWrap: 'wrap',
+          display: 'grid',
+          gridTemplateColumns: {
+            xs: '1fr',
+            sm: '1fr 1fr',
+            md: 'repeat(3, 1fr)',
+            lg: 'repeat(5, 1fr)'
+          },
           gap: 3,
-          mb: 4,
+          mb: 5,
           alignItems: 'stretch',
         }}
       >
         {stats.map((stat, idx) => (
-          <Box key={idx} sx={{ flex: '1 1 260px', minWidth: 260, maxWidth: 340, display: 'flex' }}>
+          <Box key={idx} sx={{ minWidth: 220, display: 'flex' }}>
             <StatCard {...stat} />
           </Box>
         ))}
       </Box>
 
       {/* Recent Activity */}
-      <Paper sx={{ p: 3 }}>
-        <Typography variant="h6" fontWeight={600} mb={2}>
+      <Paper sx={{ p: 3.5, borderRadius: 4, boxShadow: '0 4px 18px rgba(20,124,60,0.08)', background: '#fff' }}>
+        <Typography variant="h6" fontWeight={800} mb={2} color="#147c3c">
           Recent Activity
         </Typography>
-        <Divider sx={{ mb: 2 }} />
+        <Divider sx={{ mb: 2, borderColor: '#e0f2e9' }} />
         <Stack spacing={2}>
           {recentActivity.map((activity) => (
             <Box key={activity.id} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Avatar sx={{ bgcolor: '#147c3c', width: 40, height: 40 }}>
+              <Avatar sx={{ bgcolor: '#147c3c', width: 48, height: 48, fontWeight: 700, fontSize: 22, boxShadow: '0 2px 8px rgba(20,124,60,0.13)' }}>
                 {activity.customer.charAt(0)}
               </Avatar>
               <Box>
-                <Typography fontWeight={600}>{activity.customer}</Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography fontWeight={700} color="#147c3c">{activity.customer}</Typography>
+                <Typography variant="body2" color="text.secondary" fontWeight={500}>
                   {activity.service} &mdash; {activity.time}
                 </Typography>
               </Box>

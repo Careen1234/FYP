@@ -42,6 +42,7 @@ const categories = ["Home Services", "Personal Care", "Roadside Assistance"];
 interface Provider {
   id: number;
   name: string;
+  phone: string;
   ratings_avg_rating?: number;
   distance: number;
 }
@@ -276,7 +277,7 @@ const formattedDate = isoDate.split("T")[0]; // 'YYYY-MM-DD'
           </Box>
 
           <List>
-            {["services", "requests", "reviews", "payments", "settings", "profile"].map((key) => (
+            {["services", "requests", "reviews", "payments", "messages", "profile"].map((key) => (
               <ListItemButton
                 key={key}
                 selected={activeTab === key}
@@ -290,6 +291,14 @@ const formattedDate = isoDate.split("T")[0]; // 'YYYY-MM-DD'
                 }}
               >
                 <ListItemIcon>
+
+                  {key === "services" ? <HomeIcon fontSize="small" /> :
+                   key === "requests" ? <HistoryIcon fontSize="small" /> :
+                   key === "reviews" ? <RateReviewIcon fontSize="small" /> :
+                   key === "payments" ? <PaymentIcon fontSize="small" /> :
+                   key === "messages" ? <SettingsIcon fontSize="small" /> :
+                   <PersonIcon fontSize="small" />}
+
                   {key === "services" ? (
                     <HomeIcon fontSize="small" />
                   ) : key === "requests" ? (
@@ -303,6 +312,7 @@ const formattedDate = isoDate.split("T")[0]; // 'YYYY-MM-DD'
                   ) : (
                     <PersonIcon fontSize="small" />
                   )}
+
                 </ListItemIcon>
                 <ListItemText primary={key.charAt(0).toUpperCase() + key.slice(1)} />
               </ListItemButton>
