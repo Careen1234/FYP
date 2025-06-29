@@ -23,42 +23,7 @@ class ProviderController extends Controller
 
 
 
-
-    public function listProviders(Request $request)
-    {
-        $request->validate([
-            'service_id' => 'required|integer|exists:services,id',
-            'lat' => 'required|numeric',
-            'lng' => 'required|numeric',
-        ]);
-
-        $serviceId = $request->service_id;
-        $userLat = $request->lat;
-        $userLng = $request->lng;
-
-        $radiusKm = 30; // Radius for nearby providers, can be changed
-
-        // Haversine formula to calculate distance between two lat/lng points
-        $haversine = "(6371 * acos(cos(radians($userLat)) 
-                     * cos(radians(latitude)) 
-                     * cos(radians(longitude) - radians($userLng)) 
-                     + sin(radians($userLat)) 
-                     * sin(radians(latitude))))";
-
-        $providers = Provider::select('providers.*')
-            ->join('provider_service', 'providers.id', '=', 'provider_service.provider_id')
-            ->join('users', 'providers.user_id', '=', 'users.id')
-            ->leftJoin('ratings', 'providers.id', '=', 'ratings.provider_id')
-            ->where('provider_service.service_id', $serviceId)
-            ->selectRaw("AVG(ratings.rating) as average_rating, users.phone")
-            ->groupBy('providers.id', 'users.phone')
-            ->havingRaw("$haversine < ?", [$radiusKm])
-            ->orderByDesc('average_rating')
-            ->get();
-
-        return response()->json($providers);
-    }
-
+   
 
 
 
