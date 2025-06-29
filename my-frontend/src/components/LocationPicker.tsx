@@ -19,7 +19,7 @@ interface Props {
   onLocationSelect: (lat: number, lng: number, address: string) => void;
 }
 
-const LocationSelector: React.FC<Props> = ({ onLocationSelect }) => {
+const LocationPicker: React.FC<Props> = ({ onLocationSelect }) => {
   const [location, setLocation] = useState<L.LatLng | null>(null);
   const [address, setAddress] = useState("");
   const [loading, setLoading] = useState(false);
@@ -40,7 +40,7 @@ const LocationSelector: React.FC<Props> = ({ onLocationSelect }) => {
           const res = await fetch(
             `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${coords.lat}&lon=${coords.lng}`
           );
-          
+
           const data = await res.json();
           const clean = extractCleanAddress(data.display_name);
           setAddress(clean);
@@ -69,7 +69,7 @@ const LocationSelector: React.FC<Props> = ({ onLocationSelect }) => {
           const data = await res.json();
           const clean = extractCleanAddress(data.display_name);
           setAddress(clean);
-           onLocationSelect(e.latlng.lat, e.latlng.lng, clean);
+          onLocationSelect(e.latlng.lat, e.latlng.lng, clean);
         } catch (err) {
           console.error("Reverse geocoding failed:", err);
         }
@@ -133,4 +133,4 @@ const LocationSelector: React.FC<Props> = ({ onLocationSelect }) => {
   );
 };
 
-export default LocationSelector;
+export default LocationPicker;
