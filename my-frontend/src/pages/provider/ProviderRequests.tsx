@@ -53,7 +53,7 @@ const ProviderRequests: React.FC = () => {
 
   const updateStatus = async (id: number, status: string) => {
     try {
-      await axios.patch(`http://localhost:8000/api/provider/bookings/${id}/status`,
+      await axios.patch(`http://localhost:8000/api/bookings/${id}/status`,
         { status },
         { withCredentials: true }
       );

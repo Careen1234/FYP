@@ -5,13 +5,12 @@ import {
   Avatar,
   Button,
   TextField,
-  Divider,
   Stack,
   Chip,
   Paper,
-  IconButton,
   CircularProgress,
-  Alert
+  Alert,
+  InputAdornment
 } from '@mui/material';
 import {
   Edit as EditIcon,
@@ -20,6 +19,9 @@ import {
   Phone as PhoneIcon,
   Work as WorkIcon,
   AddPhotoAlternate as AddPhotoIcon,
+  Instagram as InstagramIcon,
+  Facebook as FacebookIcon,
+  Language as WebsiteIcon,
   AttachMoney as PriceIcon
 } from '@mui/icons-material';
 import axios from 'axios';
@@ -31,8 +33,10 @@ interface ProfileData {
   service: string;
   price: string;
   bio: string;
-  profilePhoto: string | null;
-  businessPhotos: string[];
+  profilePhoto: string | null; // for preview URL
+  instagram: string;
+  facebook: string;
+  website: string;
 }
 
 interface ProviderApiResponse {
@@ -43,7 +47,9 @@ interface ProviderApiResponse {
   price: number | string;
   bio: string;
   profile_photo_url: string | null;
-  business_photos_urls: string[];
+  instagram: string;
+  facebook: string;
+  website: string;
 }
 
 const ProviderProfile = () => {
@@ -53,7 +59,6 @@ const ProviderProfile = () => {
   const [error, setError] = useState<string | null>(null);
 
   const profileInputRef = useRef<HTMLInputElement>(null);
-  const businessInputRef = useRef<HTMLInputElement>(null);
 
   const greenColor = '#147c3c';
   const greenHover = '#126e35';
@@ -61,19 +66,21 @@ const ProviderProfile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await axios.get<ProviderApiResponse>('http://localhost:8000/api/providers', {
+        const response = await axios.get<ProviderApiResponse>('http://localhost:8000/api/providers/profile', {
           withCredentials: true,
         });
         const data = response.data;
         setProfile({
-          name: data.business_name || 'N/A',
-          email: data.business_email || 'N/A',
-          phone: data.business_phone || 'N/A',
-          service: data.service_category?.name || 'Not Set',
-          price: data.price ? `$${data.price}/hr` : 'Not Set',
+          name: data.business_name || '',
+          email: data.business_email || '',
+          phone: data.business_phone || '',
+          service: data.service_category?.name || '',
+          price: data.price ? data.price.toString() : '',
           bio: data.bio || '',
           profilePhoto: data.profile_photo_url || null,
-          businessPhotos: data.business_photos_urls || []
+          instagram: data.instagram || '',
+          facebook: data.facebook || '',
+          website: data.website || '',
         });
       } catch (err: any) {
         setError(err.response?.data?.error || 'Failed to fetch profile data.');
@@ -85,25 +92,46 @@ const ProviderProfile = () => {
     fetchProfile();
   }, []);
 
-  const handleSave = () => {
-    setIsEditing(false);
-    // API save logic would go here
+  const handleSave = async () => {
+    if (!profile) return;
+
+    if (!profile.name.trim()) {
+      alert('Business Name is required.');
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append('name', profile.name);
+      formData.append('email', profile.email);
+      formData.append('phone', profile.phone);
+      formData.append('bio', profile.bio);
+      formData.append('price', profile.price);
+      formData.append('instagram', profile.instagram);
+      formData.append('facebook', profile.facebook);
+      formData.append('website', profile.website);
+
+      if (profileInputRef.current?.files?.[0]) {
+        formData.append('profile_photo', profileInputRef.current.files[0]);
+      }
+
+      await axios.patch('http://localhost:8000/api/providers/profile', formData, {
+        withCredentials: true,
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      setIsEditing(false);
+    } catch (err: any) {
+      console.error('Failed to save profile:', err.response?.data || err.message);
+      alert('Failed to save profile.');
+    }
   };
 
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>, type: 'profile' | 'business') => {
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files && e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        if (typeof reader.result === 'string' && profile) {
-          if (type === 'profile') {
-            setProfile({ ...profile, profilePhoto: reader.result as string });
-          } else {
-            setProfile({ ...profile, businessPhotos: [...profile.businessPhotos, reader.result as string] });
-          }
-        }
-      };
-      reader.readAsDataURL(file);
+    if (file && profile) {
+      // Show local preview URL
+      setProfile({ ...profile, profilePhoto: URL.createObjectURL(file) });
     }
   };
 
@@ -124,12 +152,13 @@ const ProviderProfile = () => {
   }
 
   return (
-    <Box sx={{ 
-      p: { xs: 2, md: 3 }, 
-      backgroundColor: '#f5f5f5', // light gray
-      minHeight: '100vh' 
-    }}>
-      {/* Header */}
+    <Box
+      sx={{
+        p: { xs: 2, md: 3 },
+        backgroundColor: '#f5f5f5',
+        minHeight: '100vh',
+      }}
+    >
       <Stack direction="row" justifyContent="space-between" alignItems="center" mb={4}>
         <Typography variant="h5" fontWeight={600}>
           Business Profile
@@ -151,7 +180,7 @@ const ProviderProfile = () => {
             sx={{
               borderColor: greenColor,
               color: greenColor,
-              '&:hover': { backgroundColor: greenHover, color: '#fff', borderColor: greenHover }
+              '&:hover': { backgroundColor: greenHover, color: '#fff', borderColor: greenHover },
             }}
           >
             Edit Profile
@@ -159,10 +188,8 @@ const ProviderProfile = () => {
         )}
       </Stack>
 
-      {/* Profile Info */}
       <Paper sx={{ p: 3, mb: 3 }}>
         <Stack direction={{ xs: 'column', md: 'row' }} spacing={4} alignItems="flex-start">
-          {/* Avatar */}
           <Stack alignItems="center" spacing={2} sx={{ minWidth: '200px' }}>
             <Avatar
               src={profile.profilePhoto || undefined}
@@ -170,7 +197,7 @@ const ProviderProfile = () => {
                 width: 150,
                 height: 150,
                 bgcolor: greenColor,
-                fontSize: 60
+                fontSize: 60,
               }}
             >
               {profile.name ? profile.name.charAt(0) : ''}
@@ -182,7 +209,7 @@ const ProviderProfile = () => {
                   type="file"
                   accept="image/*"
                   ref={profileInputRef}
-                  onChange={(e) => handlePhotoUpload(e, 'profile')}
+                  onChange={handlePhotoUpload}
                   style={{ display: 'none' }}
                 />
                 <Button
@@ -192,7 +219,7 @@ const ProviderProfile = () => {
                   sx={{
                     borderColor: greenColor,
                     color: greenColor,
-                    '&:hover': { backgroundColor: greenHover, color: '#fff', borderColor: greenHover }
+                    '&:hover': { backgroundColor: greenHover, color: '#fff', borderColor: greenHover },
                   }}
                 >
                   Upload Photo
@@ -201,7 +228,6 @@ const ProviderProfile = () => {
             )}
           </Stack>
 
-          {/* Business Info */}
           <Box sx={{ flexGrow: 1 }}>
             {isEditing ? (
               <TextField
@@ -226,14 +252,23 @@ const ProviderProfile = () => {
                 borderColor: greenColor,
                 borderWidth: 1,
                 borderStyle: 'solid',
-                backgroundColor: 'transparent'
+                backgroundColor: 'transparent',
               }}
               variant="outlined"
             />
 
             <Stack direction="row" spacing={2} alignItems="center" mb={1}>
               <EmailIcon color="action" />
-              <Typography>{profile.email}</Typography>
+              {isEditing ? (
+                <TextField
+                  value={profile.email}
+                  onChange={(e) => setProfile({ ...profile, email: e.target.value })}
+                  size="small"
+                  fullWidth
+                />
+              ) : (
+                <Typography>{profile.email}</Typography>
+              )}
             </Stack>
 
             <Stack direction="row" spacing={2} alignItems="center" mb={3}>
@@ -243,6 +278,7 @@ const ProviderProfile = () => {
                   value={profile.phone}
                   onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
                   size="small"
+                  fullWidth
                 />
               ) : (
                 <Typography>{profile.phone}</Typography>
@@ -255,7 +291,8 @@ const ProviderProfile = () => {
                 value={profile.price}
                 onChange={(e) => setProfile({ ...profile, price: e.target.value })}
                 InputProps={{
-                  startAdornment: <PriceIcon color="action" sx={{ mr: 1 }} />
+                  endAdornment: <InputAdornment position="end">Tsh/hr</InputAdornment>,
+                  startAdornment: <PriceIcon color="action" sx={{ mr: 1 }} />,
                 }}
                 fullWidth
                 margin="normal"
@@ -263,14 +300,14 @@ const ProviderProfile = () => {
             ) : (
               <Chip
                 icon={<PriceIcon />}
-                label={`Service Rate: ${profile.price}`}
+                label={`Service Rate: ${profile.price} Tsh/hr`}
                 sx={{
                   mb: 2,
                   color: greenColor,
                   borderColor: greenColor,
                   borderWidth: 1,
                   borderStyle: 'solid',
-                  backgroundColor: 'transparent'
+                  backgroundColor: 'transparent',
                 }}
                 variant="outlined"
               />
@@ -291,74 +328,71 @@ const ProviderProfile = () => {
                 {profile.bio}
               </Typography>
             )}
+
+            <Box mt={3}>
+              <Typography variant="subtitle1" gutterBottom>
+                Social Media
+              </Typography>
+
+              <Stack direction="row" spacing={2} alignItems="center" mb={1}>
+                <InstagramIcon color="action" />
+                {isEditing ? (
+                  <TextField
+                    placeholder="Instagram URL"
+                    value={profile.instagram}
+                    onChange={(e) => setProfile({ ...profile, instagram: e.target.value })}
+                    size="small"
+                    fullWidth
+                  />
+                ) : profile.instagram ? (
+                  <a href={profile.instagram} target="_blank" rel="noopener noreferrer">
+                    {profile.instagram}
+                  </a>
+                ) : (
+                  <Typography color="text.secondary">Not provided</Typography>
+                )}
+              </Stack>
+
+              <Stack direction="row" spacing={2} alignItems="center" mb={1}>
+                <FacebookIcon color="action" />
+                {isEditing ? (
+                  <TextField
+                    placeholder="Facebook URL"
+                    value={profile.facebook}
+                    onChange={(e) => setProfile({ ...profile, facebook: e.target.value })}
+                    size="small"
+                    fullWidth
+                  />
+                ) : profile.facebook ? (
+                  <a href={profile.facebook} target="_blank" rel="noopener noreferrer">
+                    {profile.facebook}
+                  </a>
+                ) : (
+                  <Typography color="text.secondary">Not provided</Typography>
+                )}
+              </Stack>
+
+              <Stack direction="row" spacing={2} alignItems="center">
+                <WebsiteIcon color="action" />
+                {isEditing ? (
+                  <TextField
+                    placeholder="Website URL"
+                    value={profile.website}
+                    onChange={(e) => setProfile({ ...profile, website: e.target.value })}
+                    size="small"
+                    fullWidth
+                  />
+                ) : profile.website ? (
+                  <a href={profile.website} target="_blank" rel="noopener noreferrer">
+                    {profile.website}
+                  </a>
+                ) : (
+                  <Typography color="text.secondary">Not provided</Typography>
+                )}
+              </Stack>
+            </Box>
           </Box>
         </Stack>
-      </Paper>
-
-      {/* Business Photos */}
-      <Paper sx={{ p: 3, mb: 3 }}>
-        <Typography variant="h6" gutterBottom>
-          Business Photos
-        </Typography>
-        <Typography variant="body2" color="text.secondary" mb={3}>
-          Showcase your work to customers
-        </Typography>
-
-        {isEditing && (
-          <>
-            <input
-              type="file"
-              accept="image/*"
-              ref={businessInputRef}
-              onChange={(e) => handlePhotoUpload(e, 'business')}
-              style={{ display: 'none' }}
-            />
-            <Button
-              variant="outlined"
-              startIcon={<AddPhotoIcon />}
-              onClick={() => businessInputRef.current?.click()}
-              sx={{
-                mb: 3,
-                borderColor: greenColor,
-                color: greenColor,
-                '&:hover': { backgroundColor: greenHover, color: '#fff', borderColor: greenHover }
-              }}
-            >
-              Add Business Photos
-            </Button>
-          </>
-        )}
-
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr' },
-            gap: 2
-          }}
-        >
-          {profile.businessPhotos.map((photo, index) => (
-            <Box
-              key={index}
-              sx={{
-                height: '200px',
-                borderRadius: 1,
-                overflow: 'hidden',
-                position: 'relative',
-                bgcolor: 'grey.100'
-              }}
-            >
-              <img
-                src={photo}
-                alt={`Business work ${index + 1}`}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover'
-                }}
-              />
-            </Box>
-          ))}
-        </Box>
       </Paper>
     </Box>
   );

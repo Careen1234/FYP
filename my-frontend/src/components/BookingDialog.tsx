@@ -18,7 +18,7 @@ import ChatIcon from "@mui/icons-material/Chat";
 import PaymentIcon from "@mui/icons-material/Payment";
 import ChatDialog from "./ChatDialog";
 
-import PaymentForm from "../pages/public/PaymentForm"; // Adjust the import path as necessary
+import PaymentForm from "../pages/Payment"; // Adjust the import path as necessary
 
 interface BookingDialogProps {
   open: boolean;
@@ -176,11 +176,9 @@ const BookingDialog: React.FC<BookingDialogProps> = ({
             {/* *** RENDER PAYMENT FORM MODAL WHEN showPaymentForm IS TRUE *** */}
           {showPaymentForm && (
             <PaymentForm
-              bookingDetails={{
-                providerId: provider?.id ?? null,
-                serviceId: serviceId ?? null,
-                userLocation: userLocation ?? null,
-              }}
+              providerId={provider?.id ?? null}
+              serviceId={serviceId ?? null}
+              userLocation={userLocation ?? null}
               onClose={() => setShowPaymentForm(false)}
             />
           )}

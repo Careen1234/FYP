@@ -34,9 +34,24 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Provider::class, 'provider_id');
     }
+    public function user()
+{
+    return $this->belongsTo(User::class, 'user_id');
+}
+public function details()
+{
+    return $this->hasOne(UserBasic::class, 'user_id');
+}
+// GeneralUser.php
+public function basicUser()
+{
+    return $this->belongsTo(UserBasic::class, 'user_id');  // basic users table
+}
+public function provider()
+{
+    return $this->belongsTo(Provider::class, 'provider_id'); 
+
+}
 
 
-
-
-   
 }

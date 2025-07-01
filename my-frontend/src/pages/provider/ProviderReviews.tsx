@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { 
+import {
   Box,
   Typography,
   Paper,
@@ -9,20 +9,21 @@ import {
   Avatar,
   Chip,
   CircularProgress,
-  Alert
+  Alert,
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import {
   Reviews as ReviewsIcon,
   Star as StarIcon,
   Comment as CommentIcon,
-  DateRange as DateIcon
+  DateRange as DateIcon,
 } from '@mui/icons-material';
 import axios from 'axios';
 
 interface Review {
   id: number;
   customer: string;
+  provider: string;
   rating: number;
   date: string;
   comment: string;
@@ -35,7 +36,7 @@ interface ApiReview {
   provider_name: string;
   service_name: string;
   rating: number;
-  reviews: string;
+  review: string;
   date: string;
 }
 
@@ -63,15 +64,15 @@ const ProviderReviews: React.FC = () => {
         if (response.data && Array.isArray(response.data.data)) {
           const transformedData = response.data.data.map(r => ({
             id: r.id,
-            customer: r.user_name,
-            rating: r.rating,
-            date: r.date,
-            comment: r.reviews,
-            service: r.service_name,
+            customer: r.user_name || 'Unknown',
+            provider: r.provider_name || 'Unknown',
+            rating: r.rating ?? 0,
+            date: r.date || '',
+            comment: r.review || '',
+            service: r.service_name || 'Unspecified',
           }));
           setReviews(transformedData);
         } else {
-          console.warn("API response was not in the expected format:", response);
           setReviews([]);
           setError('Received an unexpected format from the server.');
         }
@@ -85,8 +86,11 @@ const ProviderReviews: React.FC = () => {
 
     fetchReviews();
   }, []);
-  
-  const averageRating = reviews.length > 0 ? reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length : 0;
+
+  const averageRating =
+    reviews.length > 0
+      ? reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length
+      : 0;
 
   if (loading) {
     return (
@@ -97,11 +101,7 @@ const ProviderReviews: React.FC = () => {
   }
 
   return (
-    <Box sx={{ 
-      p: { xs: 2, md: 3 }, 
-      backgroundColor: '#f5f5f5', // light gray
-      minHeight: '100vh' 
-    }}>
+    <Box sx={{ p: { xs: 2, md: 3 }, backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
       {/* Header */}
       <Stack direction="row" alignItems="center" spacing={2} mb={3}>
         <ReviewsIcon sx={{ fontSize: 32, color: greenColor }} />
@@ -145,7 +145,9 @@ const ProviderReviews: React.FC = () => {
               {reviews.filter(r => r.rating === 5).length}
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              {reviews.length > 0 ? `${Math.round((reviews.filter(r => r.rating === 5).length / reviews.length) * 100)}% of total` : 'N/A'}
+              {reviews.length > 0
+                ? `${Math.round((reviews.filter(r => r.rating === 5).length / reviews.length) * 100)}% of total`
+                : 'N/A'}
             </Typography>
           </Paper>
         </Box>
@@ -161,7 +163,9 @@ const ProviderReviews: React.FC = () => {
                   {reviews[0].rating}/5
                 </Typography>
                 <Typography variant="caption" color="text.secondary" noWrap>
-                  "{reviews[0].comment.substring(0, 30)}..."
+                  {reviews[0].comment
+                    ? `"${reviews[0].comment.substring(0, 30)}..."`
+                    : 'No recent comment'}
                 </Typography>
               </>
             ) : (
@@ -216,6 +220,11 @@ const ProviderReviews: React.FC = () => {
                           borderColor: greenColor,
                           '&:hover': { backgroundColor: greenHover },
                         }}
+                      />
+                      <Chip
+                        label={`Provider: ${review.provider}`}
+                        size="small"
+                        sx={{ ml: 1, bgcolor: '#eee' }}
                       />
                     </Stack>
 

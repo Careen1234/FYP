@@ -11,28 +11,33 @@ class RatingsController extends Controller
 {
 public function index()
 {
-    
-        
-    $ratings = Ratings::with(['user', 'provider', 'service'])->get();
+    $ratings = Ratings::with(['user', 'provider'])->get();
 
     $ratings = $ratings->map(function ($rating) {
+        $providerName = 'N/A';
+
+        // If provider has a related user for their name
+        if ($rating->provider && $rating->provider->user) {
+            $providerName = $rating->provider->user->name;
+        } elseif ($rating->provider && $rating->provider->name) {
+            $providerName = $rating->provider->name;
+        }
+
         return [
             'id' => $rating->id,
-            'user_name' => $rating->user ? $rating->user->name : 'N/A',
-            'provider_name' => $rating->provider ? $rating->provider->name : 'N/A',
-            'service_name' => $rating->service ? $rating->service->name : 'N/A',
+            'user_name' => $rating->user?->name ?? 'N/A',
+            'provider_name' => $providerName,
             'rating' => $rating->rating,
-            'reviews' => $rating->reviews,
-            'date' => $rating->created_at->toDateString(),
-           
-            
+            'review' => $rating->review,
+            'date' => $rating->created_at?->toDateString() ?? '',
         ];
     });
 
-   return response()->json(['data' => $ratings]);
+    return response()->json(['data' => $ratings]);
+}
 
       
-}
+
 
 public function providerReviews(Request $request)
 {

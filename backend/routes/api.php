@@ -11,8 +11,12 @@ use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\RatingsController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Api\PaymentController;
-use App\Http\Controllers\Api\AzamPayController;
+use App\Http\Controllers\Api\ClickPesaController;
 use App\Http\Controllers\Api\ProviderAuthController;
+use App\Http\Controllers\Api\AdminAuthController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\Api\ProviderDashboardController;
+use App\Http\Controllers\Api\ProviderReportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,10 +29,12 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 
+Route::prefix('admin')->group(function () {
+    Route::post('/login', [AdminAuthController::class, 'login']);
+});
 
 
 Route::post('/login', [AuthController::class, 'login']);
-
 Route::post('/register', [AuthController::class, 'register']);
 
 
@@ -42,6 +48,12 @@ Route::get('/sanctum/csrf-cookie', function () {
     return response()->noContent();
 });
 
+Route::middleware('auth:sanctum')->get('/provider/dashboard', [ProviderDashboardController::class, 'index']);
+Route::middleware(['auth:sanctum'])->get('/admin/dashboard', [DashboardController::class, 'index']);
+Route::middleware('auth:sanctum')->get('/provider/reports', [ProviderReportController::class, 'myReport']);
+
+
+
 
 // ✅ Providers
 Route::prefix('providers')->group(function () {
@@ -49,6 +61,7 @@ Route::prefix('providers')->group(function () {
     Route::get('/', [ProviderController::class, 'index']);
     Route::post('/', [ProviderController::class, 'store']);
     Route::get('/profile', [ProviderController::class, 'getProfile'])->middleware('auth:sanctum');
+    Route::patch('/profile', [ProviderController::class, 'updateProfile'])->middleware('auth:sanctum');
     Route::get('{id}', [ProviderController::class, 'show']);
     Route::put('{id}', [ProviderController::class, 'update']);
     Route::delete('{id}', [ProviderController::class, 'destroy']);
@@ -89,6 +102,7 @@ Route::middleware('auth:sanctum')->prefix('bookings')->group(function () {
     Route::get('{id}', [BookingController::class, 'show']);
     Route::put('{id}', [BookingController::class, 'update']);
     Route::delete('{id}', [BookingController::class, 'destroy']);
+    Route::patch('{id}/status', [BookingController::class, 'updateStatus']);
 });
 
   
@@ -99,23 +113,13 @@ Route::get('/providers/count', [DashboardController::class, 'providersCount']);
 Route::get('/bookings/count', [DashboardController::class, 'bookingsCount']);
 Route::get('/activity/latest', [DashboardController::class, 'latestActivity']);
 
-// ✅ Ratings
+Route::middleware('auth:sanctum')->group(function () {
 Route::get('/ratings', [RatingsController::class, 'index']);
 Route::get('/provider/reviews', [RatingsController::class, 'providerReviews']);
+});
 
 Route::put('/profile', [UserController::class, 'updateCurrentUserProfile']);
    
-//Route::middleware(['auth:sanctum'])->group(function () {
-    Route::get('/provider/bookings', [BookingController::class, 'getProviderBookings']);
-   
-
-//});
-
-
-Route::middleware(['auth:sanctum', 'role:user'])->group(function () {
-    Route::post('/payments/cash', [PaymentController::class, 'payWithCash']);
-    Route::post('/payments/initiate', [PaymentController::class, 'pay']);
-});
 
 
 
@@ -127,10 +131,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/providers/match', [BookingController::class, 'getAvailableProviders']);
 });
 
-
-
-
-
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/provider/bookings', [ProviderController::class, 'getProviderBookings']);
     //Route::post('/provider/bookings/{id}/accept', [ProviderController::class, 'acceptBooking']);
@@ -139,15 +139,30 @@ Route::middleware(['auth:sanctum'])->group(function () {
 });
 
 
+// Notification routes (protected by auth:sanctum middleware)
+Route::middleware('auth:sanctum')->group(function () {
+    // Get notifications
+    Route::get('/notifications', [NotificationController::class, 'getUnreadNotifications']);
+    Route::get('/notifications/all', [NotificationController::class, 'getAllNotifications']);
+    Route::get('/notifications/count', [NotificationController::class, 'getNotificationCount']);
+    
+    // Mark notifications as read
+    Route::post('/notifications/{id}/mark-as-read', [NotificationController::class, 'markAsRead']);
+    Route::post('/notifications/mark-all-as-read', [NotificationController::class, 'markAllAsRead']);
+    
+    // Delete notification
+    Route::delete('/notifications/{id}', [NotificationController::class, 'deleteNotification']);
+});
+
+// Payment routes
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/payment/initiate', [PaymentController::class, 'initiate']);
+    Route::post('/payment/callback', [PaymentController::class, 'callback'])->name('clickpesa.callback');
+});
 
 
-
-
-
-
-
-
-
+Route::get('/clickpesa/token', [PaymentController::class, 'getToken']);
+Route::post('/clickpesa', [PaymentController::class, 'initiateClickPesaUssdPush']);
 
 
 

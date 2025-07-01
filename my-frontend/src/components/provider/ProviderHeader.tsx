@@ -9,12 +9,17 @@ import {
   Menu,
   MenuItem,
   Tooltip,
+  Divider,
+  ListItemText,
+  Badge,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import MenuIcon from '@mui/icons-material/Menu';
+import NotificationsIcon from '@mui/icons-material/Notifications';
 import { logout } from '../../pages/Authlogout';  // <-- import logout
 import { useNavigate } from 'react-router-dom';   // <-- import navigate hook
+
 
 interface ProviderHeaderProps {
   toggleSidebar: () => void;
@@ -23,14 +28,28 @@ interface ProviderHeaderProps {
 
 const ProviderHeader: React.FC<ProviderHeaderProps> = ({ toggleSidebar, sidebarOpen }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+   const [notifAnchor, setNotifAnchor] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
+  const notifOpen = Boolean(notifAnchor);
   const navigate = useNavigate();  // <-- initialize navigate
+
+    // Simulate unread messages
+  const unreadMessages = [
+    { id: 1, sender: 'Admin', content: 'Your account is under review' },
+    { id: 2, sender: 'User123', content: 'Booking request sent' },
+  ];
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
 
   const handleMenuClose = () => setAnchorEl(null);
+
+    const handleNotifOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setNotifAnchor(event.currentTarget);
+  };
+
+  const handleNotifClose = () => setNotifAnchor(null);
 
   const handleProfileClick = () => {
     navigate('/provider/profile');
@@ -90,6 +109,49 @@ const ProviderHeader: React.FC<ProviderHeaderProps> = ({ toggleSidebar, sidebarO
             />
           </Box>
 
+
+          {/* Notification Bell */}
+          <Tooltip title="Messages">
+            <IconButton sx={{ color: 'white' }} onClick={handleNotifOpen}>
+              <Badge badgeContent={unreadMessages.length} color="error">
+                <NotificationsIcon />
+              </Badge>
+            </IconButton>
+          </Tooltip>
+
+          {/* Notification Dropdown */}
+          <Menu
+            anchorEl={notifAnchor}
+            open={notifOpen}
+            onClose={handleNotifClose}
+            anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+            transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+          >
+            {unreadMessages.length > 0 ? (
+              unreadMessages.map((msg) => (
+                <MenuItem
+                  key={msg.id}
+                  onClick={() => {
+                    navigate('/provider/messages');
+                    handleNotifClose();
+                  }}
+                >
+                  <ListItemText
+                    primary={msg.sender}
+                    secondary={msg.content}
+                    sx={{ maxWidth: '250px' }}
+                  />
+                </MenuItem>
+              ))
+            ) : (
+              <MenuItem disabled>No new messages</MenuItem>
+            )}
+            <Divider />
+            <MenuItem onClick={() => navigate('/provider/messages')}>
+              View All Messages
+            </MenuItem>
+          </Menu>
+          
           <Tooltip title="Account settings">
             <IconButton onClick={handleMenuOpen} sx={{ color: 'white' }}>
               <AccountCircle fontSize="large" />

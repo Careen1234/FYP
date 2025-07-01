@@ -27,45 +27,74 @@ export default function LoginForm() {
     setLoading(true);
     setError("");
 
+    const isAdminEmail = formData.email === "admin@gmail.com";
+
     try {
-      const response = await axios.post("http://localhost:8000/api/login", {
-        email: formData.email,
-        password: formData.password,
-      });
+      if (isAdminEmail) {
+        // Attempt admin login
+        const response = await axios.post<{ token: string; role: string; id: string }>(
+          "http://localhost:8000/api/admin/login",
+          {
+            password: formData.password,
+          }
+        );
 
-      const { token, user } = response.data;
+        const { token, role, id } = response.data;
 
-      if (!token || !user || !user.role) {
-        throw new Error("Invalid login response");
-      }
+        if (role !== "admin") throw new Error("Unauthorized");
 
-      // Save token to localStorage
-      localStorage.setItem("token", token);
-      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        const adminInfo = {
+          name: "Admin",
+          email: "admin@gmail.com",
+          role: "admin" as const,
+          id: Number(id),
+        };
 
-      const userInfo = {
-        name: user.name || "User",
-        email: user.email,
-        role: user.role,
-      };
-
-      localStorage.setItem("user", JSON.stringify(userInfo));
-      setUser(userInfo);
-
-      // Redirect based on role
-      if (user.role === "admin") {
+        localStorage.setItem("token", token);
+        localStorage.setItem("user", JSON.stringify(adminInfo));
+        axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        setUser(adminInfo);
         navigate("/admin/dashboard");
-      } else if (user.role === "provider") {
-        navigate("/provider/dashboard");
-      } else if (user.role === "user") {
-        navigate("/user");
+
       } else {
-        setError("Unknown role. Contact support.");
+        // Normal user/provider login
+        const response = await axios.post<{ token: string; user: { id?: number | string; name?: string; email: string; role: string } }>(
+          "http://localhost:8000/api/login",
+          {
+            email: formData.email,
+            password: formData.password,
+          }
+        );
+
+        const { token, user } = response.data;
+
+        if (!user || !token) throw new Error("Invalid response");
+
+        const userInfo = {
+          id: user.id ? Number(user.id) : 0,
+          name: user.name || "User",
+          email: user.email,
+          role: user.role as "admin" | "user" | "provider",
+        };
+
+        localStorage.setItem("token", token);
+        localStorage.setItem("user", JSON.stringify(userInfo));
+        axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        setUser(userInfo);
+
+        // Redirect by role
+        if (user.role === "admin") {
+          navigate("/admin/dashboard");
+        } else if (user.role === "provider") {
+          navigate("/provider/dashboard"); 
+        } else {
+          navigate("/user");
+        }
       }
     } catch (err: any) {
-      console.error("Login error:", err);
+      console.error("Login failed:", err);
       if (err.response?.status === 401) {
-        setError("Invalid email or password.");
+        setError("Invalid credentials.");
       } else {
         setError("Login failed. Please try again.");
       }

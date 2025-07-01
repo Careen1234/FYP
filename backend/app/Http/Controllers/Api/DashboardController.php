@@ -7,35 +7,26 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Provider;
 use App\Models\Booking;
-use App\Models\ActivityLog; // Assuming you have an ActivityLog model
+use App\Models\ActivityLog; 
+use Illuminate\Support\Facades\DB;
 class DashboardController extends Controller
 {
-     public function usersCount()
+    public function index()
     {
-        $count = User::count();
-        return response()->json(['count' => $count]);
-    }
+        $totalUsers = DB::table('user')->count();
+        $totalProviders = DB::table('providers')->count();
+        $totalBookings = DB::table('bookings')->count();
 
-   
-    public function providersCount()
-    {
-        $count = Provider::count();
-        return response()->json(['count' => $count]);
-    }
-
-    public function bookingsCount()
-    {
-        $count = Booking::count();
-        return response()->json(['count' => $count]);
-    }
-
-    
-    public function latestActivity()
-    {
-        $activities = ActivityLog::orderBy('created_at', 'desc')
+        $latestActivities = DB::table('activity_logs')
+            ->orderBy('created_at', 'desc')
             ->limit(10)
-            ->get(['id', 'message']); 
+            ->get(['id', 'message']);
 
-        return response()->json($activities);
+        return response()->json([
+            'total_users' => $totalUsers,
+            'total_providers' => $totalProviders,
+            'total_bookings' => $totalBookings,
+            'latest_activities' => $latestActivities,
+        ]);
     }
 }

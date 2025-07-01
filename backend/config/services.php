@@ -31,4 +31,11 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'clickpesa' => [
+    'base_url' => env('CLICKPESA_BASE_URL'),
+    'api_key' => env('CLICKPESA_API_KEY'),
+    'api_secret' => env('CLICKPESA_API_SECRET'),
+],
+
+
 ];

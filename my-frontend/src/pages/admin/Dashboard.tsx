@@ -8,6 +8,7 @@ import {
   List,
   ListItem,
   ListItemText,
+  Stack,
 } from '@mui/material';
 import {
   People,
@@ -21,81 +22,132 @@ interface Activity {
   message: string;
 }
 
-interface CountResponse {
-  count: number;
+interface StatCardProps {
+  icon: React.ReactElement;
+  title: string;
+  value: string | number;
 }
 
+const StatCard: React.FC<StatCardProps> = ({ icon, title, value }) => (
+  <Paper
+    sx={{
+      p: 3,
+      borderRadius: 4,
+      background: 'linear-gradient(135deg, #fff 60%, #eafaf1 100%)',
+      boxShadow: '0 6px 24px rgba(20,124,60,0.08)',
+      transition: 'transform 0.3s, box-shadow 0.3s',
+      display: 'flex',
+      alignItems: 'center',
+      gap: 2,
+      cursor: 'default',
+      '&:hover': {
+        transform: 'translateY(-8px) scale(1.03)',
+        boxShadow: '0 12px 32px rgba(20,124,60,0.18)',
+      },
+    }}
+  >
+    <Box
+      sx={{
+        background: '#eafaf1',
+        borderRadius: '50%',
+        width: 56,
+        height: 56,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        boxShadow: '0 2px 8px rgba(20,124,60,0.07)',
+        color: '#147c3c',
+      }}
+    >
+      {icon}
+    </Box>
+    <Box>
+      <Typography variant="subtitle2" color="#147c3c" fontWeight={600}>
+        {title}
+      </Typography>
+      <Typography variant="h4" color="#147c3c" fontWeight={800}>
+        {value}
+      </Typography>
+    </Box>
+  </Paper>
+);
+
 const Dashboard: React.FC = () => {
-  // State for counts
   const [totalUsers, setTotalUsers] = useState<number>(0);
   const [totalProviders, setTotalProviders] = useState<number>(0);
   const [totalBookings, setTotalBookings] = useState<number>(0);
   const [latestActivities, setLatestActivities] = useState<Activity[]>([]);
 
-  // Fetch counts and activities on component mount
-useEffect(() => {
-  const fetchCounts = async () => {
-    try {
-      const [usersRes, providersRes, bookingsRes, activityRes] = await Promise.all([
-        axios.get<CountResponse>('/api/users/count'),
-        axios.get<CountResponse>('/api/providers/count'),
-        axios.get<CountResponse>('/api/bookings/count'),
-        axios.get('/api/activity/latest'),
-      ]);
+  interface DashboardData {
+    total_users: number;
+    total_providers: number;
+    total_bookings: number;
+    latest_activities: Activity[];
+  }
 
-      console.log('Users count:', usersRes.data);
-      console.log('Providers count:', providersRes.data);
-      console.log('Bookings count:', bookingsRes.data);
+  useEffect(() => {
+    const fetchDashboard = async () => {
+      try {
+        const res = await axios.get('/api/admin/dashboard');
+        const data = res.data as DashboardData;
 
-      setTotalUsers(usersRes.data?.count ?? 0);
-      setTotalProviders(providersRes.data?.count ?? 0);
-      setTotalBookings(bookingsRes.data?.count ?? 0);
-
-      if (Array.isArray(activityRes.data)) {
-        setLatestActivities(activityRes.data);
-      } else {
-        console.warn('Expected latest activities to be an array, got:', activityRes.data);
-        setLatestActivities([]);
+        setTotalUsers(data?.total_users ?? 0);
+        setTotalProviders(data?.total_providers ?? 0);
+        setTotalBookings(data?.total_bookings ?? 0);
+        setLatestActivities(Array.isArray(data.latest_activities) ? data.latest_activities : []);
+      } catch (error) {
+        console.error('Failed to fetch admin dashboard data:', error);
       }
-    } catch (error) {
-      console.error('Failed to fetch dashboard data:', error);
-    }
-  };
+    };
 
-  fetchCounts();
-}, []);
+    fetchDashboard();
+  }, []);
 
-
-return (
-    <Box component="main" sx={{ flexGrow: 1, padding: 3, backgroundColor: '#f5f5f5', minHeight: '100vh', pt: '64px' }}>
+  return (
+    <Box
+      component="main"
+      sx={{
+        flexGrow: 1,
+        padding: 3,
+        backgroundColor: '#f5f5f5',
+        minHeight: '100vh',
+        pt: '64px',
+      }}
+    >
       <Header />
 
-      <Typography variant="h6" sx={{ color: '#147c3c', mb: 2 }} gutterBottom>
-       DASHBOARD OVERVIEW
-      </Typography>
+     <Typography
+  variant="subtitle2"
+  sx={{ color: '#147c3c', mb: 2, fontWeight: 600, fontSize: '1.25rem' }}
+>
+  DASHBOARD OVERVIEW
+</Typography>
 
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mt: 2 }}>
-        <Paper sx={{ p: 2, flex: '1 1 200px', minWidth: '200px' }}>
-          <People sx={{ color: '#147c3c' }} />
-          <Typography variant="subtitle1">Total Users</Typography>
-          <Typography variant="h6">{totalUsers}</Typography>
-        </Paper>
-        <Paper sx={{ p: 2, flex: '1 1 200px', minWidth: '200px' }}>
-          <Build sx={{ color: '#147c3c' }} />
-          <Typography variant="subtitle1">Service Providers</Typography>
-          <Typography variant="h6">{totalProviders}</Typography>
-        </Paper>
-        <Paper sx={{ p: 2, flex: '1 1 200px', minWidth: '200px' }}>
-          <BookOnline sx={{ color: '#147c3c' }} />
-          <Typography variant="subtitle1">Bookings</Typography>
-          <Typography variant="h6">{totalBookings}</Typography>
-        </Paper>
+
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: {
+            xs: '1fr',
+            sm: 'repeat(2, 1fr)',
+            md: 'repeat(3, 1fr)',
+          },
+          gap: 3,
+          mb: 4,
+        }}
+      >
+        <StatCard icon={<People sx={{ fontSize: 32 }} />} title="Total Users" value={totalUsers} />
+        <StatCard icon={<Build sx={{ fontSize: 32 }} />} title="Service Providers" value={totalProviders} />
+        <StatCard icon={<BookOnline sx={{ fontSize: 32 }} />} title="Bookings" value={totalBookings} />
       </Box>
 
       <Box sx={{ mt: 5, pb: 5 }}>
-        <Typography variant="h6" sx={{ color: '#147c3c', mb: 2 }} gutterBottom>
-          LATEST ACTIVITIES
-        </Typography>
+          <Typography
+  variant="subtitle2"
+  sx={{ color: '#147c3c', mb: 2, fontWeight: 600, fontSize: '1.25rem' }}
+>
+  LATEST ACTIVITIES
+</Typography>
         <Paper sx={{ p: 2 }}>
           <List>
             {latestActivities.length === 0 && (
@@ -103,7 +155,7 @@ return (
                 <ListItemText primary="No recent activity found." />
               </ListItem>
             )}
-            {latestActivities.map(activity => (
+            {latestActivities.map((activity) => (
               <React.Fragment key={activity.id}>
                 <ListItem>
                   <ListItemText primary={activity.message} />

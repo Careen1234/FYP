@@ -194,13 +194,14 @@ const Header: React.FC = () => {
             QuickAssist
           </Typography>
           <Typography
-            variant="body2"
+            variant="h6"
             sx={{
-              color: 'rgba(255,255,255,0.8)',
-              fontWeight: 300,
+              color: 'white',
+              textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+              fontWeight: 700,
             }}
           >
-            Dashboard
+            USER PANEL
           </Typography>
         </Box>
 
@@ -247,7 +248,7 @@ const Header: React.FC = () => {
               <MenuItemComponent sx={{ borderRadius: 1, mb: 1 }}>
                 <Box>
                   <Typography variant="body2" fontWeight={500}>
-                    New booking request
+                    Unread messages
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
                     2 minutes ago
@@ -267,7 +268,7 @@ const Header: React.FC = () => {
               <MenuItemComponent sx={{ borderRadius: 1 }}>
                 <Box>
                   <Typography variant="body2" fontWeight={500}>
-                    Payment received
+                    Payments received
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
                     3 hours ago

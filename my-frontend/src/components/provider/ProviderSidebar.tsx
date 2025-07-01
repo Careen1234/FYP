@@ -13,6 +13,7 @@ import BookOnlineIcon from '@mui/icons-material/BookOnline';
 import ReviewsIcon from '@mui/icons-material/Reviews';
 import PersonIcon from '@mui/icons-material/Person';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { BarChartIcon } from 'lucide-react';
 
 const drawerWidth = 240;
 
@@ -20,6 +21,7 @@ const menuItems = [
   { text: 'Dashboard', icon: <DashboardIcon />, path: '/provider/dashboard' },
   { text: 'Service Requests', icon: <BookOnlineIcon />, path: '/provider/requests' },
   { text: 'My Reviews', icon: <ReviewsIcon />, path: '/provider/reviews' },
+  { text: 'My Reports', icon: <BarChartIcon />, path: '/provider/reports' },
   { text: 'Profile', icon: <PersonIcon />, path: '/provider/profile' },
 ];
 

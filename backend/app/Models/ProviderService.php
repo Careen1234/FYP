@@ -18,7 +18,7 @@ class ProviderService extends Model
 
     public function provider()
     {
-        return $this->belongsTo(Provider::class);
+        return $this->belongsTo(User::class, 'provider_id');
     }
 
     public function service()
@@ -30,4 +30,9 @@ class ProviderService extends Model
     {
         return $this->hasMany(Booking::class);
     }
+    public function user()
+{
+    return $this->belongsTo(User::class, 'user_id');
+}
+
 }
