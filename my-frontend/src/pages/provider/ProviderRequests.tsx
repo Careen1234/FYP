@@ -68,20 +68,54 @@ const ProviderRequests: React.FC = () => {
   const completedRequests = requests.filter((r) => r.status === 'completed');
 
   return (
-    <Box sx={{ p: { xs: 2, md: 3 }, backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
-      <Stack direction="row" alignItems="center" spacing={1.5} mb={1}>
+    <Box
+      sx={{
+        p: { xs: 2, md: 4 },
+        backgroundColor: '#f0f4f8',
+        minHeight: '100vh',
+      }}
+    >
+      <Stack
+        direction="row"
+        alignItems="center"
+        spacing={1.5}
+        mb={3}
+        sx={{
+          backgroundColor: '#fff',
+          p: 2,
+          borderRadius: 2,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+        }}
+      >
         <AssignmentIcon sx={{ fontSize: 30, color: '#147c3c' }} />
-        <Typography variant="h5" fontWeight={600}>Service Requests</Typography>
+        <Typography variant="h5" fontWeight={700} color="#0f172a">
+          Service Requests
+        </Typography>
       </Stack>
 
-      {error && <Typography color="error" mb={2}>{error}</Typography>}
+      {error && (
+        <Typography
+          color="error"
+          mb={2}
+          sx={{
+            backgroundColor: '#fff0f0',
+            border: '1px solid #fca5a5',
+            borderRadius: 1,
+            p: 2,
+          }}
+        >
+          {error}
+        </Typography>
+      )}
+
       {loading ? (
-        <Typography>Loading...</Typography>
+        <Typography fontSize="1rem" fontWeight={500} color="#64748b">
+          Loading...
+        </Typography>
       ) : (
         <>
-          {/* Incoming */}
           <RequestTable
-            icon={<AssignmentIcon sx={{ fontSize: 28, color: '#147c3c' }} />}
+            icon={<AssignmentIcon sx={{ fontSize: 26, color: '#147c3c' }} />}
             title="Incoming Requests"
             data={incomingRequests}
             actions={(row) => (
@@ -89,7 +123,13 @@ const ProviderRequests: React.FC = () => {
                 <Button
                   size="small"
                   variant="contained"
-                  sx={{ textTransform: 'none', backgroundColor: '#147c3c' }}
+                  sx={{
+                    textTransform: 'none',
+                    backgroundColor: '#147c3c',
+                    fontWeight: 600,
+                    borderRadius: 2,
+                    boxShadow: '0 1px 5px rgba(0,0,0,0.1)',
+                  }}
                   onClick={() => updateStatus(row.id, 'accepted')}
                 >
                   Accept
@@ -99,13 +139,15 @@ const ProviderRequests: React.FC = () => {
                   variant="outlined"
                   sx={{
                     textTransform: 'none',
+                    fontWeight: 600,
+                    borderRadius: 2,
                     color: '#147c3c',
                     borderColor: '#147c3c',
                     '&:hover': {
-                      backgroundColor: '#f0fdf4',
+                      backgroundColor: '#ecfdf5',
                       borderColor: '#106d32',
-                      color: '#106d32'
-                    }
+                      color: '#106d32',
+                    },
                   }}
                   onClick={() => updateStatus(row.id, 'rejected')}
                 >
@@ -115,16 +157,21 @@ const ProviderRequests: React.FC = () => {
             )}
           />
 
-          {/* In Progress */}
           <RequestTable
-            icon={<PendingActionsIcon sx={{ fontSize: 28, color: '#147c3c' }} />}
+            icon={<PendingActionsIcon sx={{ fontSize: 26, color: '#147c3c' }} />}
             title="In Progress"
             data={inProgressRequests}
             actions={(row) => (
               <Button
                 size="small"
                 variant="contained"
-                sx={{ textTransform: 'none', backgroundColor: '#147c3c' }}
+                sx={{
+                  textTransform: 'none',
+                  backgroundColor: '#147c3c',
+                  fontWeight: 600,
+                  borderRadius: 2,
+                  boxShadow: '0 1px 5px rgba(0,0,0,0.1)',
+                }}
                 onClick={() => updateStatus(row.id, 'completed')}
               >
                 Mark as Completed
@@ -132,9 +179,8 @@ const ProviderRequests: React.FC = () => {
             )}
           />
 
-          {/* Completed */}
           <RequestTable
-            icon={<DoneAllIcon sx={{ fontSize: 28, color: '#147c3c' }} />}
+            icon={<DoneAllIcon sx={{ fontSize: 26, color: '#147c3c' }} />}
             title="Completed Requests"
             data={completedRequests}
             actions={(_row) => null}
@@ -172,27 +218,46 @@ const RequestTable = ({
     <Box mb={4}>
       <Stack direction="row" alignItems="center" spacing={1.5} mb={2}>
         {icon}
-        <Typography variant="subtitle1" fontWeight={500}>{title}</Typography>
-        <Chip 
-          label={`${data.length} ${data.length === 1 ? 'request' : 'requests'}`} 
-          size="small" 
+        <Typography variant="subtitle1" fontWeight={600}>
+          {title}
+        </Typography>
+        <Chip
+          label={`${data.length} ${data.length === 1 ? 'request' : 'requests'}`}
+          size="small"
           variant="outlined"
+          sx={{ fontWeight: 500 }}
         />
       </Stack>
 
-      <TableContainer component={Paper} sx={{ border: `1px solid ${theme.palette.divider}` }}>
+      <TableContainer
+        component={Paper}
+        sx={{
+          borderRadius: 3,
+          border: `1px solid ${theme.palette.divider}`,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+        }}
+      >
         <Table size="medium">
-          <TableHead sx={{ backgroundColor: theme.palette.grey[50] }}>
+          <TableHead sx={{ backgroundColor: '#f1f5f9' }}>
             <TableRow>
-              <TableCell sx={{ fontWeight: 600 }}>Customer</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Date</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Actions</TableCell>
+              <TableCell sx={{ fontWeight: 700, color: '#0f172a' }}>Customer</TableCell>
+              <TableCell sx={{ fontWeight: 700, color: '#0f172a' }}>Date</TableCell>
+              <TableCell sx={{ fontWeight: 700, color: '#0f172a' }}>Status</TableCell>
+              <TableCell sx={{ fontWeight: 700, color: '#0f172a' }}>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {data.map((row) => (
-              <TableRow key={row.id} hover>
+              <TableRow
+                key={row.id}
+                hover
+                sx={{
+                  transition: 'background 0.2s',
+                  '&:hover': {
+                    backgroundColor: '#f9fafb',
+                  },
+                }}
+              >
                 <TableCell>{row.customer ?? ''}</TableCell>
                 <TableCell>{row.date ?? ''}</TableCell>
                 <TableCell>
@@ -202,7 +267,9 @@ const RequestTable = ({
                     variant="outlined"
                     sx={{
                       color: getChipColor(row.status),
-                      borderColor: getChipColor(row.status)
+                      borderColor: getChipColor(row.status),
+                      fontWeight: 500,
+                      textTransform: 'capitalize',
                     }}
                   />
                 </TableCell>

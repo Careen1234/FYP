@@ -3,7 +3,6 @@ import {
   Box,
   Typography,
   TextField,
-  MenuItem,
   Button,
   Stack,
   Paper,
@@ -86,7 +85,6 @@ const ProviderReport: React.FC = () => {
       ]),
     });
 
-    // Summary
     const finalY = (doc as any).lastAutoTable.finalY || 40;
     doc.setFontSize(14);
     doc.text(`Total Customers: ${reportData.total_customers}`, 14, finalY + 10);
@@ -96,13 +94,36 @@ const ProviderReport: React.FC = () => {
   };
 
   return (
-    <Box p={3}>
-      <Typography variant="h4" sx={{ color: '#147c3c', mb: 3 }}>
+    <Box
+      sx={{
+        p: { xs: 2, md: 4 },
+        backgroundColor: '#f0f4f8',
+        minHeight: '100vh',
+      }}
+    >
+      <Typography
+        variant="h4"
+        sx={{
+          color: '#147c3c',
+          mb: 3,
+          fontWeight: 700,
+          textAlign: 'center',
+        }}
+      >
         Provider Detailed Report
       </Typography>
 
       {/* Filters */}
-      <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
+      <Paper
+        elevation={3}
+        sx={{
+          p: 3,
+          mb: 4,
+          borderRadius: 3,
+          backgroundColor: '#ffffff',
+          boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+        }}
+      >
         <form onSubmit={handleFilterSubmit}>
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} mb={2}>
             <TextField
@@ -124,7 +145,14 @@ const ProviderReport: React.FC = () => {
             <Button
               type="submit"
               variant="contained"
-              sx={{ backgroundColor: '#147c3c' }}
+              sx={{
+                backgroundColor: '#147c3c',
+                fontWeight: 600,
+                px: 4,
+                '&:hover': {
+                  backgroundColor: '#106d32',
+                },
+              }}
             >
               Filter
             </Button>
@@ -134,26 +162,59 @@ const ProviderReport: React.FC = () => {
 
       {/* Report Content */}
       {loading ? (
-        <CircularProgress />
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+          <CircularProgress />
+        </Box>
       ) : error ? (
-        <Typography color="error">Failed to load report data.</Typography>
+        <Typography
+          color="error"
+          sx={{
+            backgroundColor: '#fff0f0',
+            border: '1px solid #fca5a5',
+            borderRadius: 1,
+            p: 2,
+            textAlign: 'center',
+          }}
+        >
+          Failed to load report data.
+        </Typography>
       ) : reportData ? (
-        <Paper elevation={2} sx={{ p: 3 }}>
-          <Typography variant="h6" sx={{ mb: 2 }}>
+        <Paper
+          elevation={2}
+          sx={{
+            p: 3,
+            borderRadius: 3,
+            backgroundColor: '#ffffff',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+          }}
+        >
+          <Typography
+            variant="h6"
+            sx={{ mb: 2, fontWeight: 600, color: '#0f172a' }}
+          >
             Bookings
           </Typography>
-          <Table>
-            <TableHead>
+          <Table size="small">
+            <TableHead sx={{ backgroundColor: '#f1f5f9' }}>
               <TableRow>
-                <TableCell>Client Name</TableCell>
-                <TableCell>Date</TableCell>
-                <TableCell>Location</TableCell>
-                <TableCell>Payment (TZS)</TableCell>
+                <TableCell sx={{ fontWeight: 600 }}>Client Name</TableCell>
+                <TableCell sx={{ fontWeight: 600 }}>Date</TableCell>
+                <TableCell sx={{ fontWeight: 600 }}>Location</TableCell>
+                <TableCell sx={{ fontWeight: 600 }}>Payment (TZS)</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {reportData.bookings.map((b, idx) => (
-                <TableRow key={idx}>
+                <TableRow
+                  key={idx}
+                  hover
+                  sx={{
+                    transition: 'background 0.2s',
+                    '&:hover': {
+                      backgroundColor: '#f9fafb',
+                    },
+                  }}
+                >
                   <TableCell>{b.client_name}</TableCell>
                   <TableCell>{b.date}</TableCell>
                   <TableCell>{b.location}</TableCell>
@@ -164,24 +225,26 @@ const ProviderReport: React.FC = () => {
           </Table>
 
           <Box mt={3}>
-            <Typography variant="h6">
+            <Typography variant="subtitle1" fontWeight={600}>
               Total Customers Served: {reportData.total_customers}
             </Typography>
-            <Typography variant="h6">
+            <Typography variant="subtitle1" fontWeight={600}>
               Total Income: {reportData.total_income.toLocaleString()} TZS
             </Typography>
           </Box>
 
-          <Box mt={2}>
+          <Box mt={3} textAlign="right">
             <Button
               onClick={exportToPDF}
               variant="outlined"
               sx={{
                 borderColor: '#147c3c',
                 color: '#147c3c',
+                fontWeight: 600,
                 '&:hover': {
                   backgroundColor: '#147c3c',
                   color: 'white',
+                  borderColor: '#106d32',
                 },
               }}
             >
