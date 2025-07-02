@@ -12,7 +12,7 @@ class Booking extends Model
     
 
 
-public function user()
+public function user1()
 {
     return $this->belongsTo(\App\Models\Userbasic::class, 'user_id'); 
 }
@@ -31,6 +31,19 @@ public function providerService()
 {
     return $this->belongsTo(\App\Models\ProviderService::class, 'provider_service_id');
 }
+ public function user()
+{
+    return $this->belongsTo(UserBasic::class, 'user_id');
+}
+
+// Booking.php
+public function generalUser()
+{
+    return $this->belongsTo(User::class, 'user_id');
+}
+
+
+
 
 
 

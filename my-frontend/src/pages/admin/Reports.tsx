@@ -1,109 +1,164 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, Card, CardContent, MenuItem, TextField } from '@mui/material';
+import { Box, Typography, MenuItem, TextField, Button, Stack } from '@mui/material';
 import axios from 'axios';
-import { BarChart, LineChart, PieChart, DoughnutChart } from './Charts'; // Assume these are custom chart components
+import { BarChart, LineChart, PieChart, DoughnutChart } from './Charts'; 
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
-const ReportsAndAnalytics: React.FC = () => {
-  const [summary, setSummary] = useState({
-    users: 0,
-    providers: 0,
-    bookings: 0,
-    revenue: 0,
-    payments: 0
-  });
+type Filters = {
+  dateRange: 'daily' | 'weekly' | 'monthly';
+  service: string;
+};
 
-  const [filters, setFilters] = useState({
+type AnalyticsData = {
+  bookingsOverTime: any[];
+  revenueByService: any[];
+  paymentMethods: any[];
+  bookingStatus: any[];
+};
+
+const Reports: React.FC = () => {
+  const [filters, setFilters] = useState<Filters>({
     dateRange: 'monthly',
     service: '',
   });
 
-  useEffect(() => {
-    fetchSummaryData();
-  }, [filters]);
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData>({
+    bookingsOverTime: [],
+    revenueByService: [],
+    paymentMethods: [],
+    bookingStatus: [],
+  });
 
-  const fetchSummaryData = async () => {
+  const fetchAnalyticsData = async () => {
     try {
-      const response = await axios.get('/api/analytics/summary', { params: filters });
-      setSummary(response.data as {
-        users: number;
-        providers: number;
-        bookings: number;
-        revenue: number;
-        payments: number;
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.error('No auth token found.');
+        return;
+      }
+      const response = await axios.get('/api/analytics/data', {
+        params: filters,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
+      setAnalyticsData(response.data as AnalyticsData);
     } catch (error) {
-      console.error('Failed to fetch summary data:', error);
+      console.error('Failed to fetch analytics data:', error);
     }
   };
 
+  useEffect(() => {
+    fetchAnalyticsData();
+  }, [filters]);
+
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFilters({ ...filters, [e.target.name]: e.target.value });
+    setFilters(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const exportCSV = () => {
+    let csvContent = 'data:text/csv;charset=utf-8,';
+    csvContent += 'Date,Bookings\n';
+    analyticsData.bookingsOverTime.forEach(item => {
+      csvContent += `${item.date},${item.bookings}\n`;
+    });
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.href = encodedUri;
+    link.download = `report_${filters.dateRange}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const exportPDF = () => {
+    const doc = new jsPDF();
+    doc.text(`Report - ${filters.dateRange}`, 14, 20);
+
+    const tableColumn = ['Date', 'Bookings'];
+    const tableRows = analyticsData.bookingsOverTime.map(item => [
+      item.date,
+      item.bookings,
+    ]);
+
+    // @ts-ignore
+    doc.autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 30,
+    });
+
+    doc.save(`report_${filters.dateRange}.pdf`);
   };
 
   return (
     <Box p={5}>
-      <Typography variant="h4" sx={{ color: '#147c3c', mb: 2 }} gutterBottom>
+      <Typography variant="h4" sx={{ color: '#147c3c', mb: 3 }} gutterBottom>
         Reports & Analytics
       </Typography>
 
-      {/* Summary Cards */}
-      <Box display="flex" flexWrap="wrap" gap={2} mb={3}>
-        {[ 
-          { title: 'Users', value: summary.users },
-          { title: 'Providers', value: summary.providers },
-          { title: 'Bookings', value: summary.bookings },
-          { title: 'Revenue ($)', value: summary.revenue },
-          { title: 'Payments', value: summary.payments },
-        ].map((item) => (
-          <Card key={item.title} sx={{ flex: '1 1 200px' }}>
-            <CardContent>
-              <Typography variant="h6" color='#147c3c'>{item.title}</Typography>
-              <Typography variant="h5" color='#147c3c'>{item.value}</Typography>
-            </CardContent>
-          </Card>
-        ))}
-      </Box>
-
-      {/* Filters */}
-      <Box mb={3} display="flex" flexWrap="wrap" gap={2}>
+      <Stack direction="row" spacing={2} mb={4} alignItems="center">
         <TextField
           select
           label="Date Range"
           name="dateRange"
           value={filters.dateRange}
           onChange={handleFilterChange}
-          sx={{ width: '200px' }}
+          sx={{ width: 200 }}
         >
           <MenuItem value="daily">Daily</MenuItem>
           <MenuItem value="weekly">Weekly</MenuItem>
           <MenuItem value="monthly">Monthly</MenuItem>
         </TextField>
-        <TextField
-          label="Service Category"
-          name="service"
-          value={filters.service}
-          onChange={handleFilterChange}
-          sx={{ width: '250px' }}
-        />
-      </Box>
 
-      {/* Charts */}
+
+        <Button variant="outlined" onClick={exportCSV} sx={{ ml: 3 }}>
+          Export CSV
+        </Button>
+        <Button variant="outlined" onClick={exportPDF}>
+          Export PDF
+        </Button>
+      </Stack>
+
       <Box display="flex" flexWrap="wrap" gap={3}>
         <Box flex={1} minWidth={300}>
-          <LineChart title="Bookings Over Time" dataKey="bookings" />
+          <LineChart
+            title="Bookings Over Time"
+            dataKey="bookings"
+          />
         </Box>
+
         <Box flex={1} minWidth={300}>
-          <BarChart title="Revenue by Service" dataKey="revenue" />
+          <BarChart
+            title="Revenue by Service"
+            data={analyticsData.revenueByService}
+            dataKey="revenue"
+            xKey="service"
+          />
         </Box>
+
         <Box flex={1} minWidth={300}>
-          <PieChart title="Payment Method Distribution" />
+          <PieChart
+            title="Payment Method Distribution"
+            data={analyticsData.paymentMethods}
+            dataKey="count"
+            nameKey="method"
+          />
         </Box>
+
         <Box flex={1} minWidth={300}>
-          <DoughnutChart title="Booking Status Breakdown" />
+          <DoughnutChart
+            title="Booking Status Breakdown"
+            data={analyticsData.bookingStatus}
+            dataKey="count"
+            nameKey="status"
+          />
         </Box>
       </Box>
     </Box>
   );
 };
 
-export default ReportsAndAnalytics;
+export default Reports;

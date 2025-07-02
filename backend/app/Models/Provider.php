@@ -20,16 +20,23 @@ class Provider extends Authenticatable
         'phone',
         'service',
         'location',
+        'bio',
+        'profile_photo',
+        'instagram',
+        'price',
+        'facebook',
+        'website',
         'status',
         'latitude',
         'longitude',
+        
     ];
 
     protected $nullable=['user_id'];
  
 public function services()
 {
-    return $this->belongsToMany(Service::class, 'provider_services');
+    return $this->belongsToMany(Service::class, 'provider_services','provider_id');
 }
 public function bookings()
 {
@@ -42,6 +49,13 @@ public function ratings()
 {
 return $this->hasMany(Rating::class, 'provider_id');
 }
+
+
+public function basicUser()
+{
+    return $this->belongsTo(User::class, 'user_id'); // only if providers reference users
+}
+
 
 
 }

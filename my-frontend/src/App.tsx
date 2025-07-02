@@ -34,7 +34,8 @@ import Login from "./components/Login";
 import Unauthorized from "./pages/Unauthorized";
 
 import "./App.css";
-import BookingSuccess from "./pages/BookingSuccess";
+import ProviderReports from "./pages/provider/ProviderReports";
+//import BookingSuccess from "./pages/BookingSuccess";
 
 
 const AppContent = () => {
@@ -72,9 +73,9 @@ const AppContent = () => {
         <Route path="/user" element={<UserLayout />}>
           <Route index element={<h2>Welcome to User Dashboard</h2>} />
           <Route path="dashboard" element={<h2>User Dashboard</h2>} />
-          <Route path="booking-success" element={<BookingSuccess />} />
           <Route path="message" element={<UserMessage />} />
           <Route path="/user/usermessage" element={<UserMessage />} />
+
         </Route>
 
         {/* Provider Routes */}
@@ -83,7 +84,9 @@ const AppContent = () => {
           <Route path="requests" element={<ProviderRequests />} />
           <Route path="reviews" element={<ProviderReviews />} />
           <Route path="profile" element={<ProviderProfile />} />
+
           <Route path="messages" element={<ProviderMessage />} />
+          <Route path="reports" element={<ProviderReports />} />
         </Route>
 
         {/* 404 Fallback */}

@@ -11,6 +11,7 @@ use App\Models\Provider;
 use App\Models\User;
 use App\Models\ProviderService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class BookingController extends Controller
 {
@@ -160,11 +161,43 @@ public function getAvailableProviders(Request $request)
 
 
 
+public function updateStatus(Request $request, $id)
+{
+    $request->validate([
+        'status' => 'required|in:accepted,rejected,completed'
+    ]);
+
+    $user = Auth::user();
+
+    if ($user->role !== 'provider' || !$user->provider_id) {
+        return response()->json(['message' => 'Unauthorized. Not a provider.'], 403);
+    }
+
+    // Find the booking
+    $booking = Booking::with('providerService')->find($id);
+
+    if (!$booking || !$booking->provider_service_id || !$booking->providerService) {
+        return response()->json(['message' => 'Booking or provider service not found.'], 404);
+    }
+
+    // Make sure this provider owns the provider service linked to this booking
+    if ($booking->providerService->provider_id !== $user->provider_id) {
+        return response()->json(['message' => 'Forbidden. Not your service.'], 403);
+    }
+
+    // Update the booking status
+    $booking->status = $request->status;
+    $booking->save();
+
+    return response()->json(['message' => 'Booking status updated.', 'booking' => $booking]);
+}
+
+
+ 
 
 
 
-
-
+    
 
 
 

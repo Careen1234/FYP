@@ -380,7 +380,6 @@ const ProviderManagement: React.FC = () => {
               <Typography variant="subtitle1"><strong>Phone:</strong> {selectedProvider.phone || 'N/A'}</Typography>
               <Typography variant="subtitle1"><strong>Service:</strong> {selectedProvider.service}</Typography>
               <Typography variant="subtitle1"><strong>Location:</strong> {selectedProvider.location}</Typography>
-              <Typography variant="subtitle1"><strong>Status:</strong> {selectedProvider.status}</Typography>
               <Typography variant="subtitle1"><strong>Availability:</strong> {selectedProvider.availability}</Typography>
               <Typography variant="subtitle1"><strong>Completed Services:</strong> {selectedProvider.completed_services || 0}</Typography>
             </>

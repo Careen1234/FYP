@@ -5,6 +5,8 @@ namespace App\Http\Controllers\api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\UserBasic; 
+use Illuminate\Support\Facades\Hash;
 
 
 
@@ -12,64 +14,76 @@ class UserController extends Controller
 {
     public function index(Request $request)
     {
-        $users = User::all();
+        $users = UserBasic::all();
         return response()->json(['users' => $users]);
     }
     public function show($id)
     {
 
-        $user = User::findOrFail($id);
+        $user = UserBasic::findOrFail($id);
         
         return response()->json(['message' => "User details for ID: $id"]);
     }
-    public function store(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:8',
-            'location' => 'nullable|string|max:255',
-            'phone' => 'nullable|string|max:20',
-        ]);
-        User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => bcrypt($request->password),
-            'location' => $request->location,
-            'phone' => $request->phone,
-            //'status' => 'active', 
-        ]);
-        
-        return response()->json(['message' => 'User created successfully']);
-    }
-    public function update(Request $request, $id)
+  
+public function store(Request $request)
+{
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|email|unique:user,email',
 
-    {
-        $request->validate([
-            'name' => 'sometimes|required|string|max:255',
-            'email' => 'sometimes|required|email|unique:users,email,' . $id,
-            'password' => 'sometimes|required|string|min:8',
-            'location' => 'nullable|string|max:255',
-            'phone' => 'nullable|string|max:20',
-             //'status' => '1',
+        'password' => 'required|string|min:8',
+        'phone' => 'nullable|string|max:20',
+        //'location' => 'nullable|string|max:255',
+    ]);
 
-        ]);
-        $user = User::findOrFail($id);
-        $user->name = $request->input('name', $user->name);
-        $user->email = $request->input('email', $user->email);
-        if ($request->has('password')) {
-            $user->password = bcrypt($request->password);
-        }
-        $user->location = $request->input('location', $user->location);
-        $user->phone = $request->input('phone', $user->phone);
+    // 1. Create in users table (auth data)
+    $user = User::create([
+        'role' => 'user',
+        'password' => Hash::make($request->password),
+    ]);
+
+    
+    UserBasic::create([
+        'user_id' => $user->id,
+        'name' => $request->name,
+        'email' => $request->email,
+        'phone' => $request->phone,
+        //'location' => $request->location,
+    ]);
+
+    return response()->json(['message' => 'User created successfully']);
+}
+
+public function update(Request $request, $id)
+{
+    $request->validate([
+        'name' => 'sometimes|required|string|max:255',
+        'email' => 'sometimes|required|email|unique:user,email,' . $id,
+        'password' => 'nullable|string|min:8',
+        'phone' => 'nullable|string|max:20',
+       
+    ]);
+
+    $userBasic = UserBasic::findOrFail($id);
+
+    // Only update password if provided
+    if ($request->filled('password')) {
+        $user = User::find($userBasic->user_id);
+        $user->password = bcrypt($request->password);
         $user->save();
-        
-        return response()->json(['message' => "User with ID: $id updated successfully"]);
     }
+
+    // Update basic info
+    $userBasic->update($request->only(['name', 'email', 'phone']));
+
+    return response()->json(['message' => 'User updated successfully']);
+}
+
+
     public function destroy($id)
     {
         
-        $user = User::findOrFail($id);
+        $user = UserBasic::findOrFail($id);
         $user->delete();
         return response()->json(['message' => "User with ID: $id deleted successfully"]);
     }
@@ -89,12 +103,11 @@ class UserController extends Controller
     // Validate the request
     $request->validate([
         'name' => 'sometimes|required|string|max:255',
-        'email' => 'sometimes|required|email|unique:users,email,' . $user->id,
+        'email' => 'sometimes|required|email|unique:user,email,' . $user->id,
         'phone' => 'nullable|string|max:20',
-        'location' => 'nullable|string|max:255',
+        //'location' => 'nullable|string|max:255',
     ]);
 
-    // Update user fields
     if ($request->has('name')) {
         $user->name = $request->name;
     }
@@ -104,9 +117,7 @@ class UserController extends Controller
     if ($request->has('phone')) {
         $user->phone = $request->phone;
     }
-    if ($request->has('location')) {
-        $user->location = $request->location;
-    }
+    
 
     $user->save();
 
@@ -117,7 +128,7 @@ class UserController extends Controller
             'name' => $user->name,
             'email' => $user->email,
             'phone' => $user->phone,
-            'location' => $user->location,
+           // 'location' => $user->location,
             'role' => $user->role,
             'status' => $user->status,
             'created_at' => $user->created_at,

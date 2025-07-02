@@ -29,7 +29,6 @@ interface User {
   name: string;
   email: string;
   phone: string;
-  location: string;
   status?: number;
   password?: string;
   password_confirmation?: string;
@@ -47,7 +46,6 @@ const UsersManagement: React.FC = () => {
     name: "",
     email: "",
     phone: "",
-    location: "",
     password: "",
     password_confirmation: "",
   });
@@ -87,6 +85,7 @@ const UsersManagement: React.FC = () => {
   const handleDelete = async (id?: number) => {
     if (!id) return;
     try {
+
       await axios.delete(`http://localhost:8000/api/users/${id}`);
       fetchUsers();
     } catch (error) {
@@ -122,7 +121,6 @@ const UsersManagement: React.FC = () => {
         name: "",
         email: "",
         phone: "",
-        location: "",
         password: "",
         password_confirmation: "",
       });
@@ -175,7 +173,6 @@ const UsersManagement: React.FC = () => {
             <TableCell>Name</TableCell>
             <TableCell>Email</TableCell>
             <TableCell>Phone</TableCell>
-            <TableCell>Location</TableCell>
             <TableCell>Status</TableCell>
             <TableCell>Actions</TableCell>
           </TableRow>
@@ -187,7 +184,7 @@ const UsersManagement: React.FC = () => {
               <TableCell>{user.name}</TableCell>
               <TableCell>{user.email}</TableCell>
               <TableCell>{user.phone}</TableCell>
-              <TableCell>{user.location}</TableCell>
+              
               <TableCell>{user.status === 0 ? "Blocked" : "Active"}</TableCell>
               <TableCell>
                 <IconButton onClick={() => handleOpenForm(user)} title="Edit">
@@ -221,7 +218,6 @@ const UsersManagement: React.FC = () => {
               <p><strong>Name:</strong> {selectedUser.name}</p>
               <p><strong>Email:</strong> {selectedUser.email}</p>
               <p><strong>Phone:</strong> {selectedUser.phone || 'N/A'}</p>
-              <p><strong>Location:</strong> {selectedUser.location || 'N/A'}</p>
               <p><strong>Status:</strong> {selectedUser.status === 0 ? 'Blocked' : 'Active'}</p>
             </Box>
           ) : (
@@ -261,14 +257,7 @@ const UsersManagement: React.FC = () => {
             onChange={handleInputChange}
             fullWidth
           />
-          <TextField
-            margin="dense"
-            label="Location"
-            name="location"
-            value={currentUser.location}
-            onChange={handleInputChange}
-            fullWidth
-          />
+         
           <TextField
             margin="dense"
             label="Password"

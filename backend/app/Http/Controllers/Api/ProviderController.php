@@ -11,7 +11,10 @@ use App\Models\Booking;
 use App\Models\Service;
 use App\Models\Rating;
 use App\Models\Category;
-use App\Models\ProviderService;
+    use App\Models\ProviderService;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 
 class ProviderController extends Controller
 {
@@ -29,20 +32,33 @@ class ProviderController extends Controller
 
 // ADMIN ADD NEW PROVIDER
  public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:providers,email',
-            'service' => 'required|string|max:255',
-            'location' => 'nullable|string|max:255',
-            'status'=>'required|string|max:10',
-            'availability' =>'required|string|max:255'
-        ]);
+{
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|email|unique:user,email',
 
-        $provider = Provider::create($validated);
+        'password' => 'required|string|min:8',
+        'phone' => 'nullable|string|max:20',
+        //'location' => 'nullable|string|max:255',
+    ]);
 
-        return response()->json($provider, 201);
-    }
+    // 1. Create in users table (auth data)
+    $user = User::create([
+        'role' => 'user',
+        'password' => Hash::make($request->password),
+    ]);
+
+    
+    Provider::create([
+        'user_id' => $user->id,
+        'name' => $request->name,
+        'email' => $request->email,
+        'phone' => $request->phone,
+        //'location' => $request->location,
+    ]);
+
+    return response()->json(['message' => 'Provider created successfully']);
+}
 
     
     public function show($id)
@@ -60,30 +76,29 @@ class ProviderController extends Controller
 
     // Update provider
     public function update(Request $request, $id)
-    {
-        $provider = Provider::find($id);
-        if (!$provider) {
-            return response()->json(['message' => 'Provider not found'], 404);
-        }
-
-        $validated = $request->validate([
-            'name' => 'sometimes|required|string|max:255',
-            'email' => [
-                'sometimes',
-                'required',
-                'email',
-                Rule::unique('providers')->ignore($provider->id),
-            ],
-            'service' => 'sometimes|required|string|max:255',
-            'location' => 'nullable|string|max:255',
-            'status' => 'nullable|in:pending,rejected,approved,blocked',
-            'availability' => 'required|string|max:255',
-        ]);
-
-        $provider->update($validated);
+{
+    $request->validate([
+        'name' => 'sometimes|required|string|max:255',
+        'email' => 'sometimes|required|email|unique:user,email,' . $id,
+        'password' => 'nullable|string|min:8',
+        'phone' => 'nullable|string|max:20',
        
-        return response()->json($provider);
+    ]);
+
+    $provider = Provider::findOrFail($id);
+
+    // Only update password if provided
+    if ($request->filled('password')) {
+        $user = User::find($provider->user_id);
+        $user->password = bcrypt($request->password);
+        $user->save();
     }
+
+    // Update basic info
+    $provider->update($request->only(['name', 'email', 'phone']));
+
+    return response()->json(['message' => 'Provider updated successfully']);
+}
 
    
     public function destroy($id)
@@ -136,34 +151,35 @@ class ProviderController extends Controller
         return response()->json(['message' => 'Provider status updated']);
     }
 
-    public function getProfile(Request $request)
-    {
-        try {
-            $user = $request->user();
+   public function getProfile(Request $request)
+{
+    try {
+        $user = $request->user();
 
-            if (!$user) {
-                return response()->json(['error' => 'User not authenticated'], 401);
-            }
-
-            // Fetch provider by email (if email is unique in providers table)
-            $provider = Provider::with(['category'])
-                ->where('email', $user->email)
-                ->first();
-
-            if (!$provider) {
-                return response()->json(['error' => 'Provider profile not found for this user.'], 404);
-            }
-
-            // Optionally, attach user info for frontend mapping
-            $provider->user = $user;
-
-            return response()->json($provider);
-
-        } catch (\Exception $e) {
-            Log::error('Failed to fetch provider profile: ' . $e->getMessage());
-            return response()->json(['error' => 'Server error while fetching profile.'], 500);
+        if (!$user) {
+            return response()->json(['error' => 'User not authenticated'], 401);
         }
+
+        // Fetch provider by email (if email is unique in providers table)
+        $provider = Provider::with(['category'])
+            ->where('email', $user->email)
+            ->first();
+
+        if (!$provider) {
+            return response()->json(['error' => 'Provider profile not found for this user.'], 404);
+        }
+
+        // Optionally, attach user info for frontend mapping
+        $provider->user = $user;
+
+        return response()->json($provider);
+
+    } catch (\Exception $e) {
+        Log::error('Failed to fetch provider profile: ' . $e->getMessage());
+        return response()->json(['error' => 'Server error while fetching profile.'], 500);
     }
+}
+
 
 public function getProviderBookings(Request $request)
 {
@@ -181,13 +197,14 @@ public function getProviderBookings(Request $request)
 
     $providerServiceIds = ProviderService::where('provider_id', $provider->id)->pluck('id');
 
-    $bookings = Booking::with('user')  
+    $bookings = Booking::with('generalUser.basicUser')
         ->whereIn('provider_service_id', $providerServiceIds)
         ->get()
         ->map(function ($booking) {
             return [
                 'id' => $booking->id,
-                'customer' => $booking->user ? $booking->user->name : null,
+                'customer' => optional(optional($booking->generalUser)->basicUser)->name ?? 'Unknown',
+
                 'date' => $booking->booking_date,
                 'status' => $booking->status,
                 'address' => $booking->address,
@@ -198,6 +215,49 @@ public function getProviderBookings(Request $request)
     return response()->json($bookings);
 }
 
+
+public function updateProfile(Request $request)
+{
+    $provider = auth()->user()->provider;
+
+
+    $request->validate([
+       'name' => 'required|string|max:255',
+        'email' => 'nullable|email',
+        'phone' => 'nullable|string|max:20',
+        'price' => 'nullable|numeric',
+        'bio' => 'nullable|string',
+        'instagram' => 'nullable|string|max:255',
+        'facebook' => 'nullable|string|max:255',
+        'website' => 'nullable|string|max:255',
+        'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+    ]);
+
+    if ($request->hasFile('profile_photo')) {
+        $path = $request->file('profile_photo')->store('profile_photos', 'public');
+        $provider->profile_photo = $path; 
+    }
+
+    // Save other fields
+    $provider->name = $request->name;
+    $provider->email = $request->email;
+    $provider->phone = $request->phone;
+    $provider->price = $request->price;
+    $provider->bio = $request->bio;
+    $provider->instagram = $request->instagram;
+    $provider->facebook = $request->facebook;
+    $provider->website = $request->website;
+   // $provider->profile_photo = $provider->profile_photo ? asset('storage/' . $provider->profile_photo) : null;
+
+    $provider->save();
+
+    return response()->json([
+        'message' => 'Profile updated successfully',
+        'profile_photo' => $provider->profile_photo 
+            ? asset('storage/' . $provider->profile_photo) 
+            : null,
+    ]);
+}
  
 
 }

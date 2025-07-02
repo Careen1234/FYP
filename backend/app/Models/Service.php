@@ -22,7 +22,7 @@ class Service extends Model
 }
 public function providers()
 {
-    return $this->belongsToMany(Provider::class) ;
+    return $this->belongsToMany(Provider::class, 'provider_services', 'service_id', 'provider_id');
 }
 
 public function providerServices()

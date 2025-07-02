@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Typography,
@@ -9,8 +9,10 @@ import {
   Badge,
   LinearProgress,
   Divider,
-  Chip,
-  Avatar
+  Avatar,
+  Grid,
+  Skeleton,
+  Chip
 } from '@mui/material';
 import {
   Dashboard as DashboardIcon,
@@ -20,132 +22,192 @@ import {
   Schedule as ScheduleIcon,
   Star as RatingIcon,
   Assignment as RequestsIcon,
-  TrendingUp as TrendIcon
+  TrendingUp as TrendIcon,
+  People as PeopleIcon,
+  NotificationsActive as AlertIcon
 } from '@mui/icons-material';
-
-const recentActivity = [
-  { id: 1, customer: 'Alex Johnson', service: 'Pipe Repair', time: 'Today, 10:30 AM' },
-  { id: 2, customer: 'Sarah Miller', service: 'Faucet Installation', time: 'Yesterday' }
-];
+import axios from 'axios';
 
 const ProviderDashboard = () => {
   const [isOnline, setIsOnline] = useState(true);
+  const [dashboardData, setDashboardData] = useState<{
+    monthly_earnings: number;
+    rating: number;
+    pending_requests: number;
+    upcoming_jobs: number;
+    completion_rate: number;
+  } | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [recentActivity, setRecentActivity] = useState<any[]>([]);
 
-  const stats = [
-    {
-      icon: <EarningsIcon sx={{ fontSize: 32, color: '#147c3c' }} />,
-      title: "Monthly Earnings",
-      value: `Tsh ${6500000..toLocaleString()}`,
-      subtext: "This month"
-    },
-    {
-      icon: <RatingIcon sx={{ fontSize: 32, color: '#147c3c' }} />,
-      title: "Your Rating",
-      value: 4.8,
-      subtext: "Based on customer reviews"
-    },
-    {
-      icon: <RequestsIcon sx={{ fontSize: 32, color: '#147c3c' }} />,
-      title: "Pending Requests",
-      value: 2,
-      subtext: "Action needed"
-    },
-    {
-      icon: <ScheduleIcon sx={{ fontSize: 32, color: '#147c3c' }} />,
-      title: "Upcoming Jobs",
-      value: 3,
-      subtext: "Scheduled this week"
-    },
-    {
-      icon: <TrendIcon sx={{ fontSize: 32, color: '#147c3c' }} />,
-      title: "Completion Rate",
-      value: `85%`,
-      subtext: "All time",
-      progress: 85
-    }
-  ];
+  useEffect(() => {
+    // Fetch dashboard data
+    axios.get('/api/provider/dashboard')
+      .then(res => {
+        setDashboardData(res.data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Failed to fetch dashboard data', err);
+        setLoading(false);
+      });
+    
+    // Fetch recent activity
+    axios.get('/api/provider/recent-activity')
+      .then(res => {
+        setRecentActivity(res.data);
+      })
+      .catch(err => {
+        console.error('Failed to fetch recent activity', err);
+      });
+  }, []);
 
   const toggleAvailability = () => {
     setIsOnline(!isOnline);
+    // Send availability status to backend
+    axios.post('/api/provider/availability', { is_online: !isOnline });
   };
 
   const StatCard = ({ icon, title, value, subtext, progress }: {
     icon: React.ReactElement;
-    title: any;
-    value: any;
-    subtext: any;
+    title: string;
+    value: string | number;
+    subtext?: string;
     progress?: number;
   }) => (
     <Paper sx={{
-      p: 3,
       height: '100%',
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'space-between',
-      borderRadius: 4,
-      background: 'linear-gradient(135deg, #fff 60%, #eafaf1 100%)',
-      boxShadow: '0 6px 24px rgba(20,124,60,0.08)',
-      transition: 'transform 0.3s, box-shadow 0.3s',
+      p: 3,
+      borderRadius: 3,
+      backgroundColor: '#fff',
+      boxShadow: '0 8px 20px rgba(0, 0, 0, 0.03)',
+      border: '1px solid #e2e8f0',
+      transition: 'all 0.3s ease',
       '&:hover': {
-        transform: 'translateY(-8px) scale(1.03)',
-        boxShadow: '0 12px 32px rgba(20,124,60,0.18)'
+        transform: 'translateY(-5px)',
+        boxShadow: '0 12px 30px rgba(0, 0, 0, 0.08)',
+        borderColor: '#147c3c'
       },
-      border: '1.5px solid #e0f2e9',
     }}>
-      <Box>
-        <Stack direction="row" alignItems="center" spacing={2} mb={2}>
-          <Box sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: 56,
-            height: 56,
-            borderRadius: '50%',
-            background: '#eafaf1',
-            boxShadow: '0 2px 8px rgba(20,124,60,0.07)'
-          }}>
-            {icon}
-          </Box>
-          <Box sx={{ flex: 1 }}>
-            <Typography variant="subtitle2" color="#147c3c" fontWeight={600}>{title}</Typography>
-            <Typography variant="h4" fontWeight={800} color="#147c3c">{value}</Typography>
-          </Box>
-        </Stack>
-      </Box>
+      <Stack direction="row" alignItems="center" spacing={2} mb={2}>
+        <Box sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: 56,
+          height: 56,
+          borderRadius: '14px',
+          background: '#f0fdf4',
+          color: '#147c3c'
+        }}>
+          {icon}
+        </Box>
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Typography variant="subtitle2" color="#64748b" fontWeight={500} noWrap>
+            {title}
+          </Typography>
+          {loading ? (
+            <Skeleton variant="text" width="60%" height={40} />
+          ) : (
+            <Typography
+              variant="h5"
+              fontWeight={700}
+              color="#0d5a2c"
+              sx={{ fontSize: 24 }}
+            >
+              {value}
+            </Typography>
+          )}
+        </Box>
+      </Stack>
 
       {subtext && (
-        <Typography variant="caption" color="#147c3c" fontWeight={500}>{subtext}</Typography>
+        <Typography variant="body2" color="#94a3b8" sx={{ mt: 'auto' }}>
+          {subtext}
+        </Typography>
       )}
 
       {progress !== undefined && (
         <Box mt={2}>
-          <LinearProgress
-            variant="determinate"
-            value={progress}
-            sx={{
-              height: 7,
-              borderRadius: 3,
-              backgroundColor: '#eafaf1',
-              '& .MuiLinearProgress-bar': {
-                borderRadius: 3,
-                backgroundColor: '#147c3c'
-              }
-            }}
-          />
+          {loading ? (
+            <Skeleton variant="rectangular" height={8} sx={{ borderRadius: 4 }} />
+          ) : (
+            <LinearProgress
+              variant="determinate"
+              value={progress}
+              sx={{
+                height: 8,
+                borderRadius: 4,
+                backgroundColor: '#f1f5f9',
+                '& .MuiLinearProgress-bar': {
+                  borderRadius: 4,
+                  backgroundColor: '#147c3c'
+                }
+              }}
+            />
+          )}
         </Box>
       )}
     </Paper>
   );
 
+  const stats = dashboardData ? [
+    {
+      icon: <EarningsIcon sx={{ fontSize: 28, color: '#147c3c' }} />,
+      title: "Monthly Earnings",
+      value: `Tsh ${Number(dashboardData?.monthly_earnings || 0).toLocaleString()}`,
+      subtext: "This month"
+    },
+    {
+      icon: <RatingIcon sx={{ fontSize: 28, color: '#147c3c' }} />,
+      title: "Your Rating",
+      value: dashboardData.rating,
+      subtext: "Based on customer reviews"
+    },
+    {
+      icon: <RequestsIcon sx={{ fontSize: 28, color: '#147c3c' }} />,
+      title: "Pending Requests",
+      value: dashboardData.pending_requests,
+      subtext: "Action needed"
+    },
+    {
+      icon: <ScheduleIcon sx={{ fontSize: 28, color: '#147c3c' }} />,
+      title: "Upcoming Jobs",
+      value: dashboardData.upcoming_jobs,
+      subtext: "Scheduled this week"
+    },
+    {
+      icon: <TrendIcon sx={{ fontSize: 28, color: '#147c3c' }} />,
+      title: "Completion Rate",
+      value: `${dashboardData.completion_rate}%`,
+      subtext: "All time",
+      progress: dashboardData.completion_rate
+    }
+  ] : [];
+
+  const getStatusColor = (status: string) => {
+    switch(status) {
+      case 'pending': return 'warning';
+      case 'completed': return 'success';
+      case 'in-progress': return 'info';
+      default: return 'default';
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    switch(status) {
+      case 'pending': return 'Pending';
+      case 'completed': return 'Completed';
+      case 'in-progress': return 'In Progress';
+      default: return status;
+    }
+  };
+
   return (
-    <Box sx={{
-      p: { xs: 2, md: 4 },
-      background: 'linear-gradient(120deg, #eafaf1 0%, #fff 100%)',
-      minHeight: '100vh',
-      width: '100vw',
-      position: 'relative',
-      overflowX: 'hidden',
-    }}>
+    <Box sx={{ width: '100%' }}>
       {/* Header */}
       <Stack
         direction={{ xs: 'column', sm: 'row' }}
@@ -157,19 +219,23 @@ const ProviderDashboard = () => {
         <Stack direction="row" alignItems="center" spacing={2}>
           <Box sx={{
             background: '#147c3c',
-            borderRadius: '50%',
+            borderRadius: '14px',
             width: 48,
             height: 48,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 2px 8px rgba(20,124,60,0.13)'
           }}>
-            <DashboardIcon sx={{ fontSize: 32, color: '#fff' }} />
+            <DashboardIcon sx={{ fontSize: 28, color: '#fff' }} />
           </Box>
-          <Typography variant="h5" fontWeight={800} color="#147c3c">
-            Dashboard Overview
-          </Typography>
+          <Box>
+            <Typography variant="h5" fontWeight={700} color="#0d5a2c">
+              Dashboard Overview
+            </Typography>
+            <Typography variant="body2" color="#64748b">
+              Track your performance and recent activity
+            </Typography>
+          </Box>
         </Stack>
 
         <FormControlLabel
@@ -183,9 +249,6 @@ const ProviderDashboard = () => {
                 },
                 '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
                   backgroundColor: '#147c3c',
-                },
-                '& .MuiSwitch-track': {
-                  backgroundColor: '#eafaf1',
                 },
               }}
               size="medium"
@@ -201,11 +264,11 @@ const ProviderDashboard = () => {
                   top: 10,
                   px: 1.5,
                   py: 0.5,
-                  borderRadius: 2,
-                  background: isOnline ? '#147c3c' : '#d32f2f',
+                  borderRadius: 12,
+                  background: isOnline ? '#147c3c' : '#ef4444',
                   color: '#fff',
-                  fontWeight: 700,
-                  fontSize: 13
+                  fontWeight: 600,
+                  fontSize: 12
                 }
               }}
             />
@@ -214,9 +277,9 @@ const ProviderDashboard = () => {
           sx={{
             ml: 0,
             '& .MuiTypography-root': {
-              fontWeight: 700,
-              color: isOnline ? '#147c3c' : '#d32f2f',
-              fontSize: 16
+              fontWeight: 600,
+              color: isOnline ? '#147c3c' : '#ef4444',
+              fontSize: 14
             }
           }}
         />
@@ -224,74 +287,215 @@ const ProviderDashboard = () => {
 
       {/* Status Indicator */}
       <Paper sx={{
-        p: 2.5,
+        p: 3,
         mb: 4,
-        bgcolor: isOnline ? '#eafaf1' : '#fddede',
-        borderLeft: `5px solid ${isOnline ? '#147c3c' : '#d32f2f'}`,
+        backgroundColor: isOnline ? '#f0fdf4' : '#fef2f2',
+        borderLeft: `4px solid ${isOnline ? '#147c3c' : '#ef4444'}`,
         borderRadius: 3,
-        boxShadow: '0 2px 12px rgba(20,124,60,0.07)'
+        display: 'flex',
+        alignItems: 'center',
+        gap: 2
       }}>
-        <Stack direction="row" alignItems="center" spacing={2}>
-          {isOnline ? (
-            <OnlineIcon sx={{ color: '#147c3c', fontSize: 32 }} />
-          ) : (
-            <OfflineIcon sx={{ color: '#d32f2f', fontSize: 32 }} />
-          )}
-          <Typography variant="body1" fontWeight={700} color={isOnline ? '#147c3c' : '#d32f2f'}>
-            You are currently <span style={{
-              color: isOnline ? '#147c3c' : '#d32f2f',
-              fontWeight: 800
-            }}>
-              {isOnline ? 'AVAILABLE' : 'NOT AVAILABLE'}
-            </span> for new service requests
+        {isOnline ? (
+          <OnlineIcon sx={{ color: '#147c3c', fontSize: 32 }} />
+        ) : (
+          <OfflineIcon sx={{ color: '#ef4444', fontSize: 32 }} />
+        )}
+        <Box>
+          <Typography variant="body1" fontWeight={600} color={isOnline ? '#0d5a2c' : '#b91c1c'}>
+            Service Availability
           </Typography>
-        </Stack>
+          <Typography variant="body2" color={isOnline ? '#64748b' : '#ef4444'}>
+            You are currently <span style={{ fontWeight: 700 }}>{isOnline ? 'available' : 'not available'}</span> for new service requests
+          </Typography>
+        </Box>
       </Paper>
 
       {/* Stats Cards */}
-      <Box
-        sx={{
-          display: 'grid',
-          gridTemplateColumns: {
-            xs: '1fr',
-            sm: '1fr 1fr',
-            md: 'repeat(3, 1fr)',
-            lg: 'repeat(5, 1fr)'
-          },
-          gap: 3,
-          mb: 5,
-          alignItems: 'stretch',
-        }}
-      >
+      <Grid container spacing={3} mb={4}>
         {stats.map((stat, idx) => (
-          <Box key={idx} sx={{ minWidth: 220, display: 'flex' }}>
+          <Grid item xs={12} sm={6} md={4} lg={3} xl={2.4} key={idx}>
             <StatCard {...stat} />
-          </Box>
+          </Grid>
         ))}
-      </Box>
+      </Grid>
 
-      {/* Recent Activity */}
-      <Paper sx={{ p: 3.5, borderRadius: 4, boxShadow: '0 4px 18px rgba(20,124,60,0.08)', background: '#fff' }}>
-        <Typography variant="h6" fontWeight={800} mb={2} color="#147c3c">
-          Recent Activity
-        </Typography>
-        <Divider sx={{ mb: 2, borderColor: '#e0f2e9' }} />
-        <Stack spacing={2}>
-          {recentActivity.map((activity) => (
-            <Box key={activity.id} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Avatar sx={{ bgcolor: '#147c3c', width: 48, height: 48, fontWeight: 700, fontSize: 22, boxShadow: '0 2px 8px rgba(20,124,60,0.13)' }}>
-                {activity.customer.charAt(0)}
-              </Avatar>
+      <Grid container spacing={3}>
+        {/* Recent Activity */}
+        <Grid item xs={12} md={7}>
+          <Paper sx={{ p: 3, borderRadius: 3, height: '100%', boxShadow: '0 8px 20px rgba(0, 0, 0, 0.03)', border: '1px solid #e2e8f0' }}>
+            <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
+              <Typography variant="h6" fontWeight={700} color="#0d5a2c">
+                Recent Activity
+              </Typography>
+              {recentActivity.length > 0 && (
+                <Chip 
+                  label={`${recentActivity.length} new`} 
+                  size="small" 
+                  sx={{ backgroundColor: '#f0fdf4', color: '#147c3c', fontWeight: 500 }} 
+                />
+              )}
+            </Stack>
+            <Divider sx={{ mb: 3, borderColor: '#e2e8f0' }} />
+            
+            {loading ? (
               <Box>
-                <Typography fontWeight={700} color="#147c3c">{activity.customer}</Typography>
-                <Typography variant="body2" color="text.secondary" fontWeight={500}>
-                  {activity.service} &mdash; {activity.time}
+                {[0, 1, 2].map((i) => (
+                  <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+                    <Skeleton variant="circular" width={48} height={48} />
+                    <Box sx={{ flex: 1 }}>
+                      <Skeleton variant="text" width="60%" height={24} />
+                      <Skeleton variant="text" width="40%" height={20} />
+                      <Skeleton variant="text" width="30%" height={16} />
+                    </Box>
+                  </Box>
+                ))}
+              </Box>
+            ) : recentActivity.length > 0 ? (
+              <Stack spacing={3}>
+                {recentActivity.map((activity) => (
+                  <Box key={activity.id} sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+                    <Avatar sx={{ 
+                      bgcolor: '#f0fdf4', 
+                      width: 48, 
+                      height: 48, 
+                      fontWeight: 600, 
+                      fontSize: 18,
+                      color: '#147c3c',
+                      border: '1px solid #e2e8f0'
+                    }}>
+                      {activity.customer?.charAt(0) || 'C'}
+                    </Avatar>
+                    <Box sx={{ flex: 1 }}>
+                      <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+                        <Typography fontWeight={600} color="#0d5a2c">
+                          {activity.customer || 'Customer'}
+                        </Typography>
+                        <Chip 
+                          label={getStatusText(activity.status)} 
+                          size="small" 
+                          color={getStatusColor(activity.status)} 
+                          sx={{ fontWeight: 500 }} 
+                        />
+                      </Stack>
+                      <Typography variant="body2" fontWeight={500} color="#334155" mt={0.5}>
+                        {activity.service || 'Service'}
+                      </Typography>
+                      <Typography variant="body2" color="#94a3b8" mt={1} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <ScheduleIcon sx={{ fontSize: 16 }} />
+                        {activity.time || 'Recently'}
+                      </Typography>
+                    </Box>
+                  </Box>
+                ))}
+              </Stack>
+            ) : (
+              <Box sx={{ textAlign: 'center', py: 4 }}>
+                <Typography variant="body1" color="#64748b">
+                  No recent activity
+                </Typography>
+                <Typography variant="body2" color="#94a3b8" mt={1}>
+                  Your recent service requests will appear here
                 </Typography>
               </Box>
-            </Box>
-          ))}
-        </Stack>
-      </Paper>
+            )}
+          </Paper>
+        </Grid>
+
+        {/* Performance Tips */}
+        <Grid item xs={12} md={5}>
+          <Paper sx={{ 
+            p: 3, 
+            borderRadius: 3, 
+            height: '100%', 
+            background: 'linear-gradient(135deg, #147c3c 0%, #0d5a2c 100%)',
+            color: 'white',
+            boxShadow: '0 10px 25px rgba(20, 124, 60, 0.3)'
+          }}>
+            <Stack direction="row" alignItems="center" gap={1.5} mb={3}>
+              <AlertIcon sx={{ fontSize: 28 }} />
+              <Typography variant="h6" fontWeight={700}>
+                Performance Tips
+              </Typography>
+            </Stack>
+            <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.2)', mb: 3 }} />
+            
+            <Stack spacing={2}>
+              <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+                <Box sx={{
+                  width: 24,
+                  height: 24,
+                  borderRadius: '50%',
+                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                  mt: 0.5
+                }}>
+                  <Typography variant="body2" fontWeight={700}>1</Typography>
+                </Box>
+                <Box>
+                  <Typography variant="subtitle1" fontWeight={600} mb={0.5}>
+                    Respond Quickly
+                  </Typography>
+                  <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                    Providers who respond within 30 minutes get 40% more bookings.
+                  </Typography>
+                </Box>
+              </Box>
+              
+              <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+                <Box sx={{
+                  width: 24,
+                  height: 24,
+                  borderRadius: '50%',
+                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                  mt: 0.5
+                }}>
+                  <Typography variant="body2" fontWeight={700}>2</Typography>
+                </Box>
+                <Box>
+                  <Typography variant="subtitle1" fontWeight={600} mb={0.5}>
+                    Complete Your Profile
+                  </Typography>
+                  <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                    Providers with complete profiles get 50% more customer trust.
+                  </Typography>
+                </Box>
+              </Box>
+              
+              <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+                <Box sx={{
+                  width: 24,
+                  height: 24,
+                  borderRadius: '50%',
+                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                  mt: 0.5
+                }}>
+                  <Typography variant="body2" fontWeight={700}>3</Typography>
+                </Box>
+                <Box>
+                  <Typography variant="subtitle1" fontWeight={600} mb={0.5}>
+                    Request Reviews
+                  </Typography>
+                  <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                    A 5-star rating can increase your bookings by up to 30%.
+                  </Typography>
+                </Box>
+              </Box>
+            </Stack>
+          </Paper>
+        </Grid>
+      </Grid>
     </Box>
   );
 };

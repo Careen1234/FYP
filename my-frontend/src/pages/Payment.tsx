@@ -19,7 +19,8 @@ const PaymentForm = () => {
     setStatus('Processing...');
 
     try {
-      const response = await axios.post('http://localhost:8000/api/pay', form);
+      const token = localStorage.getItem('token');
+      const response = await axios.post('http://localhost:8000/api/clickpesa', form);
       setStatus(`Payment initiated: ${JSON.stringify(response.data)}`);
     } catch (error: any) {
       setStatus('Error: ' + (error.response?.data?.message || 'Something went wrong'));

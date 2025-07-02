@@ -13,7 +13,6 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import PeopleIcon from '@mui/icons-material/People';
 import BuildIcon from '@mui/icons-material/Build';
 import BookOnlineIcon from '@mui/icons-material/BookOnline';
-import PaymentIcon from '@mui/icons-material/Payment';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import DescriptionIcon from '@mui/icons-material/Description';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -26,9 +25,8 @@ const menuItems = [
   { text: 'Provider Management', icon: <BuildIcon />, path: '/admin/providers' },
   { text: 'Service Management', icon: <BookOnlineIcon />, path: '/admin/services' },
   { text: 'Bookings Management', icon: <BookOnlineIcon />, path: '/admin/bookings' },
-  { text: 'Payments Management', icon: <PaymentIcon />, path: '/admin/payments' },
   { text: 'Reports & Analytics', icon: <BarChartIcon />, path: '/admin/reports' },
-  { text: 'CMS Pages', icon: <DescriptionIcon />, path: '/admin/cms' },
+ 
 ];
 
 const Sidebar: React.FC = () => {

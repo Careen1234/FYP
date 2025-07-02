@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { 
+import {
   Box,
   Typography,
   Paper,
@@ -9,20 +9,26 @@ import {
   Avatar,
   Chip,
   CircularProgress,
-  Alert
+  Alert,
+  Grid,
+  Skeleton,
+  useTheme
 } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
 import {
   Reviews as ReviewsIcon,
   Star as StarIcon,
   Comment as CommentIcon,
-  DateRange as DateIcon
+  DateRange as DateIcon,
+  EmojiEvents as TopRatedIcon,
+  SentimentSatisfiedAlt as PositiveIcon,
+  RateReview as RecentIcon
 } from '@mui/icons-material';
 import axios from 'axios';
 
 interface Review {
   id: number;
   customer: string;
+  provider: string;
   rating: number;
   date: string;
   comment: string;
@@ -35,7 +41,7 @@ interface ApiReview {
   provider_name: string;
   service_name: string;
   rating: number;
-  reviews: string;
+  review: string;
   date: string;
 }
 
@@ -46,7 +52,7 @@ interface ApiResponse {
 const ProviderReviews: React.FC = () => {
   const theme = useTheme();
   const greenColor = '#147c3c';
-  const greenHover = '#126e35';
+  const lightGreen = '#e0f2e9';
 
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
@@ -63,15 +69,15 @@ const ProviderReviews: React.FC = () => {
         if (response.data && Array.isArray(response.data.data)) {
           const transformedData = response.data.data.map(r => ({
             id: r.id,
-            customer: r.user_name,
-            rating: r.rating,
-            date: r.date,
-            comment: r.reviews,
-            service: r.service_name,
+            customer: r.user_name || 'Unknown',
+            provider: r.provider_name || 'Unknown',
+            rating: r.rating ?? 0,
+            date: r.date || '',
+            comment: r.review || '',
+            service: r.service_name || 'Unspecified',
           }));
           setReviews(transformedData);
         } else {
-          console.warn("API response was not in the expected format:", response);
           setReviews([]);
           setError('Received an unexpected format from the server.');
         }
@@ -85,121 +91,278 @@ const ProviderReviews: React.FC = () => {
 
     fetchReviews();
   }, []);
-  
-  const averageRating = reviews.length > 0 ? reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length : 0;
 
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
+  const averageRating =
+    reviews.length > 0
+      ? reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length
+      : 0;
+
+  const fiveStarCount = reviews.filter(r => r.rating === 5).length;
+  const fiveStarPercent = reviews.length > 0 
+    ? Math.round((fiveStarCount / reviews.length) * 100) 
+    : 0;
 
   return (
-    <Box sx={{ 
-      p: { xs: 2, md: 3 }, 
-      backgroundColor: '#f5f5f5', // light gray
-      minHeight: '100vh' 
-    }}>
+    <Box sx={{ p: { xs: 2, md: 3 }, backgroundColor: '#f8fafc', minHeight: '100vh' }}>
       {/* Header */}
-      <Stack direction="row" alignItems="center" spacing={2} mb={3}>
-        <ReviewsIcon sx={{ fontSize: 32, color: greenColor }} />
-        <Typography variant="h5" fontWeight={600}>
-          Customer Reviews
-        </Typography>
+      <Stack direction="row" alignItems="center" spacing={1.5} mb={4}>
+        <Box sx={{
+          backgroundColor: 'rgba(20, 124, 60, 0.1)',
+          width: 48,
+          height: 48,
+          borderRadius: '14px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <ReviewsIcon sx={{ fontSize: 28, color: greenColor }} />
+        </Box>
+        <Box>
+          <Typography variant="h5" fontWeight={700} color="#0d5a2c">
+            Customer Reviews
+          </Typography>
+          <Typography variant="body2" color="#64748b">
+            See what your customers are saying about your services
+          </Typography>
+        </Box>
       </Stack>
 
-      {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
+      {error && (
+        <Paper sx={{ 
+          backgroundColor: '#fef2f2', 
+          p: 2, 
+          mb: 3, 
+          borderRadius: 2,
+          borderLeft: '4px solid #ef4444'
+        }}>
+          <Typography color="error">{error}</Typography>
+        </Paper>
+      )}
 
-      {/* Summary */}
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, mb: 4 }}>
-        <Box sx={{ flex: '1 1 260px', minWidth: 260, maxWidth: 340 }}>
-          <Paper sx={{ p: 3, textAlign: 'center' }}>
-            <Typography variant="subtitle2" color="text.secondary" mb={1}>
+      {/* Summary Cards */}
+      <Grid container spacing={3} mb={4}>
+        {/* Average Rating */}
+        <Grid item xs={12} md={4}>
+          <Paper sx={{ 
+            p: 3, 
+            borderRadius: 3,
+            backgroundColor: '#fff',
+            boxShadow: '0 6px 16px rgba(0, 0, 0, 0.05)',
+            height: '100%',
+            textAlign: 'center'
+          }}>
+            <Box sx={{
+              width: 56,
+              height: 56,
+              borderRadius: '50%',
+              backgroundColor: lightGreen,
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              mb: 2
+            }}>
+              <StarIcon sx={{ color: greenColor, fontSize: 28 }} />
+            </Box>
+            <Typography variant="subtitle1" color="#64748b" mb={1}>
               Average Rating
             </Typography>
-            <Stack direction="row" justifyContent="center" alignItems="center" spacing={1}>
-              <Rating
-                value={averageRating}
-                precision={0.1}
-                readOnly
-                sx={{ color: theme.palette.warning.main }}
-              />
-              <Typography variant="h4" fontWeight={600}>
-                {averageRating.toFixed(1)}
-              </Typography>
-            </Stack>
-            <Typography variant="caption" color="text.secondary">
-              {reviews.length > 0 ? `from ${reviews.length} reviews` : 'No reviews yet'}
-            </Typography>
+            {loading ? (
+              <Skeleton variant="text" width="40%" height={50} sx={{ mx: 'auto' }} />
+            ) : (
+              <>
+                <Rating
+                  value={averageRating}
+                  precision={0.1}
+                  readOnly
+                  sx={{ 
+                    color: theme.palette.warning.main,
+                    mb: 1.5
+                  }}
+                />
+                <Typography variant="h3" fontWeight={700} color="#0d5a2c">
+                  {averageRating.toFixed(1)}
+                </Typography>
+                <Typography variant="body2" color="#64748b">
+                  {reviews.length > 0 ? `from ${reviews.length} reviews` : 'No reviews yet'}
+                </Typography>
+              </>
+            )}
           </Paper>
-        </Box>
+        </Grid>
 
-        <Box sx={{ flex: '1 1 260px', minWidth: 260, maxWidth: 340 }}>
-          <Paper sx={{ p: 3, textAlign: 'center' }}>
-            <Typography variant="subtitle2" color="text.secondary" mb={1}>
+        {/* 5-Star Reviews */}
+        <Grid item xs={12} md={4}>
+          <Paper sx={{ 
+            p: 3, 
+            borderRadius: 3,
+            backgroundColor: '#fff',
+            boxShadow: '0 6px 16px rgba(0, 0, 0, 0.05)',
+            height: '100%',
+            textAlign: 'center'
+          }}>
+            <Box sx={{
+              width: 56,
+              height: 56,
+              borderRadius: '50%',
+              backgroundColor: lightGreen,
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              mb: 2
+            }}>
+              <TopRatedIcon sx={{ color: greenColor, fontSize: 28 }} />
+            </Box>
+            <Typography variant="subtitle1" color="#64748b" mb={1}>
               5-Star Reviews
             </Typography>
-            <Typography variant="h4" fontWeight={600} sx={{ color: greenColor }}>
-              {reviews.filter(r => r.rating === 5).length}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              {reviews.length > 0 ? `${Math.round((reviews.filter(r => r.rating === 5).length / reviews.length) * 100)}% of total` : 'N/A'}
-            </Typography>
+            {loading ? (
+              <Skeleton variant="text" width="40%" height={50} sx={{ mx: 'auto' }} />
+            ) : (
+              <>
+                <Typography variant="h3" fontWeight={700} color="#0d5a2c">
+                  {fiveStarCount}
+                </Typography>
+                <Typography variant="body2" color="#64748b">
+                  {reviews.length > 0 ? `${fiveStarPercent}% of total` : 'N/A'}
+                </Typography>
+              </>
+            )}
           </Paper>
-        </Box>
+        </Grid>
 
-        <Box sx={{ flex: '1 1 260px', minWidth: 260, maxWidth: 340 }}>
-          <Paper sx={{ p: 3, textAlign: 'center' }}>
-            <Typography variant="subtitle2" color="text.secondary" mb={1}>
+        {/* Recent Feedback */}
+        <Grid item xs={12} md={4}>
+          <Paper sx={{ 
+            p: 3, 
+            borderRadius: 3,
+            backgroundColor: '#fff',
+            boxShadow: '0 6px 16px rgba(0, 0, 0, 0.05)',
+            height: '100%',
+            textAlign: 'center'
+          }}>
+            <Box sx={{
+              width: 56,
+              height: 56,
+              borderRadius: '50%',
+              backgroundColor: lightGreen,
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              mb: 2
+            }}>
+              <RecentIcon sx={{ color: greenColor, fontSize: 28 }} />
+            </Box>
+            <Typography variant="subtitle1" color="#64748b" mb={1}>
               Recent Feedback
             </Typography>
-            {reviews.length > 0 ? (
+            {loading ? (
+              <Skeleton variant="text" width="70%" height={50} sx={{ mx: 'auto' }} />
+            ) : reviews.length > 0 ? (
               <>
-                <Typography variant="h4" fontWeight={600}>
+                <Typography variant="h3" fontWeight={700} color="#0d5a2c">
                   {reviews[0].rating}/5
                 </Typography>
-                <Typography variant="caption" color="text.secondary" noWrap>
-                  "{reviews[0].comment.substring(0, 30)}..."
+                <Typography variant="body2" color="#64748b" mt={1} noWrap>
+                  {reviews[0].comment
+                    ? `"${reviews[0].comment.substring(0, 30)}..."`
+                    : 'No recent comment'}
                 </Typography>
               </>
             ) : (
-              <Typography variant="body1" color="text.secondary">No recent feedback</Typography>
+              <Typography variant="body2" color="#64748b">
+                No recent feedback
+              </Typography>
             )}
           </Paper>
-        </Box>
-      </Box>
+        </Grid>
+      </Grid>
 
       {/* Review List */}
-      <Paper sx={{ p: { xs: 2, md: 3 }, mb: 3 }}>
-        <Typography variant="h6" fontWeight={600} mb={2}>
-          All Reviews
-        </Typography>
-        <Divider sx={{ mb: 3 }} />
+      <Paper sx={{ 
+        p: { xs: 2, md: 3 }, 
+        borderRadius: 3,
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.03)',
+        backgroundColor: '#fff'
+      }}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
+          <Typography variant="h6" fontWeight={700} color="#0d5a2c">
+            All Reviews
+          </Typography>
+          <Chip 
+            label={`${reviews.length} total`} 
+            size="small" 
+            sx={{ 
+              backgroundColor: lightGreen,
+              color: greenColor,
+              fontWeight: 600
+            }} 
+          />
+        </Stack>
+        <Divider sx={{ mb: 3, borderColor: '#e2e8f0' }} />
 
-        <Stack spacing={3}>
-          {reviews.length > 0 ? (
-            reviews.map((review) => (
-              <Box key={review.id} sx={{ p: 2, borderRadius: 1 }}>
-                <Stack direction="row" spacing={2} alignItems="flex-start">
-                  <Avatar sx={{ bgcolor: greenColor }}>
-                    {review.customer.charAt(0)}
-                  </Avatar>
-
-                  <Box sx={{ flexGrow: 1 }}>
-                    <Stack direction="row" justifyContent="space-between" flexWrap="wrap">
-                      <Typography fontWeight={600}>{review.customer}</Typography>
+        {loading ? (
+          <Box>
+            {[0, 1, 2].map((i) => (
+              <Paper key={i} sx={{ p: 3, mb: 3, borderRadius: 3, backgroundColor: '#f8fafc' }}>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm="auto">
+                    <Skeleton variant="circular" width={60} height={60} />
+                  </Grid>
+                  <Grid item xs={12} sm>
+                    <Box mb={1.5}>
+                      <Skeleton variant="text" width="40%" height={30} />
+                    </Box>
+                    <Box mb={1.5}>
+                      <Skeleton variant="text" width="60%" height={25} />
+                    </Box>
+                    <Skeleton variant="rectangular" width="100%" height={80} sx={{ borderRadius: 2 }} />
+                  </Grid>
+                </Grid>
+              </Paper>
+            ))}
+          </Box>
+        ) : reviews.length > 0 ? (
+          <Stack spacing={3}>
+            {reviews.map((review) => (
+              <Paper key={review.id} sx={{ 
+                p: 3, 
+                borderRadius: 3,
+                backgroundColor: '#f8fafc',
+                border: '1px solid #e2e8f0'
+              }}>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm="auto">
+                    <Avatar 
+                      sx={{ 
+                        width: 60, 
+                        height: 60, 
+                        bgcolor: greenColor,
+                        fontSize: 24
+                      }}
+                    >
+                      {review.customer.charAt(0)}
+                    </Avatar>
+                  </Grid>
+                  
+                  <Grid item xs={12} sm>
+                    <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" mb={1.5}>
+                      <Typography fontWeight={700} color="#0d5a2c">
+                        {review.customer}
+                      </Typography>
                       <Chip
                         icon={<DateIcon fontSize="small" />}
                         label={new Date(review.date).toLocaleDateString()}
                         size="small"
                         variant="outlined"
-                        sx={{ color: greenColor, borderColor: greenColor }}
+                        sx={{ 
+                          color: greenColor, 
+                          borderColor: greenColor,
+                          mt: { xs: 1, sm: 0 }
+                        }}
                       />
                     </Stack>
-
-                    <Stack direction="row" alignItems="center" spacing={1} my={1}>
+                    
+                    <Stack direction="row" alignItems="center" spacing={1} mb={1.5}>
                       <Rating
                         value={review.rating}
                         readOnly
@@ -214,27 +377,48 @@ const ProviderReviews: React.FC = () => {
                         sx={{
                           color: greenColor,
                           borderColor: greenColor,
-                          '&:hover': { backgroundColor: greenHover },
+                          backgroundColor: lightGreen,
+                          fontWeight: 500
                         }}
                       />
                     </Stack>
-
-                    <Stack direction="row" spacing={1} alignItems="flex-start">
-                      <CommentIcon color="disabled" fontSize="small" sx={{ mt: 0.5 }} />
-                      <Typography variant="body2" color="text.secondary">
-                        {review.comment}
-                      </Typography>
-                    </Stack>
-                  </Box>
-                </Stack>
-              </Box>
-            ))
-          ) : (
-            <Typography sx={{ textAlign: 'center', p: 4, color: 'text.secondary' }}>
-              You have no reviews yet.
+                    
+                    {review.comment && (
+                      <Paper sx={{ 
+                        p: 2, 
+                        backgroundColor: '#fff', 
+                        borderRadius: 2,
+                        borderLeft: `3px solid ${greenColor}`
+                      }}>
+                        <Stack direction="row" spacing={1} alignItems="flex-start">
+                          <CommentIcon sx={{ color: '#94a3b8', mt: 0.5 }} />
+                          <Typography variant="body1" color="#334155">
+                            {review.comment}
+                          </Typography>
+                        </Stack>
+                      </Paper>
+                    )}
+                  </Grid>
+                </Grid>
+              </Paper>
+            ))}
+          </Stack>
+        ) : (
+          <Box sx={{ 
+            p: 4, 
+            textAlign: 'center', 
+            backgroundColor: '#f8fafc',
+            borderRadius: 3
+          }}>
+            <PositiveIcon sx={{ fontSize: 60, color: '#cbd5e1', mb: 2 }} />
+            <Typography variant="h6" fontWeight={600} color="#64748b" mb={1}>
+              No Reviews Yet
             </Typography>
-          )}
-        </Stack>
+            <Typography variant="body1" color="#94a3b8">
+              Your reviews will appear here once customers rate your services
+            </Typography>
+          </Box>
+        )}
       </Paper>
     </Box>
   );
