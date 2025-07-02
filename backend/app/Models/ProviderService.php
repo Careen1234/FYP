@@ -18,7 +18,7 @@ class ProviderService extends Model
 
     public function provider()
     {
-        return $this->belongsTo(User::class, 'provider_id');
+        return $this->belongsTo(Provider::class);
     }
 
     public function service()
@@ -32,7 +32,7 @@ class ProviderService extends Model
     }
     public function user()
 {
-    return $this->belongsTo(User::class, 'user_id');
+    return $this->belongsTo(UserBaic::class, 'user_id');
 }
 
 }

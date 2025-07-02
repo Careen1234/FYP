@@ -46,6 +46,7 @@ interface UserProfile {
   status?: string;
   created_at?: string;
   updated_at?: string;
+  // Add provider-specific fields if needed
 }
 
 const Profile: React.FC = () => {
@@ -65,26 +66,22 @@ const Profile: React.FC = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        // Get user data from localStorage (stored during login)
-        const userData = localStorage.getItem("user");
-        
-        if (!userData) {
-          setError("No user data found. Please login again.");
-          setLoading(false);
-          return;
-        }
-
-        const user = JSON.parse(userData);
+        setLoading(true);
+        setError("");
+        const token = localStorage.getItem("token");
+        const res = await axios.get("http://localhost:8000/profile", {
+          headers: { Authorization: token ? `Bearer ${token}` : undefined },
+          withCredentials: true,
+        });
+        const user = res.data as UserProfile;
         setProfile(user);
         setEditedProfile(user);
-      } catch (err) {
-        console.error("Error loading profile:", err);
+      } catch (err: any) {
         setError("Failed to load your profile information.");
       } finally {
         setLoading(false);
       }
     };
-
     fetchProfile();
   }, []);
 
@@ -108,7 +105,7 @@ const Profile: React.FC = () => {
             name: editedProfile.name,
             email: editedProfile.email,
             phone: editedProfile.phone,
-            location: editedProfile.location,
+           // location: editedProfile.location,
           },
           { withCredentials: true }
         );

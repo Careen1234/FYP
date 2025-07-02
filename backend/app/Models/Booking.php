@@ -29,7 +29,7 @@ public function service()
 
 public function providerService()
 {
-    return $this->belongsTo(\App\Models\ProviderService::class, 'provider_service_id');
+    return $this->belongsTo(\App\Models\ProviderService::class, 'provider_service_id','service_id');
 }
  public function user()
 {
@@ -42,22 +42,11 @@ public function generalUser()
     return $this->belongsTo(User::class, 'user_id');
 }
 
-
-
-
-
-
-
-
-
-
-
-
-    public function category()
+public function category()
     {
         return $this->belongsToThrough(ServiceCategory::class, Service::class);
     }
     
-  
-
 }
+
+

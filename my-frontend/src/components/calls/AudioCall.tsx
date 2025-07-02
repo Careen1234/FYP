@@ -8,7 +8,7 @@ import {
   addDoc,
   onSnapshot
 } from 'firebase/firestore';
-import { firestore } from './Firebase'; // Adjust path if needed
+import { firestore } from '../Firebase'; // Adjust path if needed
 
 const servers = {
   iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],

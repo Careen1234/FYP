@@ -11,9 +11,9 @@ import {
   CircularProgress,
   Alert,
   InputAdornment,
-  Grid,
   IconButton
 } from '@mui/material';
+import { Grid } from '@mui/material';
 import {
   Edit as EditIcon,
   Check as CheckIcon,
@@ -71,20 +71,11 @@ const ProviderProfile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-
-        const response = await axios.get('http://localhost:8000/api/providers/profile', {
-
         const response = await axios.get<ProviderApiResponse>('http://localhost:8000/api/providers/profile', {
-
           withCredentials: true,
         });
         const data = response.data;
         setProfile({
-          name: data.name || 'N/A',
-          email: data.user?.email || 'N/A',
-          phone: data.user?.phone || 'N/A',
-          service: data.serviceCategory?.name || 'Not Set',
-          price: data.price ? `$${data.price}/hr` : 'Not Set',
           name: data.business_name || '',
           email: data.business_email || '',
           phone: data.business_phone || '',

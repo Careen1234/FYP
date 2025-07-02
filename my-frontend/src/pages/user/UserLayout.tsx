@@ -18,13 +18,6 @@ import {
   CardContent,
   CardActions,
   CircularProgress,
-
-  Container,
-  Stack,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-
   AppBar,
   Toolbar,
   IconButton,
@@ -36,7 +29,6 @@ import {
   createTheme,
   ThemeProvider,
   Stack,
-
   DialogActions,
 } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
@@ -46,14 +38,8 @@ import PaymentIcon from "@mui/icons-material/Payment";
 import RateReviewIcon from "@mui/icons-material/RateReview";
 import LogoutIcon from "@mui/icons-material/Logout";
 import PersonIcon from "@mui/icons-material/Person";
-
-
-import PhoneIcon from "@mui/icons-material/Phone";
-import ChatIcon from "@mui/icons-material/Chat";
-
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin } from 'lucide-react';
-
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -63,8 +49,8 @@ import Profile from "./Profile";
 import ProtectedRoute from "../Protectedroute";
 import LocationPicker from "../../components/LocationPicker";
 import BookingDialog from "../../components/BookingDialog";
-import ChatDialog from '../../components/ChatDialog';
-import PaymentForm from '../public/PaymentForm';
+import Report from './Report';
+import UserMessage from "./UserMessage";
 
 // Custom theme with the specified colors
 const customTheme = createTheme({
@@ -516,16 +502,7 @@ const UserDashboard: React.FC = () => {
 
   const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null);
-
-  const [showUserMessage, setShowUserMessage] = useState(false);
-  const [isChatOpen, setIsChatOpen] = useState(false);
-  const [showPaymentForm, setShowPaymentForm] = useState(false);
-  const [userMessageBookingDetails, setUserMessageBookingDetails] = useState<any>(null);
-  const [userMessageProvider, setUserMessageProvider] = useState<any>(null);
-
-  const [callDialogOpen, setCallDialogOpen] = useState(false);
-  const [messageDialogOpen, setMessageDialogOpen] = useState(false);
-  const [showInAppCall, setShowInAppCall] = useState(false);
+  const [userMessageData, setUserMessageData] = useState<any>(null);
 
   // Fetch services by category
   useEffect(() => {
@@ -636,60 +613,6 @@ const UserDashboard: React.FC = () => {
   };
 
   const handleBookingSuccess = async ({
-
-  scheduled_time,
-  notes,
-}: {
-  scheduled_time: string;
-  notes: string;
-}) => {
-  if (!selectedProvider || !selectedServiceId || !userLocation) return;
-
-  // ⚠️ Convert date if needed
-  const parsedDate = new Date(scheduled_time);
-if (isNaN(parsedDate.getTime())) {
-  alert("Invalid booking date/time selected.");
-  return;
-}
-const isoDate = parsedDate.toISOString();
-const formattedDate = isoDate.split("T")[0]; // 'YYYY-MM-DD'
-
-  try {
-    await axios.post(
-      "http://localhost:8000/api/bookings/book",
-      {
-        provider_id: selectedProvider.id,
-        service_id: selectedServiceId,
-        latitude: userLocation.lat,
-        longitude: userLocation.lng,
-        booking_date: formattedDate, // ✅
-        address: locationLabel,
-      },
-      {
-        withCredentials: true,
-      }
-    );
-    alert("Booking successful!");
-    setBookingDialogOpen(false);
-    setShowUserMessage(true);
-    setUserMessageProvider(selectedProvider);
-    setUserMessageBookingDetails({
-      service_id: selectedServiceId,
-      location: userLocation,
-    });
-    setSelectedProvider(null);
-    setSelectedServiceId(null);
-    setProviders([]);
-    setUserLocation(null);
-    setLocationLabel("Detecting location...");
-  } catch (error: any) {
-    if (error.response?.status === 422) {
-      console.error("Validation failed:", error.response.data.errors);
-      alert("Validation error: " + JSON.stringify(error.response.data.errors));
-    } else {
-      console.error("Booking failed:", error);
-      alert("Booking failed. Please try again.");
-
     scheduled_time,
     notes,
     communication,
@@ -705,7 +628,6 @@ const formattedDate = isoDate.split("T")[0]; // 'YYYY-MM-DD'
     if (isNaN(parsedDate.getTime())) {
       alert("Invalid booking date/time selected.");
       return;
-
     }
     const isoDate = parsedDate.toISOString();
     const formattedDate = isoDate.split("T")[0]; // 'YYYY-MM-DD'
@@ -729,6 +651,15 @@ const formattedDate = isoDate.split("T")[0]; // 'YYYY-MM-DD'
       setProviders([]);
       setUserLocation(null);
       setLocationLabel("Detecting location...");
+      // Set user message data and switch to messages tab
+      setUserMessageData({
+        provider: selectedProvider,
+        serviceId: selectedServiceId,
+        userLocation,
+        scheduledTime: scheduled_time,
+        notes,
+      });
+      setActiveTab("messages");
     } catch (error: any) {
       if (error.response?.status === 422) {
         console.error("Validation failed:", error.response.data.errors);
@@ -806,175 +737,6 @@ const formattedDate = isoDate.split("T")[0]; // 'YYYY-MM-DD'
           {/* Header */}
           <Header />
 
-
-          <List>
-            {["services", "requests", "reviews", "payments", "settings", "profile"].map((key) => (
-              <ListItemButton
-                key={key}
-                selected={activeTab === key}
-                onClick={() => {
-                  setActiveTab(key);
-                  setSelectedServiceId(null);
-                  setProviders([]);
-                  setUserLocation(null);
-                  setShowMap(false);
-                  setSelectedProvider(null);
-                }}
-              >
-                <ListItemIcon>
-                  {key === "services" ? (
-                    <HomeIcon fontSize="small" />
-                  ) : key === "requests" ? (
-                    <HistoryIcon fontSize="small" />
-                  ) : key === "reviews" ? (
-                    <RateReviewIcon fontSize="small" />
-                  ) : key === "payments" ? (
-                    <PaymentIcon fontSize="small" />
-                  ) : key === "settings" ? (
-                    <SettingsIcon fontSize="small" />
-                  ) : (
-                    <PersonIcon fontSize="small" />
-                  )}
-                </ListItemIcon>
-                <ListItemText primary={key.charAt(0).toUpperCase() + key.slice(1)} />
-              </ListItemButton>
-            ))}
-            <Divider sx={{ my: 1 }} />
-            <ListItemButton onClick={async () => {
-              try {
-                await axios.get("http://localhost:8000/sanctum/csrf-cookie", { withCredentials: true });
-                const csrfToken = Cookies.get("XSRF-TOKEN");
-                axios.defaults.headers.common["X-XSRF-TOKEN"] = csrfToken ?? "";
-                await axios.post("http://localhost:8000/api/logout", {}, { withCredentials: true });
-                localStorage.removeItem("role");
-                navigate("/login");
-              } catch (error) {
-                alert("Failed to logout. Please try again.");
-              }
-            }}>
-              <ListItemIcon><LogoutIcon fontSize="small" /></ListItemIcon>
-              <ListItemText primary="Logout" />
-            </ListItemButton>
-          </List>
-        </Paper>
-
-        <Box sx={{ flex: 1 }}>
-          {activeTab === "requests" ? (
-            <MyRequest />
-          ) : activeTab === "reviews" ? (
-            <MyReviews />
-          ) : activeTab === "profile" ? (
-            <Profile />
-          ) : activeTab === "services" && showUserMessage && userMessageProvider && userMessageBookingDetails ? (
-            <Container maxWidth="sm">
-              <Paper elevation={3} sx={{ mt: 4, p: 4, textAlign: 'center' }}>
-                <Typography variant="h5" gutterBottom>
-                  Booking Confirmed!
-                </Typography>
-                <Typography variant="h6" sx={{ mt: 3, mb: 2, fontWeight: 600 }}>
-                  Choose how you'd like to communicate
-                </Typography>
-                <Stack direction="row" spacing={2} justifyContent="center" sx={{ mt: 2 }}>
-                  <Button
-                    variant="contained"
-                    startIcon={<PhoneIcon />}
-                    onClick={() => setCallDialogOpen(true)}
-                  >
-                    Call
-                  </Button>
-                  <Button
-                    variant="contained"
-                    startIcon={<ChatIcon />}
-                    onClick={() => setMessageDialogOpen(true)}
-                  >
-                    Message
-                  </Button>
-                  <Button
-                    variant="contained"
-                    startIcon={<PaymentIcon />}
-                    onClick={() => setShowPaymentForm(true)}
-                  >
-                    Payment
-                  </Button>
-                </Stack>
-                <Button
-                  variant="text"
-                  sx={{ mt: 3 }}
-                  onClick={() => setShowUserMessage(false)}
-                >
-                  Back
-                </Button>
-              </Paper>
-              <ChatDialog
-                open={isChatOpen}
-                onClose={() => setIsChatOpen(false)}
-                provider={userMessageProvider}
-              />
-              {showPaymentForm && (
-                <PaymentForm
-                  bookingDetails={{
-                    providerId: userMessageProvider?.id ?? null,
-                    serviceId: userMessageBookingDetails.service_id,
-                    userLocation: userMessageBookingDetails.location,
-                  }}
-                  onClose={() => setShowPaymentForm(false)}
-                />
-              )}
-            </Container>
-          ) : selectedServiceId !== null ? (
-            <>
-              {!userLocation && !showMap && (
-                <>
-                  <Typography variant="h6" gutterBottom>
-                    Detecting your location...
-                  </Typography>
-                  <Button variant="contained" onClick={handleSelectAnotherLocation}>
-                    Select Another Location
-                  </Button>
-                  {/* Invisible LocationPicker that triggers geolocation detection */}
-                  <LocationPicker onLocationSelect={onLocationSelect} />
-                </>
-              )}
-
-              {userLocation && !showMap && (
-                <>
-                  <Typography variant="subtitle1" gutterBottom>
-                    Your Location: {locationLabel}
-                  </Typography>
-                  <Button variant="outlined" onClick={handleSelectAnotherLocation}>
-                    Select Another Location
-                  </Button>
-                </>
-              )}
-
-              {showMap && (
-                <>
-                  <Typography variant="h6" gutterBottom>
-                    Select Location on Map
-                  </Typography>
-                  <LocationPicker onLocationSelect={onLocationSelect} />
-                </>
-              )}
-
-              <Box mt={3}>
-                <Typography variant="h5" fontWeight={600} mb={2}>
-                  Providers Near You
-                </Typography>
-                {loadingProviders ? (
-                  <CircularProgress />
-                ) : providersError ? (
-                  <Typography color="error">{providersError}</Typography>
-                ) : providers.length === 0 ? (
-                  <Typography>No providers found near your location for this service.</Typography>
-                ) : (
-                  <List>
-                    {providers.map((provider) => (
-                      <ListItemButton key={provider.id}>
-                        <ListItemText
-                          primary={provider.name}
-                          secondary={`Rating: ${provider.ratings_avg_rating ?? "N/A"} | Distance: ${provider.distance?.toFixed(2) ?? "N/A"} km`}
-                        />
-
           {/* Main Content */}
           <Container maxWidth="xl" sx={{ flex: 1, py: 4 }}>
             <Box sx={{ display: "flex", gap: 4, minHeight: 'calc(100vh - 200px)' }}>
@@ -1002,7 +764,7 @@ const formattedDate = isoDate.split("T")[0]; // 'YYYY-MM-DD'
                   </Avatar>
                   <Box>
                     <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                      Kalistine
+                      User
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                       Premium User
@@ -1011,7 +773,7 @@ const formattedDate = isoDate.split("T")[0]; // 'YYYY-MM-DD'
                 </Box>
 
                 <List sx={{ '& .MuiListItemButton-root': { mb: 1 } }}>
-                  {["services", "requests", "reviews", "payments", "messages", "profile"].map((key) => (
+                  {["services", "requests", "reviews", "payments", "messages", "report", "profile"].map((key) => (
                     <ListItemButton
                       key={key}
                       selected={activeTab === key}
@@ -1036,6 +798,7 @@ const formattedDate = isoDate.split("T")[0]; // 'YYYY-MM-DD'
                             key === "reviews" ? <RateReviewIcon fontSize="small" /> :
                               key === "payments" ? <PaymentIcon fontSize="small" /> :
                                 key === "messages" ? <SettingsIcon fontSize="small" /> :
+                                key === "report" ? <SettingsIcon fontSize="small" /> :
                                   <PersonIcon fontSize="small" />}
                       </ListItemIcon>
                       <ListItemText
@@ -1075,6 +838,10 @@ const formattedDate = isoDate.split("T")[0]; // 'YYYY-MM-DD'
                   <MyReviews />
                 ) : activeTab === "profile" ? (
                   <Profile />
+                )  : activeTab === "messages" ? (
+                  <UserMessage {...userMessageData} />
+                ) : activeTab === "report" ? (
+                  <Report />
                 ) : selectedServiceId !== null ? (
                   <Paper sx={{ p: 4, borderRadius: 3 }}>
                     {!userLocation && !showMap && (
@@ -1083,7 +850,6 @@ const formattedDate = isoDate.split("T")[0]; // 'YYYY-MM-DD'
                         <Typography variant="h6" gutterBottom>
                           Detecting your location...
                         </Typography>
-
                         <Button
                           variant="outlined"
                           onClick={handleSelectAnotherLocation}
@@ -1318,99 +1084,8 @@ const formattedDate = isoDate.split("T")[0]; // 'YYYY-MM-DD'
             />
           )}
         </Box>
-
-
-        <BookingDialog
-          open={bookingDialogOpen}
-          onClose={() => setBookingDialogOpen(false)}
-          provider={selectedProvider}
-          serviceId={selectedServiceId}
-          userLocation={userLocation}
-          onConfirm={handleBookingSuccess}
-        />
-
-        {/* Call Option Dialog */}
-        <Dialog open={callDialogOpen} onClose={() => setCallDialogOpen(false)}>
-          <DialogTitle>How would you like to call?</DialogTitle>
-          <DialogContent>
-            <Button
-              fullWidth
-              variant="contained"
-              sx={{ mb: 2 }}
-              onClick={() => {
-                setShowInAppCall(true);
-                setCallDialogOpen(false);
-              }}
-            >
-              Within the app
-            </Button>
-            <Button
-              fullWidth
-              variant="outlined"
-              onClick={() => {
-                setCallDialogOpen(false);
-                if (userMessageProvider?.phone) {
-                  window.location.href = `tel:${userMessageProvider.phone}`;
-                }
-              }}
-            >
-              Via your phone
-            </Button>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setCallDialogOpen(false)}>Cancel</Button>
-          </DialogActions>
-        </Dialog>
-
-        {/* In-App Call Placeholder Dialog */}
-        <Dialog open={showInAppCall} onClose={() => setShowInAppCall(false)}>
-          <DialogTitle>In-App Call</DialogTitle>
-          <DialogContent>
-            <Typography>This is a placeholder for in-app calling functionality.</Typography>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setShowInAppCall(false)}>Close</Button>
-          </DialogActions>
-        </Dialog>
-
-        {/* Message Option Dialog */}
-        <Dialog open={messageDialogOpen} onClose={() => setMessageDialogOpen(false)}>
-          <DialogTitle>How would you like to message?</DialogTitle>
-          <DialogContent>
-            <Button
-              fullWidth
-              variant="contained"
-              sx={{ mb: 2 }}
-              onClick={() => {
-                setIsChatOpen(true);
-                setMessageDialogOpen(false);
-              }}
-            >
-              Within the app
-            </Button>
-            <Button
-              fullWidth
-              variant="outlined"
-              onClick={() => {
-                setMessageDialogOpen(false);
-                if (userMessageProvider?.phone) {
-                  window.location.href = `sms:${userMessageProvider.phone}`;
-                }
-              }}
-            >
-              Via your phone
-            </Button>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setMessageDialogOpen(false)}>Cancel</Button>
-          </DialogActions>
-        </Dialog>
-      </Box>
-    </ProtectedRoute>
-
       </ProtectedRoute>
     </ThemeProvider>
-
   );
 };
 

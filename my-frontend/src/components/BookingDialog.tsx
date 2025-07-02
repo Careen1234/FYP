@@ -8,32 +8,16 @@ import {
   TextField,
   Typography,
   Box,
-  Stack,
-  Menu,
-  MenuItem,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import PhoneIcon from "@mui/icons-material/Phone";
-import ChatIcon from "@mui/icons-material/Chat";
-import PaymentIcon from "@mui/icons-material/Payment";
-import ChatDialog from "./ChatDialog";
-
-import PaymentForm from "../pages/Payment"; // Adjust the import path as necessary
 
 interface BookingDialogProps {
   open: boolean;
   onClose: () => void;
-  provider: {
-    id: number;
-    name: string;
-    phone: string;
-  } | null;
+  provider: { id: number; name: string; phone: string } | null;
   serviceId: number | null;
   userLocation: { lat: number; lng: number } | null;
-  onConfirm: (details: {
-    scheduled_time: string;
-    notes: string;
-  }) => void;
+  onConfirm: (details: { scheduled_time: string; notes: string }) => void;
 }
 
 const BookingDialog: React.FC<BookingDialogProps> = ({
@@ -44,46 +28,33 @@ const BookingDialog: React.FC<BookingDialogProps> = ({
   userLocation,
   onConfirm,
 }) => {
+  const navigate = useNavigate();
   const [scheduledTime, setScheduledTime] = useState("");
   const [notes, setNotes] = useState("");
-  const [communication, setCommunication] = useState<string | null>(null);
-  const [showPaymentForm, setShowPaymentForm] = useState(false);
-  const [messageMenuAnchorEl, setMessageMenuAnchorEl] = useState<null | HTMLElement>(null);
-
-  const navigate = useNavigate();
-
-  const communicationOptions = [
-    { label: "Call", icon: <PhoneIcon /> },
-    { label: "Message", icon: <ChatIcon /> },
-    { label: "Payment", icon: <PaymentIcon /> },
-  ];
-
-  const handleMessageMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setMessageMenuAnchorEl(event.currentTarget);
-  };
-
-  const handleMessageMenuClose = () => {
-    setMessageMenuAnchorEl(null);
-  };
-
-  const handleMessageViaApp = () => {
-    setCommunication("Message");
-    setMessageMenuAnchorEl(null);
-    // Optionally open ChatDialog here
-  };
-
-  const handleMessageViaPhone = () => {
-    setCommunication("Call");
-    setMessageMenuAnchorEl(null);
-    // Optionally trigger phone message logic here
-  };
 
   const handleConfirm = () => {
-    if (!provider || !serviceId || !userLocation) return;
+    if (!scheduledTime) {
+      alert("Please choose a date and time.");
+      return;
+    }
+
     onConfirm({
       scheduled_time: scheduledTime,
-      notes: notes,
+      notes,
     });
+
+    // Navigate to UserMessage page with booking data
+    navigate("/user/message", {
+      state: {
+        provider,
+        serviceId,
+        userLocation,
+        scheduledTime,
+        notes,
+      },
+    });
+
+    onClose();
   };
 
   return (
@@ -105,49 +76,7 @@ const BookingDialog: React.FC<BookingDialogProps> = ({
           <Typography>
             {userLocation?.lat.toFixed(5)}, {userLocation?.lng.toFixed(5)}
           </Typography>
-
         </Box>
-          <Stack direction="row" spacing={2} justifyContent="center">
-            {communicationOptions.map((option) => (
-              <Button
-                key={option.label}
-                variant={communication === option.label ? "contained" : "outlined"}
-                color="primary"
-                startIcon={option.icon}
-                onClick={(e) => {
-                  if (option.label === "Payment") {
-                    setShowPaymentForm(true);
-                  } else if (option.label === "Message") {
-                    handleMessageMenuOpen(e);
-                  } else {
-                    setCommunication(option.label);
-                  }
-                }}
-                sx={{ textTransform: "none", borderRadius: 2, px: 3 }}
-              >
-                {option.label}
-              </Button>
-            ))}
-          </Stack>
-          <Menu
-            anchorEl={messageMenuAnchorEl}
-            open={Boolean(messageMenuAnchorEl)}
-            onClose={handleMessageMenuClose}
-          >
-            <MenuItem onClick={handleMessageViaApp}>Within App</MenuItem>
-            <MenuItem onClick={handleMessageViaPhone}>Via Phone</MenuItem>
-          </Menu>
-            {/* *** RENDER PAYMENT FORM MODAL WHEN showPaymentForm IS TRUE *** */}
-          {showPaymentForm && (
-            <PaymentForm
-              providerId={provider?.id ?? null}
-              serviceId={serviceId ?? null}
-              userLocation={userLocation ?? null}
-              onClose={() => setShowPaymentForm(false)}
-            />
-          )}
-
-
         <TextField
           fullWidth
           label="Preferred Date & Time"
@@ -168,7 +97,12 @@ const BookingDialog: React.FC<BookingDialogProps> = ({
         />
       </DialogContent>
       <DialogActions sx={{ justifyContent: "space-between", px: 3, pb: 2 }}>
-        <Button onClick={onClose} color="error" variant="outlined" sx={{ borderRadius: 2 }}>
+        <Button
+          onClick={onClose}
+          color="error"
+          variant="outlined"
+          sx={{ borderRadius: 2 }}
+        >
           Cancel
         </Button>
         <Button

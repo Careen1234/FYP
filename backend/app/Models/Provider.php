@@ -55,7 +55,11 @@ public function basicUser()
 {
     return $this->belongsTo(User::class, 'user_id'); // only if providers reference users
 }
+public function providerServices()
+{
+    return $this->hasMany(ProviderService::class, 'provider_id');
 
 
 
+}
 }

@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\AdminAuthController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Api\ProviderDashboardController;
 use App\Http\Controllers\Api\ProviderReportController;
+use App\Http\Controllers\Api\UserReportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -51,6 +52,8 @@ Route::get('/sanctum/csrf-cookie', function () {
 Route::middleware('auth:sanctum')->get('/provider/dashboard', [ProviderDashboardController::class, 'index']);
 Route::middleware(['auth:sanctum'])->get('/admin/dashboard', [DashboardController::class, 'index']);
 Route::middleware('auth:sanctum')->get('/provider/reports', [ProviderReportController::class, 'myReport']);
+
+Route::middleware('auth:sanctum')->get('/user/reports', [UserReportController::class, 'Report']);
 
 
 
@@ -118,7 +121,8 @@ Route::get('/ratings', [RatingsController::class, 'index']);
 Route::get('/provider/reviews', [RatingsController::class, 'providerReviews']);
 });
 
-Route::put('/profile', [UserController::class, 'updateCurrentUserProfile']);
+Route::put('/profile', [UserController::class, 'updateCurrentUserProfile'])->middleware('auth:sanctum');
+Route::get('/profile', [UserController::class, 'getProfile'])->middleware('auth:sanctum');
    
 
 

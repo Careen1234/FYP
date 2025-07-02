@@ -53,5 +53,10 @@ public function provider()
 
 }
 
+public function userBasic()
+{
+    return $this->belongsTo(UserBasic::class, 'user_id', 'id');
+}
+
 
 }
