@@ -14,26 +14,24 @@ class ServiceController extends Controller
 public function index(Request $request)
 {
     $query = Service::query()
-        ->join('service_category', 'services.category_id', '=', 'service_category.id')
-        ->select(
-            'services.*',
-            'service_category.name as category_name'
-        )
+        ->join('service_category', 'services.service_category_id', '=', 'service_category.id')
+        ->select('services.*', 'service_category.category as category_name')
         ->withCount('bookings');
 
     if ($search = $request->input('search')) {
         $query->where(function ($q) use ($search) {
             $q->where('services.name', 'like', "%{$search}%")
-              ->orWhere('service_category.name', 'like', "%{$search}%");
+              ->orWhere('service_category.category', 'like', "%{$search}%");
         });
     }
 
     if ($categoryName = $request->input('category')) {
-        $query->where('service_category.name', $categoryName);
+        $query->where('service_category.category', $categoryName);
     }
 
     return $query->paginate(10);
 }
+
 
 
     public function store(Request $request)

@@ -9,20 +9,27 @@ import { Add, Delete, Edit, Search } from '@mui/icons-material';
 import axios from 'axios';
 
 interface Service {
-  [x: string]: any;
   id: number;
   name: string;
   description?: string;
-  price: number;
-  category_id?: number;
-  category_name?: string;
+  service_category_id: number | string;
   status: boolean;
   bookings_count: number;
+  photo?: string;
 }
 
 interface Category {
   id: number;
+  category: string;
+}
+
+interface FormState {
   name: string;
+  description: string;
+  service_category_id: string;
+  status: boolean;
+  photo?: File;
+  photo_url?: string;
 }
 
 const ServicesManagement: React.FC = () => {
@@ -32,11 +39,10 @@ const ServicesManagement: React.FC = () => {
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [editService, setEditService] = useState<Service | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<FormState>({
     name: '',
     description: '',
-    price: '',
-    category_id: '',
+    service_category_id: '',
     status: true,
   });
 
@@ -81,18 +87,28 @@ const ServicesManagement: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    const payload = {
-      ...form,
-      price: parseFloat(form.price),
-      category_id: parseInt(form.category_id),
-    };
+    const formData = new FormData();
+
+    formData.append('name', form.name);
+    formData.append('description', form.description);
+    formData.append('service_category_id', form.service_category_id);
+    formData.append('status', String(form.status));
+
+    if (form.photo) {
+      formData.append('photo', form.photo);
+    }
 
     try {
       if (editService) {
-        await axios.put(`http://localhost:8000/api/services/${editService.id}`, payload);
+        await axios.post(`http://localhost:8000/api/services/${editService.id}?_method=PUT`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
       } else {
-        await axios.post('http://localhost:8000/api/services', payload);
+        await axios.post('http://localhost:8000/api/services', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
       }
+
       fetchServices();
       handleClose();
     } catch (err) {
@@ -125,9 +141,10 @@ const ServicesManagement: React.FC = () => {
     setForm({
       name: service.name,
       description: service.description || '',
-      price: service.price.toString(),
-      category_id: service.category_id?.toString() || '',
+      service_category_id: service.service_category_id.toString(),
       status: service.status,
+      photo: undefined,
+      photo_url: service.photo ? `http://localhost:8000/storage/${service.photo}` : undefined
     });
     setOpenDialog(true);
   };
@@ -138,9 +155,10 @@ const ServicesManagement: React.FC = () => {
     setForm({
       name: '',
       description: '',
-      price: '',
-      category_id: '',
+      service_category_id: '',
       status: true,
+      photo: undefined,
+      photo_url: undefined
     });
   };
 
@@ -191,7 +209,7 @@ const ServicesManagement: React.FC = () => {
                   <TableCell sx={{ color: 'white' }}>ID</TableCell>
                   <TableCell sx={{ color: 'white' }}>Name</TableCell>
                   <TableCell sx={{ color: 'white' }}>Category</TableCell>
-                  <TableCell sx={{ color: 'white' }}>Price</TableCell>
+                  <TableCell sx={{ color: 'white' }}>Photo</TableCell>
                   <TableCell sx={{ color: 'white' }}>Status</TableCell>
                   <TableCell sx={{ color: 'white' }}>Bookings</TableCell>
                   <TableCell sx={{ color: 'white' }}>Actions</TableCell>
@@ -202,9 +220,23 @@ const ServicesManagement: React.FC = () => {
                   <TableRow key={service.id}>
                     <TableCell>{service.id}</TableCell>
                     <TableCell>{service.name}</TableCell>
-                    <TableCell>{service.category?.name || '-'}</TableCell>
-                   <TableCell>Tsh{Number(service.price).toFixed(2)}</TableCell>
-
+                    <TableCell>
+                      {categories.find(cat => cat.id === Number(service.service_category_id))?.category || '-'}
+                    </TableCell>
+                    <TableCell>
+                      {service.photo ? (
+                        <img
+                          src={`http://localhost:8000/storage/${service.photo}`}
+                          alt={service.name}
+                          style={{
+                            width: 50,
+                            height: 50,
+                            objectFit: 'cover',
+                            borderRadius: 4
+                          }}
+                        />
+                      ) : 'No photo'}
+                    </TableCell>
                     <TableCell>
                       <Switch
                         checked={service.status}
@@ -239,7 +271,7 @@ const ServicesManagement: React.FC = () => {
       )}
 
       {/* Add/Edit Dialog */}
-      <Dialog open={openDialog} onClose={handleClose}>
+      <Dialog open={openDialog} onClose={handleClose} maxWidth="sm" fullWidth>
         <DialogTitle sx={{ backgroundColor: '#147c3c', color: 'white' }}>
           {editService ? 'Edit Service' : 'Add Service'}
         </DialogTitle>
@@ -251,6 +283,7 @@ const ServicesManagement: React.FC = () => {
             onChange={handleChange}
             fullWidth
             sx={{ mb: 2 }}
+            required
           />
           <TextField
             label="Description"
@@ -258,39 +291,80 @@ const ServicesManagement: React.FC = () => {
             value={form.description}
             onChange={handleChange}
             fullWidth
+            multiline
+            rows={3}
             sx={{ mb: 2 }}
           />
+
           <TextField
-            label="Price"
-            name="price"
-            value={form.price}
-            onChange={handleChange}
+            label="Upload Photo"
+            type="file"
             fullWidth
-            type="number"
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              if (e.target.files?.[0]) {
+                setForm(prev => ({
+                  ...prev,
+                  photo: e.target.files![0],
+                  photo_url: URL.createObjectURL(e.target.files![0])
+                }));
+              }
+            }}
+            inputProps={{ accept: 'image/*' }}
             sx={{ mb: 2 }}
           />
+
+          {(form.photo_url) && (
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="subtitle2">Photo Preview:</Typography>
+              <img
+                src={form.photo_url}
+                alt="Preview"
+                style={{
+                  maxWidth: '100%',
+                  maxHeight: 200,
+                  marginTop: 8,
+                  borderRadius: 4
+                }}
+              />
+            </Box>
+          )}
+
           <TextField
             label="Category"
-            name="category_id"
-            value={form.category_id}
+            name="service_category_id"
+            value={form.service_category_id}
             onChange={handleChange}
             fullWidth
             select
             sx={{ mb: 2 }}
+            required
           >
+            <MenuItem value="">Select a category</MenuItem>
             {(categories || []).map(cat => (
               <MenuItem key={cat.id} value={cat.id}>
-                {cat.name}
+                {cat.category}
               </MenuItem>
             ))}
           </TextField>
+
+          <Box display="flex" alignItems="center" sx={{ mb: 2 }}>
+            <Typography variant="body1" sx={{ mr: 2 }}>Status:</Typography>
+            <Switch
+              checked={form.status}
+              onChange={(e) => setForm(prev => ({ ...prev, status: e.target.checked }))}
+              color="success"
+            />
+            <Typography variant="body2">
+              {form.status ? 'Active' : 'Inactive'}
+            </Typography>
+          </Box>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} color="inherit">Cancel</Button>
           <Button
             onClick={handleSubmit}
             variant="contained"
-            sx={{ backgroundColor: '#147c3c', '&:hover': { backgroundColor: '#147c3c' } }}
+            sx={{ backgroundColor: '#147c3c', '&:hover': { backgroundColor: '#0f5d2d' } }}
           >
             {editService ? 'Update' : 'Add'}
           </Button>

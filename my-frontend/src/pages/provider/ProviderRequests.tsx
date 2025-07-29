@@ -29,7 +29,7 @@ const ProviderRequests: React.FC = () => {
     setLoading(true);
     setError('');
     try {
-      await axios.get('http://localhost:8000/sanctum/csrf-cookie', { withCredentials: true });
+      
       const token = localStorage.getItem('token');
       const res = await axios.get('http://localhost:8000/api/provider/bookings', {
         withCredentials: true,
@@ -53,9 +53,15 @@ const ProviderRequests: React.FC = () => {
 
   const updateStatus = async (id: number, status: string) => {
     try {
+      const token = localStorage.getItem('token');
       await axios.patch(`http://localhost:8000/api/bookings/${id}/status`,
         { status },
-        { withCredentials: true }
+        {
+          withCredentials: true,
+          headers: {
+            Authorization: token ? `Bearer ${token}` : '',
+          },
+        }
       );
       fetchRequests();
     } catch (error) {

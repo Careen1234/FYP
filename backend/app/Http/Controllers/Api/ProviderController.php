@@ -10,8 +10,7 @@ use Illuminate\Support\Facades\Log;
 use App\Models\Booking;
 use App\Models\Service;
 use App\Models\Rating;
-use App\Models\Category;
-    use App\Models\ProviderService;
+use App\Models\Category; use App\Models\ProviderService;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
@@ -68,10 +67,7 @@ class ProviderController extends Controller
         if (!$provider) {
             return response()->json(['message' => 'Provider not found'], 404);
         }
-
-     
-
-        return response()->json($provider);
+       return response()->json($provider);
     }
 
     // Update provider
@@ -153,31 +149,31 @@ class ProviderController extends Controller
 
    public function getProfile(Request $request)
 {
-    try {
-        $user = $request->user();
+    $user = $request->user();
 
-        if (!$user) {
-            return response()->json(['error' => 'User not authenticated'], 401);
-        }
-
-        // Fetch provider by email (if email is unique in providers table)
-        $provider = Provider::with(['category'])
-            ->where('email', $user->email)
-            ->first();
-
-        if (!$provider) {
-            return response()->json(['error' => 'Provider profile not found for this user.'], 404);
-        }
-
-        // Optionally, attach user info for frontend mapping
-        $provider->user = $user;
-
-        return response()->json($provider);
-
-    } catch (\Exception $e) {
-        Log::error('Failed to fetch provider profile: ' . $e->getMessage());
-        return response()->json(['error' => 'Server error while fetching profile.'], 500);
+    if (!$user || !$user->provider_id) {
+        return response()->json(['error' => 'Unauthorized or no provider linked.'], 401);
     }
+
+    $provider = Provider::with('services')->find($user->provider_id);
+
+    if (!$provider) {
+        return response()->json(['error' => 'Provider not found.'], 404);
+    }
+
+    return response()->json([
+        'business_name' => $provider->name,
+        'business_email' => $provider->email,
+        'business_phone' => $provider->phone,
+        'services' => $provider->services,
+        'price' => $provider->price,
+        'bio' => $provider->bio,
+        'profile_photo' => $provider->profile_photo,
+        'instagram' => $provider->instagram,
+        'facebook' => $provider->facebook,
+        'website' => $provider->website,
+        
+    ]);
 }
 
 

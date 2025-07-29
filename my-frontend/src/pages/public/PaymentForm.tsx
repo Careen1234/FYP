@@ -32,11 +32,12 @@ const PROVIDER_LOGOS: Record<string, string> = {
   HALOTEL: halotelLogo,
 };
 
-const Payment: React.FC<PaymentProps> = ({ bookingId, onClose }) => {
+const PaymentForm: React.FC<PaymentProps> = ({ bookingId, onClose }) => {
   const [paymentMethod, setPaymentMethod] = useState("mobile_money");
   const [provider, setProvider] = useState("TIGO");
-  const [phone, setPhone] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [amount, setAmount] = useState("15000");
+  const [orderReference, setOrderReference] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -46,55 +47,49 @@ const Payment: React.FC<PaymentProps> = ({ bookingId, onClose }) => {
     setError("");
     setMessage("");
 
-    // 1. Require login
-    try {
-      const userRes = await axios.get("http://localhost:8000/api/user", {
-        withCredentials: true,
-      });
-      if (!userRes.data) throw new Error("User not authenticated");
-    } catch {
-      setError("You must be logged in to make a payment.");
-      setLoading(false);
-      return;
-    }
+    // Generate unique order reference
+    const reference = `CP${Date.now()}${Math.floor(Math.random() * 100000)}`;
+    setOrderReference(reference); // update UI
 
-    // 2. Cash option
     if (paymentMethod === "cash") {
       setMessage("Cash payment selected. Please pay the provider directly.");
       setLoading(false);
       return;
     }
 
-    // 3. Mobile money validation
-    if (!phone.match(/^255\d{9}$/)) {
+    if (!/^255\d{9}$/.test(phoneNumber)) {
       setError("Please enter a valid phone number starting with 255...");
       setLoading(false);
       return;
     }
 
     try {
-      
-      // Make payment request
+      console.log("Using order reference:", reference);
       const response = await axios.post(
-        "http://localhost:8000/api/payment/initiate",
+        "http://localhost:8000/api/clickpesa/initiate",
         {
-          amount: Number(amount),
+          amount: parseFloat(amount),
           currency: "TZS",
-          accountNumber: phone,
-          provider,
-          booking_id: bookingId,
+          orderReference: reference, // Laravel expects this key
+          phoneNumber: phoneNumber.replace(/\D/g, ""), // Strip any non-numeric chars
+          checksum: "", // Required but unused in your backend
         },
         { withCredentials: true }
       );
 
-      if (response.status === 200) {
-        setMessage("Payment initiated. Check your phone to complete.");
+      const data = response.data as { success: boolean; message?: string };
+      if (data.success) {
+        setMessage("Payment initiated. Check your phone.");
       } else {
-        setError("Payment failed. Please try again.");
+        setError(data.message || "Payment failed.");
       }
     } catch (err: any) {
-      const backendError = err?.response?.data?.message || "Server error occurred.";
-      setError(backendError);
+      if (err.response) {
+        const { message, error: backendError } = err.response.data;
+        setError(`${message}${backendError ? `: ${backendError}` : ""}`);
+      } else {
+        setError("Network or server error.");
+      }
     } finally {
       setLoading(false);
     }
@@ -111,7 +106,11 @@ const Payment: React.FC<PaymentProps> = ({ bookingId, onClose }) => {
           value={paymentMethod}
           onChange={(e) => setPaymentMethod(e.target.value)}
         >
-          <FormControlLabel value="cash" control={<Radio />} label="Pay with Cash" />
+          <FormControlLabel
+            value="cash"
+            control={<Radio />}
+            label="Pay with Cash"
+          />
           <FormControlLabel
             value="mobile_money"
             control={<Radio />}
@@ -125,19 +124,39 @@ const Payment: React.FC<PaymentProps> = ({ bookingId, onClose }) => {
               label="Phone Number"
               placeholder="2557XXXXXXXX"
               fullWidth
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
               margin="dense"
+              required
             />
 
             <TextField
               label="Amount (TZS)"
               fullWidth
               type="number"
-              inputProps={{ min: 1 }}
+              inputProps={{ min: 100 }}
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               margin="dense"
+              required
+            />
+
+            <TextField
+              label="Currency"
+              value="TZS"
+              margin="dense"
+              fullWidth
+              InputProps={{ readOnly: true }}
+              disabled
+            />
+
+            <TextField
+              label="Order Reference"
+              value={orderReference}
+              margin="dense"
+              fullWidth
+              InputProps={{ readOnly: true }}
+              disabled
             />
 
             <Typography sx={{ mt: 2 }}>Select Provider:</Typography>
@@ -164,8 +183,16 @@ const Payment: React.FC<PaymentProps> = ({ bookingId, onClose }) => {
         )}
 
         {loading && <CircularProgress sx={{ mt: 2 }} />}
-        {message && <Alert severity="success" sx={{ mt: 2 }}>{message}</Alert>}
-        {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
+        {message && (
+          <Alert severity="success" sx={{ mt: 2 }}>
+            {message}
+          </Alert>
+        )}
+        {error && (
+          <Alert severity="error" sx={{ mt: 2 }}>
+            {error}
+          </Alert>
+        )}
       </DialogContent>
 
       <DialogActions>
@@ -180,4 +207,4 @@ const Payment: React.FC<PaymentProps> = ({ bookingId, onClose }) => {
   );
 };
 
-export default Payment;
+export default PaymentForm;

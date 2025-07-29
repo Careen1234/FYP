@@ -11,12 +11,13 @@ class PaymentController extends Controller
     
  public function initiateClickPesaUssdPush(Request $request)
 {
+ 
     // Step 1: Generate token
     $tokenResponse = Http::withHeaders([
-        'api-key' => 'SKpM73aauzK8NBkPmCWWLgAhkydccrjs8sG4B9aPz0',
+        'api-key' => 'SKeNBn3gP2db2M0D9kTIdI0oDTaeOdpncR3g88JGuA',
         'client-id' => 'IDFFHRx2wxNdDtA21Ix4XFk7jSHavcvd',
-    ])->timeout(30)->post('https://api.clickpesa.com/third-parties/generate-token');
-
+    ])->timeout(60)->post('https://api.clickpesa.com/third-parties/generate-token');
+ Log::info('Incoming payment request', $request->all());
     if (!$tokenResponse->successful()) {
         Log::error('ClickPesa Token Error', [
             'status' => $tokenResponse->status(),
@@ -44,7 +45,7 @@ class PaymentController extends Controller
     'amount' => (float) $request->amount,
     'currency' => 'TZS',
     'orderReference' => $request->orderReference,
-    'phoneNumber' => preg_replace('/[^0-9]/', '', $request->phoneNumber), // remove + if exists
+    'phoneNumber' => preg_replace('/[^0-9]/', '', $request->phoneNumber),
     'checksum' => $request->checksum,
 ];
 
@@ -54,7 +55,7 @@ class PaymentController extends Controller
     $paymentResponse = Http::withHeaders([
         'Authorization' => $token,
         'Content-Type' => 'application/json'
-    ])->timeout(30)->post($url, $payload);
+    ])->timeout(60)->post($url, $payload);
 
     if ($paymentResponse->successful()) {
         $data = $paymentResponse->json();
@@ -77,6 +78,7 @@ class PaymentController extends Controller
         'status_code' => $paymentResponse->status(),
         'error' => $paymentResponse->body(),
     ], $paymentResponse->status());
+
 }
 
     public function initiatePayment(Request $request)

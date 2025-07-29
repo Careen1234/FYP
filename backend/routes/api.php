@@ -45,10 +45,6 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 
-Route::get('/sanctum/csrf-cookie', function () {
-    return response()->noContent();
-});
-
 Route::middleware('auth:sanctum')->get('/provider/dashboard', [ProviderDashboardController::class, 'index']);
 Route::middleware(['auth:sanctum'])->get('/admin/dashboard', [DashboardController::class, 'index']);
 Route::middleware('auth:sanctum')->get('/provider/reports', [ProviderReportController::class, 'myReport']);
@@ -92,7 +88,7 @@ Route::prefix('services')->group(function () {
     Route::delete('{id}', [ServiceController::class, 'destroy']);
 });
 
-// ✅ Categories
+// Categories
 Route::get('/service-categories', [CategoryController::class, 'index']);
 
 
@@ -110,7 +106,7 @@ Route::middleware('auth:sanctum')->prefix('bookings')->group(function () {
 
   
 
-// ✅ Dashboard Stats
+//  Dashboard Stats
 Route::get('/users/count', [DashboardController::class, 'usersCount']);
 Route::get('/providers/count', [DashboardController::class, 'providersCount']);
 Route::get('/bookings/count', [DashboardController::class, 'bookingsCount']);
@@ -140,28 +136,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     //Route::post('/provider/bookings/{id}/accept', [ProviderController::class, 'acceptBooking']);
    // Route::post('/provider/bookings/{id}/reject', [ProviderController::class, 'rejectBooking']);
     //Route::post('/provider/bookings/{id}/complete', [ProviderController::class, 'completeBooking']);
-});
-
-
-// Notification routes (protected by auth:sanctum middleware)
-Route::middleware('auth:sanctum')->group(function () {
-    // Get notifications
-    Route::get('/notifications', [NotificationController::class, 'getUnreadNotifications']);
-    Route::get('/notifications/all', [NotificationController::class, 'getAllNotifications']);
-    Route::get('/notifications/count', [NotificationController::class, 'getNotificationCount']);
-    
-    // Mark notifications as read
-    Route::post('/notifications/{id}/mark-as-read', [NotificationController::class, 'markAsRead']);
-    Route::post('/notifications/mark-all-as-read', [NotificationController::class, 'markAllAsRead']);
-    
-    // Delete notification
-    Route::delete('/notifications/{id}', [NotificationController::class, 'deleteNotification']);
-});
-
-// Payment routes
-Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/payment/initiate', [PaymentController::class, 'initiate']);
-    Route::post('/payment/callback', [PaymentController::class, 'callback'])->name('clickpesa.callback');
 });
 
 

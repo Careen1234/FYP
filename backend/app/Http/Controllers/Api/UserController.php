@@ -96,48 +96,45 @@ public function update(Request $request, $id)
         return response()->json(['message' => "User with ID: $id block status toggled"]);
     }
 
-
-    
-public function getProfile(Request $request)
+    public function updateCurrentUserProfile(Request $request)
 {
-   $user = auth()->user(); 
-$user->load('userBasic');
+    $user = auth()->user(); 
 
-return response()->json([
-    'id' => $user->id,
-    'role' => $user->role,
-    'name' => $user->userBasic->name,
-    'email' => $user->userBasic->email,
-    'phone' => $user->userBasic->phone,
-]);
-
-}
-
-public function updateCurrentUserProfile(Request $request)
-{
-    $user = auth()->user(); // from users table
-
+    // Validate the request
     $request->validate([
         'name' => 'sometimes|required|string|max:255',
-        'email' => 'sometimes|required|email|unique:user,email,' . $user->user_id . ',id',
+        'email' => 'sometimes|required|email|unique:user,email,' . $user->id,
         'phone' => 'nullable|string|max:20',
+        //'location' => 'nullable|string|max:255',
     ]);
 
-    $userBasic = $user->userBasic;
-
-    if (!$userBasic) {
-        return response()->json(['message' => 'User basic info not found'], 404);
+    if ($request->has('name')) {
+        $user->name = $request->name;
     }
+    if ($request->has('email')) {
+        $user->email = $request->email;
+    }
+    if ($request->has('phone')) {
+        $user->phone = $request->phone;
+    }
+    
 
-    $userBasic->update($request->only(['name', 'email', 'phone']));
+    $user->save();
 
-    return response()->json(['message' => 'Profile updated successfully']);
+    return response()->json([
+        'message' => 'Profile updated successfully',
+        'user' => [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'phone' => $user->phone,
+           // 'location' => $user->location,
+            'role' => $user->role,
+            'status' => $user->status,
+            'created_at' => $user->created_at,
+            'updated_at' => $user->updated_at,
+        ]
+    ]);
 }
-   
+
 }
-
-
-
-
-
-

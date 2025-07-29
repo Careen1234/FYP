@@ -7,24 +7,21 @@ import {
   ListItemText,
   Toolbar,
   Divider,
-
   Badge,
-
   Box,
   Typography,
   useMediaQuery,
   useTheme
-
 } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import BookOnlineIcon from '@mui/icons-material/BookOnline';
 import ReviewsIcon from '@mui/icons-material/Reviews';
 import PersonIcon from '@mui/icons-material/Person';
 import MessageIcon from '@mui/icons-material/Message';
+import BarChartIcon from '@mui/icons-material/BarChart';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../Firebase';
 import { useAuth } from '../AuthContext';
-import BarChartIcon from '@mui/icons-material/BarChart';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 const drawerWidth = 260;
@@ -52,7 +49,6 @@ const ProviderSidebar: React.FC<ProviderSidebarProps> = ({ open, onClose, isMobi
 
   useEffect(() => {
     if (!user) return;
-    // Listen to all chats where this provider is a participant
     const chatsRef = collection(db, 'chats');
     const unsubscribe = onSnapshot(chatsRef, (snapshot) => {
       let hasUnread = false;
@@ -69,6 +65,7 @@ const ProviderSidebar: React.FC<ProviderSidebarProps> = ({ open, onClose, isMobi
     });
     return () => unsubscribe();
   }, [user]);
+
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -91,7 +88,7 @@ const ProviderSidebar: React.FC<ProviderSidebarProps> = ({ open, onClose, isMobi
         },
       }}
     >
-      <Toolbar sx={{ 
+      <Toolbar sx={{
         minHeight: '70px !important',
         display: 'flex',
         alignItems: 'center',
@@ -100,8 +97,8 @@ const ProviderSidebar: React.FC<ProviderSidebarProps> = ({ open, onClose, isMobi
         color: '#fff',
         px: 2
       }}>
-        <Box sx={{ 
-          display: 'flex', 
+        <Box sx={{
+          display: 'flex',
           alignItems: 'center',
           width: '100%',
           justifyContent: isSmallScreen ? 'center' : 'flex-start'
@@ -125,9 +122,9 @@ const ProviderSidebar: React.FC<ProviderSidebarProps> = ({ open, onClose, isMobi
           )}
         </Box>
       </Toolbar>
-      
+
       <Divider sx={{ borderColor: '#e2e8f0' }} />
-      
+
       <List sx={{ py: 1 }}>
         {menuItems.map(({ text, icon, path }) => {
           const isSelected = location.pathname === path;
@@ -162,33 +159,25 @@ const ProviderSidebar: React.FC<ProviderSidebarProps> = ({ open, onClose, isMobi
                 },
               }}
             >
-              <ListItemIcon sx={{ color: '#fff' }}>
+              <ListItemIcon sx={{ minWidth: '40px', color: isSelected ? '#147c3c' : '#94a3b8' }}>
                 {text === 'Messages' ? (
                   <Badge color="error" variant="dot" invisible={!unread}>
                     {icon}
                   </Badge>
                 ) : icon}
               </ListItemIcon>
-              <ListItemText primary={text} />
-              <ListItemIcon sx={{ 
-                minWidth: '40px',
-                color: isSelected ? '#147c3c' : '#94a3b8'
-              }}>
-                {icon}
-              </ListItemIcon>
-              <ListItemText 
-                primary={text} 
-                primaryTypographyProps={{ 
+              <ListItemText
+                primary={text}
+                primaryTypographyProps={{
                   fontWeight: isSelected ? 600 : 500,
                   fontSize: '0.95rem'
-                }} 
+                }}
               />
-
             </ListItemButton>
           );
         })}
       </List>
-      
+
       <Box sx={{ mt: 'auto', p: 2.5, textAlign: 'center' }}>
         <Typography variant="caption" color="#94a3b8">
           Provider Hub v1.0

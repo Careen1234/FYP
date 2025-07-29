@@ -12,28 +12,35 @@ use App\Models\User;
 use App\Models\ProviderService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use App\Notifications\BookingCreated;
+use App\Notifications\BookingAccepted;
 
 class BookingController extends Controller
 {
 
 public function index()
 {
-    $bookings = Booking::with(['user', 'provider', 'service'])->get();
+    $bookings = Booking::with([
+        'providerService.provider',
+        'providerService.service',
+        'user' 
+    ])->get();
 
     $formatted = $bookings->map(function ($booking) {
         return [
             'id' => $booking->id,
-            'user_name' => $booking->user ? $booking->user->name : 'N/A',
-            'provider_name' => $booking->provider ? $booking->provider->name : 'N/A',
-            'service_name' => $booking->service ? $booking->service->name : 'N/A',
+            'user_name' => $booking->user?->name ?? 'N/A',
+            'provider_name' => $booking->providerService?->provider?->name ?? 'N/A',
+            'service_name' => $booking->providerService?->service?->name ?? 'N/A',
             'booking_date' => $booking->booking_date,
             'status' => $booking->status,
-            
         ];
     });
 
     return response()->json(['data' => $formatted], 200);
 }
+
+
 
     // Store a new booking
     public function store(Request $request)
@@ -63,13 +70,14 @@ public function index()
             $validated,
             ['status' => 'pending']
         ));
-
-        return response()->json(['message' => 'Booking created successfully', 'data' => $booking], 201);
+        $providerId = $booking->providerService->provider_id;
+        $provider = Provider::find($providerId);
+        $provider->notify(new BookingCreated($booking));  
+        
+       return response()->json(['message' => 'Booking created successfully', 'data' => $booking], 201);
     }
 
-
-    // Get available providers for a service within a radius;
-
+// Get available providers for a service within a radius;
 
 public function getAvailableProviders(Request $request)
 {
@@ -77,6 +85,7 @@ public function getAvailableProviders(Request $request)
     if (!$user) {
         return response()->json(['error' => 'Unauthorized'], 401);
     }
+
     $serviceId = $request->input('service_id');
     $lat = $request->input('lat');
     $lng = $request->input('lng');
@@ -157,12 +166,16 @@ public function getAvailableProviders(Request $request)
             'message' => 'Booking successful.',
             'booking' => $booking
         ], 201);
+        $providerId = $booking->providerService->provider_id;
+       $provider = Provider::find($providerId);
+       $provider->notify(new BookingCreated($booking));
     }
 
 
 
 public function updateStatus(Request $request, $id)
 {
+
     $request->validate([
         'status' => 'required|in:accepted,rejected,completed'
     ]);
@@ -172,6 +185,8 @@ public function updateStatus(Request $request, $id)
     if ($user->role !== 'provider' || !$user->provider_id) {
         return response()->json(['message' => 'Unauthorized. Not a provider.'], 403);
     }
+ 
+
 
     // Find the booking
     $booking = Booking::with('providerService')->find($id);
@@ -192,18 +207,7 @@ public function updateStatus(Request $request, $id)
     return response()->json(['message' => 'Booking status updated.', 'booking' => $booking]);
 }
 
-
- 
-
-
-
-    
-
-
-
-
-
-    // Update booking status (admin or provider action)
+ // Update booking status (admin or provider action)
     public function update(Request $request, $id)
     {
         $booking = Booking::findOrFail($id);
@@ -218,7 +222,7 @@ public function updateStatus(Request $request, $id)
         return response()->json(['message' => 'Booking status updated successfully', 'data' => $booking]);
     }
 
-    // Delete a booking (optional)
+    // Delete a booking 
     public function destroy($id)
     {
         Booking::destroy($id);
@@ -269,7 +273,7 @@ public function updateStatus(Request $request, $id)
         'address' => $validated['address'] ?? '',
         'status' => 'pending',
     'is_paid' => false,
-    'provider_service_id' => $providerService->id // Assuming you have a provider_service_id in the bookings table
+    'provider_service_id' => $providerService->id 
 ]);
 
     return response()->json(['message' => 'Booking successful', 'booking' => $booking]);
